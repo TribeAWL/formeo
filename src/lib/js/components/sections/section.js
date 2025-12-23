@@ -1,7 +1,7 @@
 import i18n from '@draggable/i18n'
 import Sortable from 'sortablejs'
 import dom from '../../common/dom.js'
-import { COLUMN_CLASSNAME, ROW_CLASSNAME } from '../../constants.js'
+import { ROW_CLASSNAME } from '../../constants.js'
 import Component from '../component.js'
 
 export const SECTION_CLASSNAME = 'formeo-section'

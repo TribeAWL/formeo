@@ -288,7 +288,7 @@ export default class FormeoRenderer {
   }
 
   applyConditions = () => {
-    for (const [componentId, componentData] of Object.entries(this.components)) {
+    for (const [_componentId, componentData] of Object.entries(this.components)) {
       const { conditions } = componentData
       if (conditions) {
         for (const condition of conditions) {
