@@ -9,6 +9,7 @@ import { get, set } from '../../common/utils/object.mjs'
 import { CONTROL_GROUP_CLASSNAME, PANEL_CLASSNAME } from '../../constants.js'
 import Panels from '../panels.js'
 import Rows from '../rows/index.js'
+import Sections from '../sections/index.js'
 import Stages from '../stages/index.js'
 import Control from './control.js'
 import defaultOptions from './options.js'
@@ -367,6 +368,11 @@ export class Controls {
     row: () => Stages.active.addChild(),
     column: () => this.layoutTypes.row().addChild(),
     field: controlData => this.layoutTypes.column().addChild(controlData),
+    section: () => {
+      const section = Sections.add()
+      Stages.active.dom.querySelector('.stage-children').appendChild(section.dom)
+      return section
+    },
   }
 
   /**

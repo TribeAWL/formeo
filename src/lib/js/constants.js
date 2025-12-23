@@ -24,6 +24,7 @@ export const STAGE_CLASSNAME = `${PACKAGE_NAME}-stage`
 export const ROW_CLASSNAME = `${PACKAGE_NAME}-row`
 export const COLUMN_CLASSNAME = `${PACKAGE_NAME}-column`
 export const FIELD_CLASSNAME = `${PACKAGE_NAME}-field`
+export const SECTION_CLASSNAME = `${PACKAGE_NAME}-section`
 
 export const CUSTOM_COLUMN_OPTION_CLASSNAME = 'custom-column-widths'
 export const COLUMN_PRESET_CLASSNAME = 'column-preset'

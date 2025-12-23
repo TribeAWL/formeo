@@ -3,7 +3,13 @@ import Sortable from 'sortablejs'
 import animate from '../../common/animation.js'
 import dom from '../../common/dom.js'
 import { debounce } from '../../common/utils/index.mjs'
-import { ANIMATION_SPEED_BASE, CONDITION_TEMPLATE, ROW_CLASSNAME, STAGE_CLASSNAME } from '../../constants.js'
+import {
+  ANIMATION_SPEED_BASE,
+  CONDITION_TEMPLATE,
+  ROW_CLASSNAME,
+  SECTION_CLASSNAME,
+  STAGE_CLASSNAME,
+} from '../../constants.js'
 import Component from '../component.js'
 import Stages from './index.js'
 

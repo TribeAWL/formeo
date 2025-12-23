@@ -116,14 +116,14 @@
   cursor: move;
   list-style: none;
   margin: 0;
-  border: 1px solid sass-color.adjust(color.$gray-lighter, $lightness: 2%);
-  border-radius: calc(var.$border-radius * 1.5);
+  border: 1px solid #E5E7EB;
+  border-radius: 8px !important;
   text-align: center;
   background: color.$white;
   user-select: none;
   overflow: hidden;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  aspect-ratio: 1;
 
   &.control-moving {
     animation: DRAG_GHOST 500ms forwards;
@@ -137,37 +137,33 @@
   }
 
   &:hover {
-    background-color: color.$white;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
-    border-color: sass-color.adjust(color.$gray-lighter, $lightness: -5%);
+    background-color: #F9FAFB;
+    border-color: #D1D5DB;
   }
 
   button {
     box-sizing: border-box;
-    font-size: 0.9em;
+    font-size: 0.85em;
     line-height: 1.3;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: space(0.75);
-    min-height: 130px;
-    aspect-ratio: 1 / 1;
+    gap: space(0.5);
     height: 100%;
     width: 100%;
     background: transparent;
     border: 0 none;
     text-align: center;
-    padding: space(2) space(1);
-    border-radius: calc(var.$border-radius * 1.5);
+    padding: space(1);
+    border-radius: 8px;
     cursor: move;
 
     &:focus {
       outline: 0 none;
-      background-color: sass-color.adjust(color.$white, $lightness: -2%);
-      box-shadow: 0 0 0 2px color.$input-focus inset;
-      border-radius: calc(var.$border-radius * 1.5) !important;
+      background-color: #F3F4F6;
+      box-shadow: none;
+      border-radius: 8px !important;
     }
 
     &:active {
@@ -183,24 +179,24 @@
     margin-right: 0;
     margin-bottom: space(0.5);
     text-align: center;
-    width: calc(var.$icon-size * 2.2);
-    height: calc(var.$icon-size * 2.2);
+    width: calc(var.$icon-size * 1.8);
+    height: calc(var.$icon-size * 1.8);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    color: #374151;
 
     svg {
       width: 100%;
       height: 100%;
-      opacity: 0.9;
     }
   }
 
   .control-label {
-    font-weight: 500;
-    color: sass-color.adjust(color.$gray-dark, $lightness: -10%);
-    font-size: 0.9em;
+    font-weight: 400;
+    color: #374151;
+    font-size: 1.05em;
     line-height: 1.3;
     word-break: break-word;
   }

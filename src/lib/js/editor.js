@@ -145,6 +145,30 @@ export class FormeoEditor {
         stage.dom.style.order = 1
       }
     }
+
+    // Create preview button for the stage header
+    const previewButton = dom.create({
+      tag: 'button',
+      className: 'formeo-preview-btn',
+      attrs: {
+        type: 'button',
+        title: i18n.get('Preview'),
+      },
+      children: [dom.icon('new-eye')],
+      action: {
+        click: () => {
+          Events.formeoUpdated({ type: 'preview' }, 'formeoPreview')
+        },
+      },
+    })
+
+    // Create stage header (aligned with tab row)
+    const stageHeader = dom.create({
+      tag: 'div',
+      className: 'formeo-stage-header',
+      children: [previewButton],
+    })
+
     const elemConfig = {
       attrs: {
         className: 'formeo formeo-editor',
@@ -162,6 +186,12 @@ export class FormeoEditor {
 
     const controlsContainer = this.controls.container || this.editor
     controlsContainer.appendChild(this.controls.dom)
+
+    // Insert the stage header at the top of the stage
+    const stageArea = this.stages[0]?.dom
+    if (stageArea) {
+      stageArea.insertBefore(stageHeader, stageArea.firstChild)
+    }
 
     if (this.editorContainer) {
       dom.empty(this.editorContainer)

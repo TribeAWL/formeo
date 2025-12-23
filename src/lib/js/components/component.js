@@ -577,16 +577,19 @@ export default class Component extends Data {
             row: 0,
             column: -1,
             field: -2,
+            section: 0, // section is a specialized row
           },
           row: {
             row: 1,
             column: 0,
             field: -1,
+            section: 1, // section treated like row
           },
           column: {
             row: 2,
             column: 1,
             field: 0,
+            section: 2, // section treated like row
           },
           field: 1,
         }

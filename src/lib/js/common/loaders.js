@@ -179,6 +179,10 @@ export const fetchDependencies = dependencies => {
  * @returns {Promise<void>} A promise that resolves when the style sheet is loaded.
  */
 export const fetchFormeoStyle = async cssUrl => {
+  // If no CSS URL provided, skip loading (use bundled SCSS instead)
+  if (!cssUrl) {
+    return
+  }
   // check if necessary styles were loaded
   if (!loaded.css.has(cssUrl)) {
     await insertStyle(cssUrl)

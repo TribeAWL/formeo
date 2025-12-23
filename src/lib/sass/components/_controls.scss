@@ -5,12 +5,17 @@
 @use "../base/variables" as var;
 
 .formeo-controls {
-  width: 30%;
-  max-width: mixins.space(40);
-  min-width: mixins.space(30);
+  width: 35%;
+  max-width: mixins.space(50);
+  min-width: mixins.space(38);
   overflow: hidden;
   container-type: inline-size;
   container-name: controls;
+  order: -1;
+  border: 0 none;
+  border-right: 1px solid #E5E7EB;
+  background-color: #fff;
+  box-shadow: none;
 
   &.formeo-sticky {
     position: sticky;
@@ -33,16 +38,48 @@
     width: calc(100% - 2px);
   }
 
+  // Hide prev/next navigation buttons - Figma design uses clean tabs
+  .prev-group,
+  .next-group {
+    display: none !important;
+  }
+
   .tabbed-panels {
     nav {
       padding: 0;
+      overflow: visible;
+    }
+
+    .panel-labels {
+      overflow: hidden !important;
+      width: 100%;
+
+      div {
+        display: flex !important;
+        flex-wrap: nowrap;
+        transform: none !important;
+        width: 100%;
+        overflow: hidden;
+      }
+    }
+
+    .panels {
+      transform: none !important;
+    }
+
+    .control-group {
+      display: grid !important;
+
+      &.active-panel {
+        padding: mixins.space(2);
+      }
     }
   }
 
   nav {
     position: relative;
-    padding: 0 var.$action-btn-width;
-    overflow: hidden;
+    padding: 0;
+    overflow: visible;
     margin-bottom: 0;
 
     h5 {
@@ -82,7 +119,7 @@
   .formeo-panels-wrap {
     font-size: 0.85em;
     line-height: 1;
-    overflow: hidden;
+    overflow: visible;
     margin: 0;
     padding: 0;
   }
@@ -98,12 +135,6 @@
     .panel-nav {
       display: none;
     }
-
-    .control-group {
-      li:first-child {
-        border-radius: var.$border-radius;
-      }
-    }
   }
 
   ul {
@@ -113,8 +144,8 @@
   .control-group {
     vertical-align: top;
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: mixins.space(1.5);
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: mixins.space(1.5) mixins.space(1);
     width: 100%;
     padding: mixins.space(2);
     border-top: 0 none;
@@ -123,17 +154,6 @@
 
     &:not(.active-panel) {
       padding: 0;
-    }
-
-    > li {
-      &:first-child {
-        border-top-right-radius: var.$border-radius;
-      }
-
-      &:last-child {
-        border-radius: var.$border-radius;
-        margin-bottom: 0;
-      }
     }
   }
 
@@ -144,10 +164,6 @@
 
     .control-group {
       display: grid;
-
-      > li {
-        border-radius: var.$border-radius;
-      }
     }
   }
 
@@ -295,9 +311,12 @@
     grid-template-columns: 1fr !important;
   }
 
-  .field-control button {
-    min-height: 80px;
-    padding: mixins.space(1);
+  .field-control {
+    aspect-ratio: auto;
+
+    button {
+      padding: mixins.space(1);
+    }
   }
 
   .control-icon {

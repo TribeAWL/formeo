@@ -13,24 +13,26 @@
   width: 73%;
   box-sizing: border-box;
   transition: width 250ms;
-  margin-right: mixins.space();
+  margin-right: 0;
   flex: 1 1 auto;
   position: relative;
   transition-property: background-color, border;
   transition-duration: var.$animation-speed-base, var.$animation-speed-base;
-  border-width: 1px;
-  border-style: dashed;
-  border-color: transparent;
-  background-color: color.$stage-background;
-  padding-left: var.$action-btn-width - 1;
-  padding-bottom: mixins.space(1);
+  border: 0 none;
+  background-color: #fff;
+  padding: 0;
   overflow: visible;
-  border-radius: mixins.space(1) 0 mixins.space(1) mixins.space(1);
+  border-radius: 0;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
 
   >.children {
     @include mixins.display-column;
     gap: var.$component-gap;
     min-height: 100%;
+    padding: mixins.space(3);
+    flex: 1;
   }
 
   &.removing-all-fields {
@@ -58,8 +60,8 @@
   }
 
   &.empty {
-    border-color: color.$gray-light;
-    background-color: color.$shadow;
+    border: 0 none;
+    background-color: #fff;
   }
 
   &.editing-stage,
@@ -67,6 +69,7 @@
   &.hovering-stage.empty {
     border-color: color.$stage-outline-color;
     border-style: solid;
+    border-width: 1px;
 
     .stage-tag {
       display: flex;
@@ -150,28 +153,82 @@
   margin-bottom: 0;
 }
 
-[class$='empty'] {
-  &[class*='editing-'] {
+.formeo-stage.empty {
+  > .children {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+
+    &::before {
+      content: '+';
+      font-size: 28px;
+      color: #9CA3AF;
+      font-weight: 300;
+      margin-bottom: mixins.space(1);
+    }
+
     &::after {
-      opacity: 0;
+      font-size: 14px;
+      color: #9CA3AF;
+      content: 'Drag and drop fields here';
+      font-weight: 400;
     }
   }
 
-  &::after {
-    opacity: 1;
-    font-size: 24px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    color: color.$gray-light;
-    transition: opacity 200ms ease-in-out;
-    will-change: opacity;
-    text-align: center;
-    transform: translate(-50%, -50%);
-    content: attr(data-hover-tag);
+  &[class*='editing-'] {
+    > .children::after,
+    > .children::before {
+      opacity: 0;
+    }
   }
 }
 
 .formeo-settings {
   display: none;
+}
+
+.formeo-stage-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 mixins.space(2);
+  min-height: 48px;
+  border-bottom: 1px solid #E5E7EB;
+  background-color: #fff;
+}
+
+.formeo-preview-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #E5E7EB;
+  background-color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.15s ease;
+
+  .svg-icon {
+    width: 18px;
+    height: 18px;
+    color: #374151;
+  }
+
+  &:hover {
+    border-color: #D1D5DB;
+    background-color: #F9FAFB;
+
+    .svg-icon {
+      color: #111827;
+    }
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px color.$input-focus;
+  }
 }

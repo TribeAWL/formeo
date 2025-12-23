@@ -153,7 +153,7 @@ button[class*=-clone]:hover .svg-icon {
   color: #666666;
   font-weight: normal;
   display: inline-block;
-  width: 100%;
+  width: auto;
   line-height: 1;
 }
 .formeo-panels-wrap nav {
@@ -209,9 +209,6 @@ button[class*=-clone]:hover .svg-icon {
   margin: 0;
   padding: 0;
 }
-.formeo-panels-wrap .f-panel > li:last-child {
-  border-radius: 0 0 4px 4px;
-}
 .formeo-panels-wrap .panels {
   white-space: normal;
   transition-property: height;
@@ -224,9 +221,9 @@ button[class*=-clone]:hover .svg-icon {
   display: block;
 }
 .formeo-panels-wrap .panel-labels {
-  height: 100%;
+  height: auto;
   background: #fff;
-  overflow: hidden;
+  overflow: visible;
   text-align: center;
   white-space: nowrap;
   margin-bottom: 0;
@@ -237,33 +234,62 @@ button[class*=-clone]:hover .svg-icon {
 }
 
 .tabbed-panels .panel-nav {
-  height: 0;
+  height: auto;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 .tabbed-panels .panel-nav button {
   display: none;
 }
+.tabbed-panels .panel-labels {
+  background-color: transparent;
+  border-bottom: none;
+  overflow: hidden !important;
+  width: 100%;
+}
 .tabbed-panels .panel-labels div {
+  display: flex;
   flex-direction: row;
   justify-content: flex-start;
   flex-wrap: nowrap;
-  align-content: stretch;
   align-items: stretch;
-  display: flex;
+  gap: 0;
+  transform: none !important;
+  width: 100%;
+  overflow: hidden;
+  border-bottom: 1px solid #E5E7EB;
+  min-height: 48px;
 }
 .tabbed-panels .panel-labels h5 {
-  flex-direction: column;
-  flex: 1;
+  flex: 1 1 33.33%;
+  max-width: 33.33%;
   cursor: pointer;
-  background-color: #cccccc;
-  box-shadow: 0 -1px 8px #999999 inset;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none;
+  color: #6B7280;
+  font-weight: 500;
+  padding: 0 8px;
+  margin: 0;
+  font-size: 14px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .tabbed-panels .panel-labels h5.active-tab {
-  color: #000;
-  box-shadow: none;
-  background-color: #fff;
+  color: #1F2937;
+  box-shadow: none !important;
+  background-color: #EFF6FF !important;
+  border-bottom: none;
+}
+.tabbed-panels .panel-labels h5:hover, .tabbed-panels .panel-labels h5:focus {
+  box-shadow: none !important;
+  outline: none;
 }
 
 #formeo-sprite {
@@ -663,12 +689,16 @@ button[class*=-clone]:hover .svg-icon {
   display: flex;
   flex-direction: row;
   text-align: left;
-  gap: 16px;
+  gap: 0;
+  background-color: #fff;
   /*
     Mixins
   */
   /*
     Animations
+  */
+  /*
+    Mixins
   */
   /*
     Mixins
@@ -1662,19 +1692,19 @@ button[class*=-clone]:hover .svg-icon {
   width: 73%;
   box-sizing: border-box;
   transition: width 250ms;
-  margin-right: 4px;
+  margin-right: 0;
   flex: 1 1 auto;
   position: relative;
   transition-property: background-color, border;
   transition-duration: 266ms, 266ms;
-  border-width: 1px;
-  border-style: dashed;
-  border-color: transparent;
-  background-color: rgba(255, 255, 255, 0);
-  padding-left: 23px;
-  padding-bottom: 8px;
+  border: 0 none;
+  background-color: #fff;
+  padding: 0;
   overflow: visible;
-  border-radius: 8px 0 8px 8px;
+  border-radius: 0;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1685,6 +1715,8 @@ button[class*=-clone]:hover .svg-icon {
   justify-content: flex-start;
   gap: 16px;
   min-height: 100%;
+  padding: 24px;
+  flex: 1;
 }
 .formeo.formeo-editor .formeo-stage.removing-all-fields .formeo-row {
   transition: margin-top 250ms ease-in;
@@ -1704,12 +1736,13 @@ button[class*=-clone]:hover .svg-icon {
   display: none;
 }
 .formeo.formeo-editor .formeo-stage.empty {
-  border-color: #999999;
-  background-color: rgba(255, 255, 255, 0.25);
+  border: 0 none;
+  background-color: #fff;
 }
 .formeo.formeo-editor .formeo-stage.editing-stage, .formeo.formeo-editor .formeo-stage.hovering-stage, .formeo.formeo-editor .formeo-stage.hovering-stage.empty {
   border-color: #4F46E5;
   border-style: solid;
+  border-width: 1px;
 }
 .formeo.formeo-editor .formeo-stage.editing-stage .stage-tag, .formeo.formeo-editor .formeo-stage.hovering-stage .stage-tag, .formeo.formeo-editor .formeo-stage.hovering-stage.empty .stage-tag {
   display: flex;
@@ -1775,24 +1808,212 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .f-field-group {
   margin-bottom: 0;
 }
-.formeo.formeo-editor [class$=empty][class*=editing-]::after {
-  opacity: 0;
+.formeo.formeo-editor .formeo-stage.empty > .children {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
 }
-.formeo.formeo-editor [class$=empty]::after {
-  opacity: 1;
-  font-size: 24px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  color: #999999;
-  transition: opacity 200ms ease-in-out;
-  will-change: opacity;
-  text-align: center;
-  transform: translate(-50%, -50%);
-  content: attr(data-hover-tag);
+.formeo.formeo-editor .formeo-stage.empty > .children::before {
+  content: "+";
+  font-size: 28px;
+  color: #9CA3AF;
+  font-weight: 300;
+  margin-bottom: 8px;
+}
+.formeo.formeo-editor .formeo-stage.empty > .children::after {
+  font-size: 14px;
+  color: #9CA3AF;
+  content: "Drag and drop fields here";
+  font-weight: 400;
+}
+.formeo.formeo-editor .formeo-stage.empty[class*=editing-] > .children::after,
+.formeo.formeo-editor .formeo-stage.empty[class*=editing-] > .children::before {
+  opacity: 0;
 }
 .formeo.formeo-editor .formeo-settings {
   display: none;
+}
+.formeo.formeo-editor .formeo-stage-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 16px;
+  min-height: 48px;
+  border-bottom: 1px solid #E5E7EB;
+  background-color: #fff;
+}
+.formeo.formeo-editor .formeo-preview-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #E5E7EB;
+  background-color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.15s ease;
+}
+.formeo.formeo-editor .formeo-preview-btn .svg-icon {
+  width: 18px;
+  height: 18px;
+  color: #374151;
+}
+.formeo.formeo-editor .formeo-preview-btn:hover {
+  border-color: #D1D5DB;
+  background-color: #F9FAFB;
+}
+.formeo.formeo-editor .formeo-preview-btn:hover .svg-icon {
+  color: #111827;
+}
+.formeo.formeo-editor .formeo-preview-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(102, 175, 233);
+}
+.formeo.formeo-editor .formeo-section {
+  list-style: none;
+  margin: 0 0 16px 0;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+.formeo.formeo-editor .formeo-section:hover {
+  border-color: #D1D5DB;
+}
+.formeo.formeo-editor .formeo-section.empty .section-children {
+  min-height: 60px;
+}
+.formeo.formeo-editor .formeo-section.collapsed .section-children {
+  display: none;
+}
+.formeo.formeo-editor .formeo-section.collapsed .section-collapse-toggle .svg-icon {
+  transform: rotate(-90deg);
+}
+.formeo.formeo-editor .formeo-section .section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px;
+  border-bottom: 1px solid #E5E7EB;
+  background: #F9FAFB;
+  border-radius: 8px 8px 0 0;
+}
+.formeo.formeo-editor .formeo-section .section-collapse-toggle {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B7280;
+  transition: color 0.15s ease;
+}
+.formeo.formeo-editor .formeo-section .section-collapse-toggle:hover {
+  color: #374151;
+}
+.formeo.formeo-editor .formeo-section .section-collapse-toggle:focus {
+  outline: none;
+}
+.formeo.formeo-editor .formeo-section .section-collapse-toggle .svg-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.15s ease;
+}
+.formeo.formeo-editor .formeo-section .section-drag-handle {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: move;
+  color: #9CA3AF;
+}
+.formeo.formeo-editor .formeo-section .section-drag-handle:hover {
+  color: #6B7280;
+}
+.formeo.formeo-editor .formeo-section .section-drag-handle .svg-icon {
+  width: 16px;
+  height: 16px;
+}
+.formeo.formeo-editor .formeo-section .section-header-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.formeo.formeo-editor .formeo-section .section-name-input {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1F2937;
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  outline: none;
+}
+.formeo.formeo-editor .formeo-section .section-name-input::placeholder {
+  color: #9CA3AF;
+  font-weight: 400;
+}
+.formeo.formeo-editor .formeo-section .section-name-input:focus {
+  outline: none;
+}
+.formeo.formeo-editor .formeo-section .section-name-input.invalid {
+  color: rgb(217, 83, 79);
+}
+.formeo.formeo-editor .formeo-section .section-instruction-input {
+  font-size: 14px;
+  color: #6B7280;
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  outline: none;
+}
+.formeo.formeo-editor .formeo-section .section-instruction-input::placeholder {
+  color: #9CA3AF;
+}
+.formeo.formeo-editor .formeo-section .section-instruction-input:focus {
+  outline: none;
+}
+.formeo.formeo-editor .formeo-section .section-children {
+  padding: 16px;
+  min-height: 40px;
+}
+.formeo.formeo-editor .formeo-section .section-children:empty::before {
+  content: "Drag fields here";
+  display: block;
+  text-align: center;
+  color: #9CA3AF;
+  padding: 32px;
+  border: 2px dashed #E5E7EB;
+  border-radius: 8px;
+}
+.formeo.formeo-editor .formeo-section .action-buttons {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.formeo.formeo-editor .formeo-section:hover .action-buttons {
+  opacity: 1;
+}
+.formeo.formeo-editor .formeo-section .section-edit {
+  padding: 16px;
+  background: #F9FAFB;
+  border-top: 1px solid #E5E7EB;
 }
 .formeo.formeo-editor [dir=rtl] {
   /*
@@ -1991,12 +2212,17 @@ button[class*=-clone]:hover .svg-icon {
   Mixins
 */
 .formeo-controls {
-  width: 30%;
-  max-width: 320px;
-  min-width: 240px;
+  width: 35%;
+  max-width: 400px;
+  min-width: 304px;
   overflow: hidden;
   container-type: inline-size;
   container-name: controls;
+  order: -1;
+  border: 0 none;
+  border-right: 1px solid #E5E7EB;
+  background-color: #fff;
+  box-shadow: none;
 }
 
 .formeo-controls.formeo-sticky {
@@ -2018,14 +2244,45 @@ button[class*=-clone]:hover .svg-icon {
   width: calc(100% - 2px);
 }
 
+.formeo-controls .prev-group,
+.formeo-controls .next-group {
+  display: none !important;
+}
+
 .formeo-controls .tabbed-panels nav {
   padding: 0;
+  overflow: visible;
+}
+
+.formeo-controls .tabbed-panels .panel-labels {
+  overflow: hidden !important;
+  width: 100%;
+}
+
+.formeo-controls .tabbed-panels .panel-labels div {
+  display: flex !important;
+  flex-wrap: nowrap;
+  transform: none !important;
+  width: 100%;
+  overflow: hidden;
+}
+
+.formeo-controls .tabbed-panels .panels {
+  transform: none !important;
+}
+
+.formeo-controls .tabbed-panels .control-group {
+  display: grid !important;
+}
+
+.formeo-controls .tabbed-panels .control-group.active-panel {
+  padding: 16px;
 }
 
 .formeo-controls nav {
   position: relative;
-  padding: 0 24px;
-  overflow: hidden;
+  padding: 0;
+  overflow: visible;
   margin-bottom: 0;
 }
 
@@ -2065,7 +2322,7 @@ button[class*=-clone]:hover .svg-icon {
 .formeo-controls .formeo-panels-wrap {
   font-size: 0.85em;
   line-height: 1;
-  overflow: hidden;
+  overflow: visible;
   margin: 0;
   padding: 0;
 }
@@ -2083,10 +2340,6 @@ button[class*=-clone]:hover .svg-icon {
   display: none;
 }
 
-.formeo-controls .panel-count-1 .control-group li:first-child {
-  border-radius: 8px;
-}
-
 .formeo-controls ul {
   margin: 0;
   padding: 0;
@@ -2096,8 +2349,8 @@ button[class*=-clone]:hover .svg-icon {
 .formeo-controls .control-group {
   vertical-align: top;
   display: grid !important;
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 12px 8px;
   width: 100%;
   padding: 16px;
   border-top: 0 none;
@@ -2109,25 +2362,12 @@ button[class*=-clone]:hover .svg-icon {
   padding: 0;
 }
 
-.formeo-controls .control-group > li:first-child {
-  border-top-right-radius: 8px;
-}
-
-.formeo-controls .control-group > li:last-child {
-  border-radius: 8px;
-  margin-bottom: 0;
-}
-
 .formeo-controls.filtered .panel-nav {
   display: none;
 }
 
 .formeo-controls.filtered .control-group {
   display: grid;
-}
-
-.formeo-controls.filtered .control-group > li {
-  border-radius: 8px;
 }
 
 .formeo-controls .control-groups {
@@ -2245,14 +2485,14 @@ button[class*=-clone]:hover .svg-icon {
   cursor: move;
   list-style: none;
   margin: 0;
-  border: 1px solid rgb(209.1, 209.1, 209.1);
-  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px !important;
   text-align: center;
   background: #fff;
   user-select: none;
   overflow: hidden;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  aspect-ratio: 1;
 }
 
 .formeo-controls .field-control.control-moving {
@@ -2266,38 +2506,34 @@ button[class*=-clone]:hover .svg-icon {
 }
 
 .formeo-controls .field-control:hover {
-  background-color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-  border-color: rgb(191.25, 191.25, 191.25);
+  background-color: #F9FAFB;
+  border-color: #D1D5DB;
 }
 
 .formeo-controls .field-control button {
   box-sizing: border-box;
-  font-size: 0.9em;
+  font-size: 0.85em;
   line-height: 1.3;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 130px;
-  aspect-ratio: 1/1;
+  gap: 4px;
   height: 100%;
   width: 100%;
   background: transparent;
   border: 0 none;
   text-align: center;
-  padding: 16px 8px;
-  border-radius: 12px;
+  padding: 8px;
+  border-radius: 8px;
   cursor: move;
 }
 
 .formeo-controls .field-control button:focus {
   outline: 0 none;
-  background-color: rgb(249.9, 249.9, 249.9);
-  box-shadow: 0 0 0 2px rgb(102, 175, 233) inset;
-  border-radius: 12px !important;
+  background-color: #F3F4F6;
+  box-shadow: none;
+  border-radius: 8px !important;
 }
 
 .formeo-controls .field-control button:active {
@@ -2312,24 +2548,24 @@ button[class*=-clone]:hover .svg-icon {
   margin-right: 0;
   margin-bottom: 4px;
   text-align: center;
-  width: 52.8px;
-  height: 52.8px;
+  width: 43.2px;
+  height: 43.2px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: #374151;
 }
 
 .formeo-controls .field-control .control-icon svg {
   width: 100%;
   height: 100%;
-  opacity: 0.9;
 }
 
 .formeo-controls .field-control .control-label {
-  font-weight: 500;
-  color: rgb(25.5, 25.5, 25.5);
-  font-size: 0.9em;
+  font-weight: 400;
+  color: #374151;
+  font-size: 1.05em;
   line-height: 1.3;
   word-break: break-word;
 }
@@ -2355,8 +2591,10 @@ button[class*=-clone]:hover .svg-icon {
   .control-group {
     grid-template-columns: 1fr !important;
   }
+  .field-control {
+    aspect-ratio: auto;
+  }
   .field-control button {
-    min-height: 80px;
     padding: 8px;
   }
   .control-icon {
@@ -2384,14 +2622,14 @@ button[class*=-clone]:hover .svg-icon {
   cursor: move;
   list-style: none;
   margin: 0;
-  border: 1px solid rgb(209.1, 209.1, 209.1);
-  border-radius: 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px !important;
   text-align: center;
   background: #fff;
   user-select: none;
   overflow: hidden;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  aspect-ratio: 1;
 }
 .field-control.control-moving {
   animation: DRAG_GHOST 500ms forwards;
@@ -2402,36 +2640,32 @@ button[class*=-clone]:hover .svg-icon {
   font-size: 16px;
 }
 .field-control:hover {
-  background-color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-1px);
-  border-color: rgb(191.25, 191.25, 191.25);
+  background-color: #F9FAFB;
+  border-color: #D1D5DB;
 }
 .field-control button {
   box-sizing: border-box;
-  font-size: 0.9em;
+  font-size: 0.85em;
   line-height: 1.3;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 130px;
-  aspect-ratio: 1/1;
+  gap: 4px;
   height: 100%;
   width: 100%;
   background: transparent;
   border: 0 none;
   text-align: center;
-  padding: 16px 8px;
-  border-radius: 12px;
+  padding: 8px;
+  border-radius: 8px;
   cursor: move;
 }
 .field-control button:focus {
   outline: 0 none;
-  background-color: rgb(249.9, 249.9, 249.9);
-  box-shadow: 0 0 0 2px rgb(102, 175, 233) inset;
-  border-radius: 12px !important;
+  background-color: #F3F4F6;
+  box-shadow: none;
+  border-radius: 8px !important;
 }
 .field-control button:active {
   transform: none;
@@ -2443,22 +2677,22 @@ button[class*=-clone]:hover .svg-icon {
   margin-right: 0;
   margin-bottom: 4px;
   text-align: center;
-  width: 52.8px;
-  height: 52.8px;
+  width: 43.2px;
+  height: 43.2px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: #374151;
 }
 .field-control .control-icon svg {
   width: 100%;
   height: 100%;
-  opacity: 0.9;
 }
 .field-control .control-label {
-  font-weight: 500;
-  color: rgb(25.5, 25.5, 25.5);
-  font-size: 0.9em;
+  font-weight: 400;
+  color: #374151;
+  font-size: 1.05em;
   line-height: 1.3;
   word-break: break-word;
 }

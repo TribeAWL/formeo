@@ -6,6 +6,7 @@ import ColumnsData from './columns/index.js'
 import Data from './data.js'
 import FieldsData from './fields/index.js'
 import RowsData from './rows/index.js'
+import SectionsData from './sections/index.js'
 import StagesData from './stages/index.js'
 import ControlsData from './controls/index.js'
 
@@ -13,6 +14,7 @@ export const Stages = StagesData
 export const Rows = RowsData
 export const Columns = ColumnsData
 export const Fields = FieldsData
+export const Sections = SectionsData
 export const Controls = ControlsData
 
 const getFormData = (formData, useSessionStorage = false) => {
@@ -34,6 +36,7 @@ export class Components extends Data {
     this.rows = Rows
     this.columns = Columns
     this.fields = Fields
+    this.sections = Sections
     this.controls = Controls
   }
 
@@ -48,6 +51,7 @@ export class Components extends Data {
     this.add('rows', Rows.load(formData.rows))
     this.add('columns', Columns.load(formData.columns))
     this.add('fields', Fields.load(formData.fields))
+    this.add('sections', Sections.load(formData.sections || {}))
 
     for (const stage of Object.values(this.get('stages'))) {
       stage.loadChildren()
@@ -91,6 +95,7 @@ export class Components extends Data {
       rows: RowsData.getData(),
       columns: ColumnsData.getData(),
       fields: FieldsData.getData(),
+      sections: SectionsData.getData(),
     }
   }
 
