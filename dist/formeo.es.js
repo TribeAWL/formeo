@@ -2166,7 +2166,7 @@ function buildFlatDataStructure(data, componentId, componentType2, result = {}) 
   }
   return result;
 }
-const BUNDLED_SVG_SPRITE = '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><symbol id="f-i-autocomplete" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M6,5h1v1H6V5z M4,4H3v1h1V4z M6,4H5v1h1V4z M2,5v1h1V5H2z M3,7h1V6H3V7z M5,7h1V6H5V7z M4,5v1h1V5H4z M2,14h1v-1H2V14z M4,14h1v-1H4V14z M6,14h1v-1H6V14z M9,13H8v1h1V13z M16,3.5v4C16,8.3,15.3,9,14.5,9H14v3v3c0,0.6-0.4,1-1,1H1c-0.6,0-1-0.4-1-1V3.5 C0,2.7,0.7,2,1.5,2h3H8V1.5V1H7H6V0.5V0h2.5H11v0.5V1h-1H9v0.5V2h3h2.5C15.3,2,16,2.7,16,3.5z M13,12H7H1v3h12V12z M3,11v-1H2v1H3z M5,11v-1H4v1H5z M15,3.5C15,3.2,14.8,3,14.5,3H9v2.5V8H8.5H8V7.5V7H7V6h1V5.5V5H7V4h1V3.5V3H1.5C1.2,3,1,3.2,1,3.5v4 C1,7.8,1.2,8,1.5,8H8v1H6v0.5V10h2.5H11V9.5V9H9V8h5.5C14.8,8,15,7.8,15,7.5V3.5z"/></symbol><symbol viewBox="0 0 32 32" id="f-i-bin" xmlns="http://www.w3.org/2000/svg"><path d="M4 10v20c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2v-20h-22zM10 28h-2v-14h2v14zM14 28h-2v-14h2v14zM18 28h-2v-14h2v14zM22 28h-2v-14h2v14zM26.5 4h-6.5v-2.5c0-.825-.675-1.5-1.5-1.5h-7c-.825 0-1.5.675-1.5 1.5v2.5h-6.5c-.825 0-1.5.675-1.5 1.5v2.5h26v-2.5c0-.825-.675-1.5-1.5-1.5zM18 4h-6v-1.975h6v1.975z"/></symbol><symbol id="f-i-button" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><metadata id="adprefix__metadata8"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><path id="adprefix__rect4140" d="M 0.4765625,4 A 0.47706934,0.47706934 0 0 0 0,4.4765625 L 0,11.523438 A 0.47706934,0.47706934 0 0 0 0.4765625,12 L 15.523438,12 A 0.47706934,0.47706934 0 0 0 16,11.523438 L 16,4.4765625 A 0.47706934,0.47706934 0 0 0 15.523438,4 L 0.4765625,4 Z m 0.4765625,0.953125 14.09375,0 0,6.09375 -14.09375,0 0,-6.09375 z"/><g id="adprefix__layer1"><g id="adprefix__text4203"><g id="adprefix__g4212" transform="translate(0.10112835,0.1001358)"><path id="adprefix__path4208" d="m 6.0690374,6.4093857 q -0.5371093,0 -0.8544922,0.4003906 -0.3149414,0.4003906 -0.3149414,1.0913086 0,0.6884766 0.3149414,1.0888672 0.3173829,0.4003906 0.8544922,0.4003906 0.5371094,0 0.8496094,-0.4003906 0.3149414,-0.4003906 0.3149414,-1.0888672 0,-0.690918 -0.3149414,-1.0913086 -0.3125,-0.4003906 -0.8496094,-0.4003906 z m 0,-0.4003906 q 0.7666016,0 1.225586,0.5151367 0.4589843,0.5126953 0.4589843,1.3769531 0,0.8618164 -0.4589843,1.3769531 -0.4589844,0.5126953 -1.225586,0.5126953 -0.7690429,0 -1.2304687,-0.5126953 -0.4589844,-0.5126953 -0.4589844,-1.3769531 0,-0.8642578 0.4589844,-1.3769531 0.4614258,-0.5151367 1.2304687,-0.5151367 z"/><path id="adprefix__path4210" d="m 8.5250921,6.074913 0.4931641,0 0,1.5405274 1.6357418,-1.5405274 0.634766,0 -1.809082,1.6992188 1.938477,1.9458008 -0.649415,0 -1.7504878,-1.7553711 0,1.7553711 -0.4931641,0 0,-3.6450196 z"/></g></g></g></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-button-line" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 17h-17A2.502 2.502 0 0 1 1 14.5v-4A2.502 2.502 0 0 1 3.5 8h17a2.502 2.502 0 0 1 2.5 2.5v4a2.502 2.502 0 0 1-2.5 2.5zm-17-8A1.502 1.502 0 0 0 2 10.5v4A1.502 1.502 0 0 0 3.5 16h17a1.502 1.502 0 0 0 1.5-1.5v-4A1.502 1.502 0 0 0 20.5 9zM17 12H7v1h10z" fill="currentColor"/></symbol><symbol viewBox="0 0 32 32" id="f-i-calendar" xmlns="http://www.w3.org/2000/svg"><path d="M12.048 16.961c-0.178 0.257-0.395 0.901-0.652 1.059-0.257 0.157-0.547 0.267-0.869 0.328-0.323 0.062-0.657 0.089-1.002 0.079v1.527h2.467v6.046h1.991v-9.996h-1.584c-0.056 0.381-0.173 0.7-0.351 0.957zM23 8h2c0.553 0 1-0.448 1-1v-6c0-0.552-0.447-1-1-1h-2c-0.553 0-1 0.448-1 1v6c0 0.552 0.447 1 1 1zM7 8h2c0.552 0 1-0.448 1-1v-6c0-0.552-0.448-1-1-1h-2c-0.552 0-1 0.448-1 1v6c0 0.552 0.448 1 1 1zM30 4h-2v5c0 0.552-0.447 1-1 1h-6c-0.553 0-1-0.448-1-1v-5h-8v5c0 0.552-0.448 1-1 1h-6c-0.552 0-1-0.448-1-1v-5h-2c-1.104 0-2 0.896-2 2v24c0 1.104 0.896 2 2 2h28c1.104 0 2-0.896 2-2v-24c0-1.104-0.896-2-2-2zM30 29c0 0.553-0.447 1-1 1h-26c-0.552 0-1-0.447-1-1v-16c0-0.552 0.448-1 1-1h26c0.553 0 1 0.448 1 1v16zM15.985 17.982h4.968c-0.936 1.152-1.689 2.325-2.265 3.705-0.575 1.381-0.638 2.818-0.749 4.312h2.131c0.009-0.666-0.195-1.385-0.051-2.156 0.146-0.771 0.352-1.532 0.617-2.285 0.267-0.752 0.598-1.461 0.996-2.127 0.396-0.667 0.853-1.229 1.367-1.686v-1.742h-7.015v1.979z"/></symbol><symbol viewBox="0 0 14 14" fill="none" id="f-i-checkbox" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m 4.2666667,5.73333 -0.9333334,0.93334 3,3 L 13,3 12.066667,2.06667 6.3333333,7.8 4.2666667,5.73333 Z m 7.4000003,5.93334 -9.3333337,0 0,-9.33334 L 9,2.33333 9,1 2.3333333,1 C 1.6,1 1,1.6 1,2.33333 l 0,9.33334 C 1,12.4 1.6,13 2.3333333,13 l 9.3333337,0 C 12.4,13 13,12.4 13,11.66667 l 0,-5.33334 -1.333333,0 0,5.33334 z"/></symbol><symbol viewBox="0 0 14 14" fill="none" id="f-i-checkbox-check" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m 4.2666667,5.73333 -0.9333334,0.93334 3,3 L 13,3 12.066667,2.06667 6.3333333,7.8 4.2666667,5.73333 Z m 7.4000003,5.93334 -9.3333337,0 0,-9.33334 L 9,2.33333 9,1 2.3333333,1 C 1.6,1 1,1.6 1,2.33333 l 0,9.33334 C 1,12.4 1.6,13 2.3333333,13 l 9.3333337,0 C 12.4,13 13,12.4 13,11.66667 l 0,-5.33334 -1.333333,0 0,5.33334 z"/></symbol><symbol id="f-i-checkbox-group" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M0,1h16V0H0V1z M0,3h16V2H0V3z M6,5v1h9V5H6z M15,14v-1H6v1H15z M6,10h9V9H6V10z M4,12l-2.5,1.5L0,13l1.5,2L4,12z M4,8 L1.5,9.5L0,9l1.5,2L4,8z M4,4L1.5,5.5L0,5l1.5,2L4,4z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-columns" xmlns="http://www.w3.org/2000/svg"><metadata id="aiprefix__metadata4318"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><path id="aiprefix__rect4860-3-5" d="M 16,0.5 A 0.50004997,0.50004997 0 0 0 15.5,0 l -5,0 -5,0 -5,0 A 0.50004997,0.50004997 0 0 0 0,0.5 l 0,15 A 0.50004997,0.50004997 0 0 0 0.5,16 l 5,0 5,0 5,0 A 0.50004997,0.50004997 0 0 0 16,15.5 l 0,-15 z M 15,1 15,15 11,15 11,1 15,1 Z M 10,1 10,15 6,15 6,1 10,1 Z M 5,1 5,15 1,15 1,1 5,1 Z"/></symbol><symbol viewBox="0 0 32 32" id="f-i-copy" xmlns="http://www.w3.org/2000/svg"><path d="M20 8v-8h-14l-6 6v18h12v8h20v-24h-12zM6 2.828v3.172h-3.172l3.172-3.172zM2 22v-14h6v-6h10v6l-6 6v8h-10zM18 10.828v3.172h-3.172l3.172-3.172zM30 30h-16v-14h6v-6h10v20z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-date-calendar" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M3.5,21.3V4.3h3.8V2.7h1v1.6h7.4V2.7h1v1.6h3.9V21.3H3.5z M19.6,20.3V8.8H4.5v11.6H19.6z M19.6,7.8V5.2h-2.9v1h-1V5.2H8.2v1h-1V5.2H4.5v2.6H19.6z"/></symbol><symbol id="f-i-divider" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg"><metadata id="amprefix__metadata10"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><rect y="7" x="0" height="1" width="15" id="amprefix__rect4182"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-divider-dots" xmlns="http://www.w3.org/2000/svg"><path d="M3 12H3.01M7.5 12H7.51M16.5 12H16.51M12 12H12.01M21 12H21.01M21 21V20.2C21 19.0799 21 18.5198 20.782 18.092C20.5903 17.7157 20.2843 17.4097 19.908 17.218C19.4802 17 18.9201 17 17.8 17H6.2C5.0799 17 4.51984 17 4.09202 17.218C3.7157 17.4097 3.40973 17.7157 3.21799 18.092C3 18.5198 3 19.0799 3 20.2V21M21 3V3.8C21 4.9201 21 5.48016 20.782 5.90798C20.5903 6.28431 20.2843 6.59027 19.908 6.78201C19.4802 7 18.9201 7 17.8 7H6.2C5.0799 7 4.51984 7 4.09202 6.78201C3.71569 6.59027 3.40973 6.28431 3.21799 5.90798C3 5.48016 3 4.92011 3 3.8V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-dropdown-chevron" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 28 32" id="f-i-edit" xmlns="http://www.w3.org/2000/svg"><path d="M22 2l-4 4 6 6 4-4-6-6zM0 24l0.021 6.018 5.979-0.018 16-16-6-6-16 16zM6 28h-4v-4h2v2h2v2z"/></symbol><symbol fill="#000000" viewBox="0 0 24 24" id="f-i-email" xmlns="http://www.w3.org/2000/svg"><path d="M12,2 C17.4292399,2 21.8479317,6.32667079 21.9961582,11.7200952 L22,12 L22,13 C22,15.1729208 20.477434,17 18.5,17 C17.3269391,17 16.3139529,16.3570244 15.6839382,15.3803024 C14.770593,16.3757823 13.4581934,17 12,17 C9.23857625,17 7,14.7614237 7,12 C7,9.23857625 9.23857625,7 12,7 C14.6887547,7 16.8818181,9.12230671 16.9953805,11.7831104 L17,12 L17,13 C17,14.1407877 17.7160103,15 18.5,15 C19.2447902,15 19.928229,14.2245609 19.9947109,13.1689341 L20,13 L20,12 C20,7.581722 16.418278,4 12,4 C7.581722,4 4,7.581722 4,12 C4,16.418278 7.581722,20 12,20 C13.1630948,20 14.2892822,19.7522618 15.3225159,19.2798331 C15.8247876,19.0501777 16.4181317,19.271177 16.647787,19.7734487 C16.8774423,20.2757205 16.656443,20.8690646 16.1541713,21.0987199 C14.861218,21.689901 13.4515463,22 12,22 C6.4771525,22 2,17.5228475 2,12 C2,6.4771525 6.4771525,2 12,2 Z M12,9 C10.3431458,9 9,10.3431458 9,12 C9,13.6568542 10.3431458,15 12,15 C13.6568542,15 15,13.6568542 15,12 C15,10.3431458 13.6568542,9 12,9 Z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-email-envelope" xmlns="http://www.w3.org/2000/svg"><path d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6zm3.519 0L12 11.671 18.481 6H5.52zM20 7.329l-7.341 6.424a1 1 0 0 1-1.318 0L4 7.329V18h16V7.329z" fill="currentColor"/></symbol><symbol viewBox="0 0 24 24" id="f-i-eye" xmlns="http://www.w3.org/2000/svg"><path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-file-upload-image" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M2.4 1.6H21.6V0H2.4V1.6ZM22.4 2.4V21.6H24V2.4H22.4ZM21.6 22.4H2.4V24H21.6V22.4ZM1.6 21.6V2.4H0V21.6H1.6ZM2.4 22.4C1.96 22.4 1.6 22.04 1.6 21.6H0C0 22.93 1.07 24 2.4 24V22.4ZM22.4 21.6C22.4 22.04 22.04 22.4 21.6 22.4V24C22.93 24 24 22.93 24 21.6H22.4ZM21.6 1.6C22.04 1.6 22.4 1.96 22.4 2.4H24C24 1.07 22.93 0 21.6 0V1.6ZM2.4 0C1.07 0 0 1.07 0 2.4H1.6C1.6 1.96 1.96 1.6 2.4 1.6V0ZM0.8 17.6H23.2V16H0.8V17.6ZM1.37 12.57L7.77 6.17L6.63 5.03L0.23 11.43L1.37 12.57ZM6.63 6.17L17.83 17.37L18.97 16.23L7.77 5.03L6.63 6.17ZM16.8 8C16.36 8 16 7.64 16 7.2H14.4C14.4 8.53 15.47 9.6 16.8 9.6V8ZM17.6 7.2C17.6 7.64 17.24 8 16.8 8V9.6C18.13 9.6 19.2 8.53 19.2 7.2H17.6ZM16.8 6.4C17.24 6.4 17.6 6.76 17.6 7.2H19.2C19.2 5.87 18.13 4.8 16.8 4.8V6.4ZM16.8 4.8C15.47 4.8 14.4 5.87 14.4 7.2H16C16 6.76 16.36 6.4 16.8 6.4V4.8Z"/></symbol><symbol viewBox="0 0 32 32" id="f-i-floppy-disk" xmlns="http://www.w3.org/2000/svg"><path d="M28 0h-28v32h32v-28l-4-4zM16 4h4v8h-4v-8zM28 28h-24v-24h2v10h18v-10h2.343l1.657 1.657v22.343z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle" xmlns="http://www.w3.org/2000/svg"><metadata id="ayprefix__metadata8"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><g transform="translate(0,-2)" id="ayprefix__g4220"><rect id="ayprefix__rect4191" width="2" height="2" x="2" y="7"/><rect id="ayprefix__rect4191-2" width="2" height="2" x="7" y="7"/><rect id="ayprefix__rect4191-4" width="2" height="2" x="12" y="7"/></g><g transform="translate(0,2)" id="ayprefix__g4220-6"><rect id="ayprefix__rect4191-40" width="2" height="2" x="2" y="7"/><rect id="ayprefix__rect4191-2-3" width="2" height="2" x="7" y="7"/><rect id="ayprefix__rect4191-4-9" width="2" height="2" x="12" y="7"/></g></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-column" xmlns="http://www.w3.org/2000/svg"><path d="M2 7h2v2H2zM7 7h2v2H7zM12 7h2v2h-2zM2 12h2v2H2zM7 12h2v2H7zM12 12h2v2h-2z" transform="rotate(90 9.25 9.25)"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-field" xmlns="http://www.w3.org/2000/svg"><path d="M9.5-6.5h2v2h-2zm-5 0h2v2h-2zm5-5h2v2h-2zm-5 0h2v2h-2z" transform="rotate(90)"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-row" xmlns="http://www.w3.org/2000/svg"><path d="M12 9.5h2v2h-2zm-5 0h2v2H7Zm-5 0h2v2H2Zm10-5h2v2h-2zm-5 0h2v2H7Zm-5 0h2v2H2Z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-stage" xmlns="http://www.w3.org/2000/svg"><path d="M2 4.5h2v2H2zM7 4.5h2v2H7zM12 4.5h2v2h-2zM2 9.5h2v2H2zM7 9.5h2v2H7zM12 9.5h2v2h-2zM2-.5h2v2H2zM7-.5h2v2H7zM12-.5h2v2h-2z" transform="translate(0 2.5)"/></symbol><symbol viewBox="0 0 448 512" id="f-i-hash" xmlns="http://www.w3.org/2000/svg"><g id="azprefix__icomoon-ignore"/><path fill="#000" d="M448 192v-64h-80.064l16-128h-64l-16 128h-127.968l16-128h-64l-16 128h-111.968v64h103.968l-15.968 128h-88v64h80l-16 128h64l16-128h127.968l-16 128h64.032l16-128h112v-64h-104l15.936-128h88.064zM279.968 320h-127.968l15.968-128h127.968l-15.968 128z"/></symbol><symbol viewBox="0 0 28 28" id="f-i-header" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M26.281 26q-0.688 0-2.070-0.055t-2.086-0.055q-0.688 0-2.063 0.055t-2.063 0.055q-0.375 0-0.578-0.32t-0.203-0.711q0-0.484 0.266-0.719t0.609-0.266 0.797-0.109 0.703-0.234q0.516-0.328 0.516-2.188l-0.016-6.109q0-0.328-0.016-0.484-0.203-0.063-0.781-0.063h-10.547q-0.594 0-0.797 0.063-0.016 0.156-0.016 0.484l-0.016 5.797q0 2.219 0.578 2.562 0.25 0.156 0.75 0.203t0.891 0.055 0.703 0.234 0.313 0.711q0 0.406-0.195 0.75t-0.57 0.344q-0.734 0-2.18-0.055t-2.164-0.055q-0.672 0-2 0.055t-1.984 0.055q-0.359 0-0.555-0.328t-0.195-0.703q0-0.469 0.242-0.703t0.562-0.273 0.742-0.117 0.656-0.234q0.516-0.359 0.516-2.234l-0.016-0.891v-12.703q0-0.047 0.008-0.406t0-0.57-0.023-0.602-0.055-0.656-0.102-0.57-0.172-0.492-0.25-0.281q-0.234-0.156-0.703-0.187t-0.828-0.031-0.641-0.219-0.281-0.703q0-0.406 0.187-0.75t0.562-0.344q0.719 0 2.164 0.055t2.164 0.055q0.656 0 1.977-0.055t1.977-0.055q0.391 0 0.586 0.344t0.195 0.75q0 0.469-0.266 0.68t-0.602 0.227-0.773 0.063-0.672 0.203q-0.547 0.328-0.547 2.5l0.016 5q0 0.328 0.016 0.5 0.203 0.047 0.609 0.047h10.922q0.391 0 0.594-0.047 0.016-0.172 0.016-0.5l0.016-5q0-2.172-0.547-2.5-0.281-0.172-0.914-0.195t-1.031-0.203-0.398-0.773q0-0.406 0.195-0.75t0.586-0.344q0.688 0 2.063 0.055t2.063 0.055q0.672 0 2.016-0.055t2.016-0.055q0.391 0 0.586 0.344t0.195 0.75q0 0.469-0.273 0.688t-0.625 0.227-0.805 0.047-0.688 0.195q-0.547 0.359-0.547 2.516l0.016 14.734q0 1.859 0.531 2.188 0.25 0.156 0.719 0.211t0.836 0.070 0.648 0.242 0.281 0.695q0 0.406-0.187 0.75t-0.562 0.344z"/></symbol><symbol viewBox="0 0 16 16" fill="none" id="f-i-header-t" xmlns="http://www.w3.org/2000/svg"><path d="M5.68412,13v-.72885l.221-.0181c.7641-.05812.947-.1896.98514-.22866.02573-.02668.1572-.202.1572-.99276V4.07755H6.47918A2.45938,2.45938,0,0,0,5.002,4.36909a2.26179,2.26179,0,0,0-.56259,1.35957l-.03811.19626H3.6038L3.70384,3h8.59994l.09242,2.92492h-.78411l-.02144-.09527a2.81746,2.81746,0,0,0-.58832-1.46532c-.14719-.13148-.52305-.28678-1.481-.28678H8.9606v7.12272c0,.67835.13815.8184.16578.83936a2.09154,2.09154,0,0,0,1.00943.21342l.223.0181V13Z" fill="currentColor"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-hidden" xmlns="http://www.w3.org/2000/svg"><path d="M0 12h1v-1H0Zm15-7h1V4h-1zm-1 7h1v-1h-1zm-2 0h1v-1h-1zm-2 0h1v-1h-1Zm-2 0h1v-1H8Zm-2 0h1v-1H6Zm-2 0h1v-1H4Zm-2 0h1v-1H2Zm13-1h1v-1h-1ZM0 10h1V9H0Zm15-1h1V8h-1ZM0 8h1V7H0Zm15-1h1V6h-1ZM0 6h1V5H0Zm13-1h1V4h-1zm-2 0h1V4h-1ZM9 5h1V4H9ZM7 5h1V4H7ZM5 5h1V4H5ZM3 5h1V4H3ZM1 5h1V4H1Z"/></symbol><symbol viewBox="0 0 384 512" id="f-i-menu" xmlns="http://www.w3.org/2000/svg"><g id="bdprefix__icomoon-ignore"/><path d="M0 96v64h384v-64h-384zM0 288h384v-64h-384v64zM0 416h384v-64h-384v64z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-minus" xmlns="http://www.w3.org/2000/svg"><path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 512 512" id="f-i-move" xmlns="http://www.w3.org/2000/svg"><path d="M287.744 94.736v129.008h128v-64l96.256 96.256-96.256 96.24v-65.488h-128v129.008h64.496l-96.24 96.24-96.256-96.24h64v-129.008h-128v64.992l-95.744-95.744 95.744-95.744v63.488h128v-129.008h-62.496l94.752-94.736 94.752 94.736h-63.008z"/></symbol><symbol viewBox="0 0 512 512" id="f-i-move-vertical" xmlns="http://www.w3.org/2000/svg"><metadata id="bfprefix__metadata10"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><sodipodi:namedview pagecolor="#ffffff" bordercolor="#666666" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:window-width="3440" inkscape:window-height="1416" id="bfprefix__namedview6" showgrid="false" inkscape:zoom="1.84375" inkscape:cx="421.4312" inkscape:cy="218.56484" inkscape:window-x="0" inkscape:window-y="24" inkscape:window-maximized="1" inkscape:current-layer="svg2" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"/><path d="m 287.744,94.736 0,321.024 64.496,0 L 256,512 l -96.256,-96.24 64,0 0,-321.024 -62.496,0 L 256,0 350.752,94.736 Z" id="bfprefix__path4" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:connector-curvature="0" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" sodipodi:nodetypes="ccccccccccc"/></symbol><symbol viewBox="0 0 15 15" fill="none" id="f-i-new-eye" xmlns="http://www.w3.org/2000/svg"><path d="M0.5 7.5L0.0357612 7.31431C-0.0119204 7.43351 -0.0119204 7.56649 0.0357612 7.68569L0.5 7.5ZM14.5 7.5L14.9642 7.6857C15.0119 7.56649 15.0119 7.43351 14.9642 7.3143L14.5 7.5ZM7.49998 12C5.18597 12 3.56111 10.8483 2.49664 9.66552C1.96405 9.07375 1.57811 8.48029 1.32563 8.03474C1.19968 7.81247 1.10772 7.62838 1.04797 7.50164C1.01811 7.4383 0.996349 7.3894 0.98246 7.35735C0.975517 7.34133 0.970545 7.32953 0.967517 7.32225C0.966003 7.31861 0.964975 7.3161 0.96443 7.31477C0.964157 7.3141 0.964005 7.31372 0.963973 7.31364C0.963958 7.3136 0.963972 7.31364 0.964016 7.31375C0.964038 7.31381 0.964094 7.31394 0.964105 7.31397C0.964168 7.31413 0.964239 7.31431 0.5 7.5C0.0357612 7.68569 0.0358471 7.68591 0.0359408 7.68614C0.0359823 7.68625 0.036084 7.6865 0.0361671 7.68671C0.0363335 7.68712 0.0365311 7.68761 0.0367599 7.68818C0.0372175 7.68931 0.0377999 7.69075 0.0385076 7.69248C0.0399231 7.69595 0.0418401 7.70062 0.0442628 7.70644C0.0491078 7.71808 0.0559773 7.73436 0.0649031 7.75495C0.0827516 7.79614 0.108844 7.85467 0.143439 7.92805C0.212592 8.07474 0.315944 8.28128 0.455611 8.52776C0.734381 9.01971 1.16093 9.67625 1.75334 10.3345C2.93886 11.6517 4.814 13 7.49998 13V12ZM0.5 7.5C0.964239 7.68569 0.964168 7.68587 0.964105 7.68603C0.964094 7.68606 0.964038 7.68619 0.964016 7.68625C0.963972 7.68636 0.963958 7.6864 0.963973 7.68636C0.964005 7.68628 0.964157 7.6859 0.96443 7.68523C0.964975 7.6839 0.966003 7.68139 0.967517 7.67775C0.970545 7.67047 0.975517 7.65867 0.98246 7.64265C0.996349 7.6106 1.01811 7.5617 1.04797 7.49836C1.10772 7.37162 1.19968 7.18753 1.32563 6.96526C1.57811 6.51971 1.96405 5.92625 2.49664 5.33448C3.56111 4.15173 5.18597 3 7.49998 3V2C4.814 2 2.93886 3.34827 1.75334 4.66552C1.16093 5.32375 0.734381 5.98029 0.455611 6.47224C0.315944 6.71872 0.212592 6.92526 0.143439 7.07195C0.108844 7.14533 0.0827516 7.20386 0.0649031 7.24505C0.0559773 7.26564 0.0491078 7.28192 0.0442628 7.29356C0.0418401 7.29938 0.0399231 7.30405 0.0385076 7.30752C0.0377999 7.30925 0.0372175 7.31069 0.0367599 7.31182C0.0365311 7.31239 0.0363335 7.31288 0.0361671 7.31329C0.036084 7.3135 0.0359823 7.31375 0.0359408 7.31386C0.0358471 7.31409 0.0357612 7.31431 0.5 7.5ZM7.49998 3C9.814 3 11.4389 4.15173 12.5033 5.33448C13.0359 5.92625 13.4219 6.51971 13.6744 6.96526C13.8003 7.18754 13.8923 7.37162 13.952 7.49837C13.9819 7.5617 14.0037 7.6106 14.0175 7.64265C14.0245 7.65868 14.0295 7.67048 14.0325 7.67775C14.034 7.68139 14.035 7.6839 14.0356 7.68524C14.0358 7.6859 14.036 7.68628 14.036 7.68636C14.036 7.6864 14.036 7.68636 14.036 7.68625C14.036 7.6862 14.0359 7.68606 14.0359 7.68603C14.0358 7.68587 14.0358 7.6857 14.5 7.5C14.9642 7.3143 14.9642 7.31409 14.9641 7.31385C14.964 7.31375 14.9639 7.3135 14.9638 7.31329C14.9637 7.31288 14.9635 7.31239 14.9632 7.31182C14.9628 7.31069 14.9622 7.30925 14.9615 7.30752C14.9601 7.30405 14.9582 7.29938 14.9557 7.29356C14.9509 7.28192 14.944 7.26564 14.9351 7.24504C14.9172 7.20385 14.8912 7.14533 14.8566 7.07195C14.7874 6.92526 14.6841 6.71871 14.5444 6.47224C14.2656 5.98029 13.8391 5.32375 13.2466 4.66552C12.0611 3.34827 10.186 2 7.49998 2V3ZM14.5 7.5C14.0358 7.3143 14.0358 7.31413 14.0359 7.31397C14.0359 7.31394 14.036 7.3138 14.036 7.31375C14.036 7.31364 14.036 7.3136 14.036 7.31364C14.036 7.31372 14.0358 7.3141 14.0356 7.31476C14.035 7.3161 14.034 7.31861 14.0325 7.32225C14.0295 7.32952 14.0245 7.34132 14.0175 7.35735C14.0037 7.3894 13.9819 7.4383 13.952 7.50163C13.8923 7.62838 13.8003 7.81246 13.6744 8.03474C13.4219 8.48029 13.0359 9.07375 12.5033 9.66552C11.4389 10.8483 9.814 12 7.49998 12V13C10.186 13 12.0611 11.6517 13.2466 10.3345C13.8391 9.67625 14.2656 9.01971 14.5444 8.52776C14.6841 8.28129 14.7874 8.07474 14.8566 7.92805C14.8912 7.85467 14.9172 7.79615 14.9351 7.75496C14.944 7.73436 14.9509 7.71808 14.9557 7.70644C14.9582 7.70062 14.9601 7.69595 14.9615 7.69248C14.9622 7.69075 14.9628 7.68931 14.9632 7.68818C14.9635 7.68761 14.9637 7.68712 14.9638 7.68671C14.9639 7.6865 14.964 7.68625 14.9641 7.68615C14.9642 7.68591 14.9642 7.6857 14.5 7.5ZM7.5 9C6.67157 9 6 8.32843 6 7.5H5C5 8.88071 6.11929 10 7.5 10V9ZM9 7.5C9 8.32843 8.32843 9 7.5 9V10C8.88071 10 10 8.88071 10 7.5H9ZM7.5 6C8.32843 6 9 6.67157 9 7.5H10C10 6.11929 8.88071 5 7.5 5V6ZM7.5 5C6.11929 5 5 6.11929 5 7.5H6C6 6.67157 6.67157 6 7.5 6V5Z" fill="#000000"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-number-hash" xmlns="http://www.w3.org/2000/svg"><path d="M10 4L8 20M16 4L14 20M5 8H21M3 16H19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 32 32" fill="none" id="f-i-paragraph" xmlns="http://www.w3.org/2000/svg"><path d="M24 6H12c-2.761 0-5 2.239-5 5v0c0 2.761 2.239 5 5 5h5M17 27V6M21 27V6" fill="none" stroke="currentColor" stroke-width="2" stroke-miterlimit="10"/></symbol><symbol viewBox="0 0 32 32" fill="none" id="f-i-paragraph-lines" xmlns="http://www.w3.org/2000/svg"><path d="M24 6H12c-2.761 0-5 2.239-5 5v0c0 2.761 2.239 5 5 5h5M17 27V6M21 27V6" fill="none" stroke="currentColor" stroke-width="2" stroke-miterlimit="10"/></symbol><symbol id="f-i-phone-receiver" viewBox="0 0 578.106 578.106" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><g><g><path d="M577.83,456.128c1.225,9.385-1.635,17.545-8.568,24.48l-81.396,80.781 c-3.672,4.08-8.465,7.551-14.381,10.404c-5.916,2.857-11.729,4.693-17.439,5.508c-0.408,0-1.635,0.105-3.676,0.309 c-2.037,0.203-4.689,0.307-7.953,0.307c-7.754,0-20.301-1.326-37.641-3.979s-38.555-9.182-63.645-19.584 c-25.096-10.404-53.553-26.012-85.376-46.818c-31.823-20.805-65.688-49.367-101.592-85.68 c-28.56-28.152-52.224-55.08-70.992-80.783c-18.768-25.705-33.864-49.471-45.288-71.299 c-11.425-21.828-19.993-41.616-25.705-59.364S4.59,177.362,2.55,164.51s-2.856-22.95-2.448-30.294 c0.408-7.344,0.612-11.424,0.612-12.24c0.816-5.712,2.652-11.526,5.508-17.442s6.324-10.71,10.404-14.382L98.022,8.756 c5.712-5.712,12.24-8.568,19.584-8.568c5.304,0,9.996,1.53,14.076,4.59s7.548,6.834,10.404,11.322l65.484,124.236 c3.672,6.528,4.692,13.668,3.06,21.42c-1.632,7.752-5.1,14.28-10.404,19.584l-29.988,29.988c-0.816,0.816-1.53,2.142-2.142,3.978 s-0.918,3.366-0.918,4.59c1.632,8.568,5.304,18.36,11.016,29.376c4.896,9.792,12.444,21.726,22.644,35.802 s24.684,30.293,43.452,48.653c18.36,18.77,34.68,33.354,48.96,43.76c14.277,10.4,26.215,18.053,35.803,22.949 c9.588,4.896,16.932,7.854,22.031,8.871l7.648,1.531c0.816,0,2.145-0.307,3.979-0.918c1.836-0.613,3.162-1.326,3.979-2.143 l34.883-35.496c7.348-6.527,15.912-9.791,25.705-9.791c6.938,0,12.443,1.223,16.523,3.672h0.611l118.115,69.768 C571.098,441.238,576.197,447.968,577.83,456.128z"/></g></g><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-plus" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-radio-circle" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></symbol><symbol id="f-i-radio-group" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M0,1h16V0H0V1z M0,3h16V2H0V3z M5,6h10V5H5V6z M15,9H5v1h10V9z M15,14v-1H5v1H15z M1.5,7C0.7,7,0,6.3,0,5.5S0.7,4,1.5,4 S3,4.7,3,5.5S2.3,7,1.5,7z M1.5,5C1.2,5,1,5.2,1,5.5S1.2,6,1.5,6S2,5.8,2,5.5S1.8,5,1.5,5z M1.5,11.1C0.7,11.1,0,10.4,0,9.6 s0.7-1.5,1.5-1.5S3,8.7,3,9.6S2.3,11.1,1.5,11.1z M1.5,9.1C1.2,9.1,1,9.3,1,9.6s0.2,0.5,0.5,0.5S2,9.8,2,9.6S1.8,9.1,1.5,9.1z M1.5,15C0.7,15,0,14.3,0,13.5S0.7,12,1.5,12S3,12.7,3,13.5S2.3,15,1.5,15z M1.5,13C1.2,13,1,13.2,1,13.5S1.2,14,1.5,14 S2,13.8,2,13.5S1.8,13,1.5,13z"/></symbol><symbol viewBox="0 0 512 512" id="f-i-remove" xmlns="http://www.w3.org/2000/svg"><path d="M193.694-139.2h87.322v510.916h-87.322zM-18.103 159.92V72.597h510.915v87.322z" transform="rotate(45 77.994 208.636)"/></symbol><symbol id="f-i-rich-text" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M15,1H1C0.4,1,0,1.4,0,2v12c0,0.6,0.4,1,1,1h14c0.6,0,1-0.4,1-1V2C16,1.4,15.6,1,15,1z M1,3.1h0.8v0.3H1V3.1z M1,3.6h0.8 v0.3H1V3.6z M15,14H1V5.1h14V14z M15,4.9H1V4.6h14V4.9z M15,4.4H1V4.1h0.8v0.2h1.5V4.1h1.3v0.2H6V4.1h1.3v0.2h1.5V4.1H10v0.2h1.5 V4.1h1.3v0.2h1.5V4.1H15V4.4z M4.5,3.6v0.3H3.3V3.6H4.5z M3.3,3.4V3.1h1.3v0.3H3.3z M7.3,3.6v0.3H6V3.6H7.3z M6,3.4V3.1h1.3v0.3H6z M10,3.6v0.3H8.8V3.6H10z M8.8,3.4V3.1H10v0.3H8.8z M12.8,3.6v0.3h-1.3V3.6H12.8z M11.5,3.4V3.1h1.3v0.3H11.5z M15,3.9h-0.8V3.6H15 V3.9z M15,3.4h-0.8V3.1H15V3.4z M15,2.9h-0.8V2.8h-1.5v0.2h-1.3V2.8H10v0.2H8.8V2.8H7.3v0.2H6V2.8H4.5v0.2H3.3V2.8H1.8v0.2H1V2.6h14 V2.9z M15,2.4H1V2.1h14V2.4z M3,12v-1h10v1H3z M13,10H3V9h10V10z M11,8H3V7h8V8z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-rows" xmlns="http://www.w3.org/2000/svg"><metadata id="brprefix__metadata4318"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><g transform="matrix(0,1,-1,0,3.0984025,11.835155)" id="brprefix__g7209"><path id="brprefix__rect4860-3-5" d="m 4.1640625,-12.402344 a 0.50004997,0.50004997 0 0 0 -0.5,-0.5 l -5,0 -5,0 -5.0000005,0 a 0.50004997,0.50004997 0 0 0 -0.5,0.5 l 0,15.0000002 a 0.50004997,0.50004997 0 0 0 0.5,0.5 l 4.9648442,0 a 0.50004997,0.50004997 0 0 0 0.035156,0 l 4.9648437,0 a 0.50004997,0.50004997 0 0 0 0.035156,0 l 5,0 a 0.50004997,0.50004997 0 0 0 0.5,-0.5 l 0,-15.0000002 z m -1,0.5 0,14.0000002 -4,0 0,-14.0000002 4,0 z m -5,0 0,14.0000002 -4,0 0,-14.0000002 4,0 z m -5,0 0,14.0000002 -4.0000005,0 0,-14.0000002 4.0000005,0 z"/></g></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-section" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 5.6L12 0.8L23.2 5.6M0.8 5.6L12 10.4M0.8 5.6V18.4L12 23.2M23.2 5.6L12 10.4M23.2 5.6V18.4L12 23.2M12 10.4V23.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol><symbol id="f-i-select" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path id="btprefix__XMLID_1_" d="M0,0v14h0c0,0.6,0.4,1,1,1h10c0.6,0,1-0.4,1-1h0V5h4V0H0z M1,1h10v3H1V1z M1,7h10v3H1V7z M1,14v-3h10v3H1z M15,4h-3V1h3V4z M2,2h1v1H2V2z M2,12h1v1H2V12z M4,12h1v1H4V12z M6,12h1v1H6V12z M9,12v1H8v-1H9z M2,8h1v1H2V8z M4,8h1v1H4V8z M6,8 h1v1H6V8z M13.5,3.1l-1-1.1h1.9L13.5,3.1z M2,6V5h1v1H2L2,6z M4,6V5h1v1H4L4,6z"/></symbol><symbol viewBox="0 0 448 512" id="f-i-settings" xmlns="http://www.w3.org/2000/svg"><g id="buprefix__icomoon-ignore"/><path d="M223.969 175c-44.703 0-80.969 36.266-80.969 81 0 44.688 36.266 81.031 80.969 81.031 44.719 0 80.719-36.344 80.719-81.031-0-44.734-36-81-80.719-81zM386.313 302.531l-14.594 35.156 29.469 57.875-36.094 36.094-59.218-27.969-35.156 14.438-17.844 54.625-2.281 7.25h-51.016l-22.078-61.656-35.156-14.5-57.952 29.344-36.078-36.063 27.938-59.25-14.484-35.125-61.767-20.156v-50.984l61.703-22.109 14.485-35.094-25.953-51.234-3.422-6.719 36.031-36.031 59.297 27.922 35.109-14.516 17.828-54.594 2.297-7.234h51l22.094 61.734 35.063 14.516 58.031-29.406 36.063 36.031-27.938 59.203 14.438 35.172 61.875 20.125v50.969l-61.688 22.187z"/></symbol><symbol id="f-i-text-input" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path id="bwprefix__XMLID_10_" d="M15,4H4.5V3H6V2H4.5h-1H2v1h1.5v1H1C0.4,4,0,4.5,0,5v6c0,0.6,0.4,1,1,1h2.5v1H2v1h4v-1H4.5v-1H15 c0.6,0,1-0.4,1-1V5C16,4.5,15.6,4,15,4z M1,11V5h2.5v6H1z M15,11H4.5V5H15V11z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-text-input-pilcrow" xmlns="http://www.w3.org/2000/svg"><path d="M4 7a1 1 0 0 1 1-1h1a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1zm-5 5a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1zm-5 5a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1z" fill="currentColor"/></symbol><symbol id="f-i-textarea" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path id="bxprefix__XMLID_1_" d="M3,11v-1h8v1H3L3,11z M3,7h10V6H3V7L3,7z M3,8v1h10V8H3L3,8z M13,4H3v1h10V4L13,4z M16,14V2c0-0.6-0.4-1-1-1 H1C0.4,1,0,1.4,0,2v12c0,0.6,0.4,1,1,1h14C15.6,15,16,14.6,16,14z M15,2v12H1V2H15z"/></symbol><symbol viewBox="0 0 24 32" id="f-i-triangle-down" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M0 12l11.992 11.992 11.992-11.992h-23.984z"/></symbol><symbol viewBox="0 0 12 32" id="f-i-triangle-left" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M0 15.996l11.992 11.992v-23.984l-11.992 11.992z"/></symbol><symbol viewBox="0 0 12 32" id="f-i-triangle-right" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M0.002 4.008l11.992 11.992-11.992 11.992v-23.984z"/></symbol><symbol viewBox="0 0 24 32" id="f-i-triangle-up" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M11.992 8l-11.992 11.992h23.984l-11.992-11.992z"/></symbol><symbol viewBox="0 0 512 512" id="f-i-upload" xmlns="http://www.w3.org/2000/svg"><g id="ccprefix__icomoon-ignore"/><path d="M240 352h-240v128h480v-128h-240zM448 416h-64v-32h64v32zM112 160l128-128 128 128h-80v160h-96v-160z"/></symbol></svg>';
+const BUNDLED_SVG_SPRITE = '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><symbol id="f-i-autocomplete" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M6,5h1v1H6V5z M4,4H3v1h1V4z M6,4H5v1h1V4z M2,5v1h1V5H2z M3,7h1V6H3V7z M5,7h1V6H5V7z M4,5v1h1V5H4z M2,14h1v-1H2V14z M4,14h1v-1H4V14z M6,14h1v-1H6V14z M9,13H8v1h1V13z M16,3.5v4C16,8.3,15.3,9,14.5,9H14v3v3c0,0.6-0.4,1-1,1H1c-0.6,0-1-0.4-1-1V3.5 C0,2.7,0.7,2,1.5,2h3H8V1.5V1H7H6V0.5V0h2.5H11v0.5V1h-1H9v0.5V2h3h2.5C15.3,2,16,2.7,16,3.5z M13,12H7H1v3h12V12z M3,11v-1H2v1H3z M5,11v-1H4v1H5z M15,3.5C15,3.2,14.8,3,14.5,3H9v2.5V8H8.5H8V7.5V7H7V6h1V5.5V5H7V4h1V3.5V3H1.5C1.2,3,1,3.2,1,3.5v4 C1,7.8,1.2,8,1.5,8H8v1H6v0.5V10h2.5H11V9.5V9H9V8h5.5C14.8,8,15,7.8,15,7.5V3.5z"/></symbol><symbol viewBox="0 0 32 32" id="f-i-bin" xmlns="http://www.w3.org/2000/svg"><path d="M4 10v20c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2v-20h-22zM10 28h-2v-14h2v14zM14 28h-2v-14h2v14zM18 28h-2v-14h2v14zM22 28h-2v-14h2v14zM26.5 4h-6.5v-2.5c0-.825-.675-1.5-1.5-1.5h-7c-.825 0-1.5.675-1.5 1.5v2.5h-6.5c-.825 0-1.5.675-1.5 1.5v2.5h26v-2.5c0-.825-.675-1.5-1.5-1.5zM18 4h-6v-1.975h6v1.975z"/></symbol><symbol id="f-i-button" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><metadata id="adprefix__metadata8"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><path id="adprefix__rect4140" d="M 0.4765625,4 A 0.47706934,0.47706934 0 0 0 0,4.4765625 L 0,11.523438 A 0.47706934,0.47706934 0 0 0 0.4765625,12 L 15.523438,12 A 0.47706934,0.47706934 0 0 0 16,11.523438 L 16,4.4765625 A 0.47706934,0.47706934 0 0 0 15.523438,4 L 0.4765625,4 Z m 0.4765625,0.953125 14.09375,0 0,6.09375 -14.09375,0 0,-6.09375 z"/><g id="adprefix__layer1"><g id="adprefix__text4203"><g id="adprefix__g4212" transform="translate(0.10112835,0.1001358)"><path id="adprefix__path4208" d="m 6.0690374,6.4093857 q -0.5371093,0 -0.8544922,0.4003906 -0.3149414,0.4003906 -0.3149414,1.0913086 0,0.6884766 0.3149414,1.0888672 0.3173829,0.4003906 0.8544922,0.4003906 0.5371094,0 0.8496094,-0.4003906 0.3149414,-0.4003906 0.3149414,-1.0888672 0,-0.690918 -0.3149414,-1.0913086 -0.3125,-0.4003906 -0.8496094,-0.4003906 z m 0,-0.4003906 q 0.7666016,0 1.225586,0.5151367 0.4589843,0.5126953 0.4589843,1.3769531 0,0.8618164 -0.4589843,1.3769531 -0.4589844,0.5126953 -1.225586,0.5126953 -0.7690429,0 -1.2304687,-0.5126953 -0.4589844,-0.5126953 -0.4589844,-1.3769531 0,-0.8642578 0.4589844,-1.3769531 0.4614258,-0.5151367 1.2304687,-0.5151367 z"/><path id="adprefix__path4210" d="m 8.5250921,6.074913 0.4931641,0 0,1.5405274 1.6357418,-1.5405274 0.634766,0 -1.809082,1.6992188 1.938477,1.9458008 -0.649415,0 -1.7504878,-1.7553711 0,1.7553711 -0.4931641,0 0,-3.6450196 z"/></g></g></g></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-button-line" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 17h-17A2.502 2.502 0 0 1 1 14.5v-4A2.502 2.502 0 0 1 3.5 8h17a2.502 2.502 0 0 1 2.5 2.5v4a2.502 2.502 0 0 1-2.5 2.5zm-17-8A1.502 1.502 0 0 0 2 10.5v4A1.502 1.502 0 0 0 3.5 16h17a1.502 1.502 0 0 0 1.5-1.5v-4A1.502 1.502 0 0 0 20.5 9zM17 12H7v1h10z" fill="currentColor"/></symbol><symbol viewBox="0 0 32 32" id="f-i-calendar" xmlns="http://www.w3.org/2000/svg"><path d="M12.048 16.961c-0.178 0.257-0.395 0.901-0.652 1.059-0.257 0.157-0.547 0.267-0.869 0.328-0.323 0.062-0.657 0.089-1.002 0.079v1.527h2.467v6.046h1.991v-9.996h-1.584c-0.056 0.381-0.173 0.7-0.351 0.957zM23 8h2c0.553 0 1-0.448 1-1v-6c0-0.552-0.447-1-1-1h-2c-0.553 0-1 0.448-1 1v6c0 0.552 0.447 1 1 1zM7 8h2c0.552 0 1-0.448 1-1v-6c0-0.552-0.448-1-1-1h-2c-0.552 0-1 0.448-1 1v6c0 0.552 0.448 1 1 1zM30 4h-2v5c0 0.552-0.447 1-1 1h-6c-0.553 0-1-0.448-1-1v-5h-8v5c0 0.552-0.448 1-1 1h-6c-0.552 0-1-0.448-1-1v-5h-2c-1.104 0-2 0.896-2 2v24c0 1.104 0.896 2 2 2h28c1.104 0 2-0.896 2-2v-24c0-1.104-0.896-2-2-2zM30 29c0 0.553-0.447 1-1 1h-26c-0.552 0-1-0.447-1-1v-16c0-0.552 0.448-1 1-1h26c0.553 0 1 0.448 1 1v16zM15.985 17.982h4.968c-0.936 1.152-1.689 2.325-2.265 3.705-0.575 1.381-0.638 2.818-0.749 4.312h2.131c0.009-0.666-0.195-1.385-0.051-2.156 0.146-0.771 0.352-1.532 0.617-2.285 0.267-0.752 0.598-1.461 0.996-2.127 0.396-0.667 0.853-1.229 1.367-1.686v-1.742h-7.015v1.979z"/></symbol><symbol viewBox="0 0 14 14" fill="none" id="f-i-checkbox" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m 4.2666667,5.73333 -0.9333334,0.93334 3,3 L 13,3 12.066667,2.06667 6.3333333,7.8 4.2666667,5.73333 Z m 7.4000003,5.93334 -9.3333337,0 0,-9.33334 L 9,2.33333 9,1 2.3333333,1 C 1.6,1 1,1.6 1,2.33333 l 0,9.33334 C 1,12.4 1.6,13 2.3333333,13 l 9.3333337,0 C 12.4,13 13,12.4 13,11.66667 l 0,-5.33334 -1.333333,0 0,5.33334 z"/></symbol><symbol viewBox="0 0 14 14" fill="none" id="f-i-checkbox-check" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m 4.2666667,5.73333 -0.9333334,0.93334 3,3 L 13,3 12.066667,2.06667 6.3333333,7.8 4.2666667,5.73333 Z m 7.4000003,5.93334 -9.3333337,0 0,-9.33334 L 9,2.33333 9,1 2.3333333,1 C 1.6,1 1,1.6 1,2.33333 l 0,9.33334 C 1,12.4 1.6,13 2.3333333,13 l 9.3333337,0 C 12.4,13 13,12.4 13,11.66667 l 0,-5.33334 -1.333333,0 0,5.33334 z"/></symbol><symbol id="f-i-checkbox-group" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M0,1h16V0H0V1z M0,3h16V2H0V3z M6,5v1h9V5H6z M15,14v-1H6v1H15z M6,10h9V9H6V10z M4,12l-2.5,1.5L0,13l1.5,2L4,12z M4,8 L1.5,9.5L0,9l1.5,2L4,8z M4,4L1.5,5.5L0,5l1.5,2L4,4z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-columns" xmlns="http://www.w3.org/2000/svg"><metadata id="aiprefix__metadata4318"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><path id="aiprefix__rect4860-3-5" d="M 16,0.5 A 0.50004997,0.50004997 0 0 0 15.5,0 l -5,0 -5,0 -5,0 A 0.50004997,0.50004997 0 0 0 0,0.5 l 0,15 A 0.50004997,0.50004997 0 0 0 0.5,16 l 5,0 5,0 5,0 A 0.50004997,0.50004997 0 0 0 16,15.5 l 0,-15 z M 15,1 15,15 11,15 11,1 15,1 Z M 10,1 10,15 6,15 6,1 10,1 Z M 5,1 5,15 1,15 1,1 5,1 Z"/></symbol><symbol viewBox="0 0 32 32" id="f-i-copy" xmlns="http://www.w3.org/2000/svg"><path d="M20 8v-8h-14l-6 6v18h12v8h20v-24h-12zM6 2.828v3.172h-3.172l3.172-3.172zM2 22v-14h6v-6h10v6l-6 6v8h-10zM18 10.828v3.172h-3.172l3.172-3.172zM30 30h-16v-14h6v-6h10v20z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-date-calendar" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M3.5,21.3V4.3h3.8V2.7h1v1.6h7.4V2.7h1v1.6h3.9V21.3H3.5z M19.6,20.3V8.8H4.5v11.6H19.6z M19.6,7.8V5.2h-2.9v1h-1V5.2H8.2v1h-1V5.2H4.5v2.6H19.6z"/></symbol><symbol id="f-i-divider" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg"><metadata id="amprefix__metadata10"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><rect y="7" x="0" height="1" width="15" id="amprefix__rect4182"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-divider-dots" xmlns="http://www.w3.org/2000/svg"><path d="M3 12H3.01M7.5 12H7.51M16.5 12H16.51M12 12H12.01M21 12H21.01M21 21V20.2C21 19.0799 21 18.5198 20.782 18.092C20.5903 17.7157 20.2843 17.4097 19.908 17.218C19.4802 17 18.9201 17 17.8 17H6.2C5.0799 17 4.51984 17 4.09202 17.218C3.7157 17.4097 3.40973 17.7157 3.21799 18.092C3 18.5198 3 19.0799 3 20.2V21M21 3V3.8C21 4.9201 21 5.48016 20.782 5.90798C20.5903 6.28431 20.2843 6.59027 19.908 6.78201C19.4802 7 18.9201 7 17.8 7H6.2C5.0799 7 4.51984 7 4.09202 6.78201C3.71569 6.59027 3.40973 6.28431 3.21799 5.90798C3 5.48016 3 4.92011 3 3.8V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-dropdown-chevron" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 28 32" id="f-i-edit" xmlns="http://www.w3.org/2000/svg"><path d="M22 2l-4 4 6 6 4-4-6-6zM0 24l0.021 6.018 5.979-0.018 16-16-6-6-16 16zM6 28h-4v-4h2v2h2v2z"/></symbol><symbol fill="#000000" viewBox="0 0 24 24" id="f-i-email" xmlns="http://www.w3.org/2000/svg"><path d="M12,2 C17.4292399,2 21.8479317,6.32667079 21.9961582,11.7200952 L22,12 L22,13 C22,15.1729208 20.477434,17 18.5,17 C17.3269391,17 16.3139529,16.3570244 15.6839382,15.3803024 C14.770593,16.3757823 13.4581934,17 12,17 C9.23857625,17 7,14.7614237 7,12 C7,9.23857625 9.23857625,7 12,7 C14.6887547,7 16.8818181,9.12230671 16.9953805,11.7831104 L17,12 L17,13 C17,14.1407877 17.7160103,15 18.5,15 C19.2447902,15 19.928229,14.2245609 19.9947109,13.1689341 L20,13 L20,12 C20,7.581722 16.418278,4 12,4 C7.581722,4 4,7.581722 4,12 C4,16.418278 7.581722,20 12,20 C13.1630948,20 14.2892822,19.7522618 15.3225159,19.2798331 C15.8247876,19.0501777 16.4181317,19.271177 16.647787,19.7734487 C16.8774423,20.2757205 16.656443,20.8690646 16.1541713,21.0987199 C14.861218,21.689901 13.4515463,22 12,22 C6.4771525,22 2,17.5228475 2,12 C2,6.4771525 6.4771525,2 12,2 Z M12,9 C10.3431458,9 9,10.3431458 9,12 C9,13.6568542 10.3431458,15 12,15 C13.6568542,15 15,13.6568542 15,12 C15,10.3431458 13.6568542,9 12,9 Z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-email-envelope" xmlns="http://www.w3.org/2000/svg"><path d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6zm3.519 0L12 11.671 18.481 6H5.52zM20 7.329l-7.341 6.424a1 1 0 0 1-1.318 0L4 7.329V18h16V7.329z" fill="currentColor"/></symbol><symbol viewBox="0 0 24 24" id="f-i-eye" xmlns="http://www.w3.org/2000/svg"><path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol><symbol viewBox="0 0 15 15" fill="none" id="f-i-eye-open" xmlns="http://www.w3.org/2000/svg"><path d="M0.5 7.5L0.0357612 7.31431C-0.0119204 7.43351 -0.0119204 7.56649 0.0357612 7.68569L0.5 7.5ZM14.5 7.5L14.9642 7.6857C15.0119 7.56649 15.0119 7.43351 14.9642 7.3143L14.5 7.5ZM7.49998 12C5.18597 12 3.56111 10.8483 2.49664 9.66552C1.96405 9.07375 1.57811 8.48029 1.32563 8.03474C1.19968 7.81247 1.10772 7.62838 1.04797 7.50164C1.01811 7.4383 0.996349 7.3894 0.98246 7.35735C0.975517 7.34133 0.970545 7.32953 0.967517 7.32225C0.966003 7.31861 0.964975 7.3161 0.96443 7.31477C0.964157 7.3141 0.964005 7.31372 0.963973 7.31364C0.963958 7.3136 0.963972 7.31364 0.964016 7.31375C0.964038 7.31381 0.964094 7.31394 0.964105 7.31397C0.964168 7.31413 0.964239 7.31431 0.5 7.5C0.0357612 7.68569 0.0358471 7.68591 0.0359408 7.68614C0.0359823 7.68625 0.036084 7.6865 0.0361671 7.68671C0.0363335 7.68712 0.0365311 7.68761 0.0367599 7.68818C0.0372175 7.68931 0.0377999 7.69075 0.0385076 7.69248C0.0399231 7.69595 0.0418401 7.70062 0.0442628 7.70644C0.0491078 7.71808 0.0559773 7.73436 0.0649031 7.75495C0.0827516 7.79614 0.108844 7.85467 0.143439 7.92805C0.212592 8.07474 0.315944 8.28128 0.455611 8.52776C0.734381 9.01971 1.16093 9.67625 1.75334 10.3345C2.93886 11.6517 4.814 13 7.49998 13V12ZM0.5 7.5C0.964239 7.68569 0.964168 7.68587 0.964105 7.68603C0.964094 7.68606 0.964038 7.68619 0.964016 7.68625C0.963972 7.68636 0.963958 7.6864 0.963973 7.68636C0.964005 7.68628 0.964157 7.6859 0.96443 7.68523C0.964975 7.6839 0.966003 7.68139 0.967517 7.67775C0.970545 7.67047 0.975517 7.65867 0.98246 7.64265C0.996349 7.6106 1.01811 7.5617 1.04797 7.49836C1.10772 7.37162 1.19968 7.18753 1.32563 6.96526C1.57811 6.51971 1.96405 5.92625 2.49664 5.33448C3.56111 4.15173 5.18597 3 7.49998 3V2C4.814 2 2.93886 3.34827 1.75334 4.66552C1.16093 5.32375 0.734381 5.98029 0.455611 6.47224C0.315944 6.71872 0.212592 6.92526 0.143439 7.07195C0.108844 7.14533 0.0827516 7.20386 0.0649031 7.24505C0.0559773 7.26564 0.0491078 7.28192 0.0442628 7.29356C0.0418401 7.29938 0.0399231 7.30405 0.0385076 7.30752C0.0377999 7.30925 0.0372175 7.31069 0.0367599 7.31182C0.0365311 7.31239 0.0363335 7.31288 0.0361671 7.31329C0.036084 7.3135 0.0359823 7.31375 0.0359408 7.31386C0.0358471 7.31409 0.0357612 7.31431 0.5 7.5ZM7.49998 3C9.814 3 11.4389 4.15173 12.5033 5.33448C13.0359 5.92625 13.4219 6.51971 13.6744 6.96526C13.8003 7.18754 13.8923 7.37162 13.952 7.49837C13.9819 7.5617 14.0037 7.6106 14.0175 7.64265C14.0245 7.65868 14.0295 7.67048 14.0325 7.67775C14.034 7.68139 14.035 7.6839 14.0356 7.68524C14.0358 7.6859 14.036 7.68628 14.036 7.68636C14.036 7.6864 14.036 7.68636 14.036 7.68625C14.036 7.6862 14.0359 7.68606 14.0359 7.68603C14.0358 7.68587 14.0358 7.6857 14.5 7.5C14.9642 7.3143 14.9642 7.31409 14.9641 7.31385C14.964 7.31375 14.9639 7.3135 14.9638 7.31329C14.9637 7.31288 14.9635 7.31239 14.9632 7.31182C14.9628 7.31069 14.9622 7.30925 14.9615 7.30752C14.9601 7.30405 14.9582 7.29938 14.9557 7.29356C14.9509 7.28192 14.944 7.26564 14.9351 7.24504C14.9172 7.20385 14.8912 7.14533 14.8566 7.07195C14.7874 6.92526 14.6841 6.71871 14.5444 6.47224C14.2656 5.98029 13.8391 5.32375 13.2466 4.66552C12.0611 3.34827 10.186 2 7.49998 2V3ZM14.5 7.5C14.0358 7.3143 14.0358 7.31413 14.0359 7.31397C14.0359 7.31394 14.036 7.3138 14.036 7.31375C14.036 7.31364 14.036 7.3136 14.036 7.31364C14.036 7.31372 14.0358 7.3141 14.0356 7.31476C14.035 7.3161 14.034 7.31861 14.0325 7.32225C14.0295 7.32952 14.0245 7.34132 14.0175 7.35735C14.0037 7.3894 13.9819 7.4383 13.952 7.50163C13.8923 7.62838 13.8003 7.81246 13.6744 8.03474C13.4219 8.48029 13.0359 9.07375 12.5033 9.66552C11.4389 10.8483 9.814 12 7.49998 12V13C10.186 13 12.0611 11.6517 13.2466 10.3345C13.8391 9.67625 14.2656 9.01971 14.5444 8.52776C14.6841 8.28129 14.7874 8.07474 14.8566 7.92805C14.8912 7.85467 14.9172 7.79615 14.9351 7.75496C14.944 7.73436 14.9509 7.71808 14.9557 7.70644C14.9582 7.70062 14.9601 7.69595 14.9615 7.69248C14.9622 7.69075 14.9628 7.68931 14.9632 7.68818C14.9635 7.68761 14.9637 7.68712 14.9638 7.68671C14.9639 7.6865 14.964 7.68625 14.9641 7.68615C14.9642 7.68591 14.9642 7.6857 14.5 7.5ZM7.5 9C6.67157 9 6 8.32843 6 7.5H5C5 8.88071 6.11929 10 7.5 10V9ZM9 7.5C9 8.32843 8.32843 9 7.5 9V10C8.88071 10 10 8.88071 10 7.5H9ZM7.5 6C8.32843 6 9 6.67157 9 7.5H10C10 6.11929 8.88071 5 7.5 5V6ZM7.5 5C6.11929 5 5 6.11929 5 7.5H6C6 6.67157 6.67157 6 7.5 6V5Z" fill="#975DAA"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-file-upload-image" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M2.4 1.6H21.6V0H2.4V1.6ZM22.4 2.4V21.6H24V2.4H22.4ZM21.6 22.4H2.4V24H21.6V22.4ZM1.6 21.6V2.4H0V21.6H1.6ZM2.4 22.4C1.96 22.4 1.6 22.04 1.6 21.6H0C0 22.93 1.07 24 2.4 24V22.4ZM22.4 21.6C22.4 22.04 22.04 22.4 21.6 22.4V24C22.93 24 24 22.93 24 21.6H22.4ZM21.6 1.6C22.04 1.6 22.4 1.96 22.4 2.4H24C24 1.07 22.93 0 21.6 0V1.6ZM2.4 0C1.07 0 0 1.07 0 2.4H1.6C1.6 1.96 1.96 1.6 2.4 1.6V0ZM0.8 17.6H23.2V16H0.8V17.6ZM1.37 12.57L7.77 6.17L6.63 5.03L0.23 11.43L1.37 12.57ZM6.63 6.17L17.83 17.37L18.97 16.23L7.77 5.03L6.63 6.17ZM16.8 8C16.36 8 16 7.64 16 7.2H14.4C14.4 8.53 15.47 9.6 16.8 9.6V8ZM17.6 7.2C17.6 7.64 17.24 8 16.8 8V9.6C18.13 9.6 19.2 8.53 19.2 7.2H17.6ZM16.8 6.4C17.24 6.4 17.6 6.76 17.6 7.2H19.2C19.2 5.87 18.13 4.8 16.8 4.8V6.4ZM16.8 4.8C15.47 4.8 14.4 5.87 14.4 7.2H16C16 6.76 16.36 6.4 16.8 6.4V4.8Z"/></symbol><symbol viewBox="0 0 32 32" id="f-i-floppy-disk" xmlns="http://www.w3.org/2000/svg"><path d="M28 0h-28v32h32v-28l-4-4zM16 4h4v8h-4v-8zM28 28h-24v-24h2v10h18v-10h2.343l1.657 1.657v22.343z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle" xmlns="http://www.w3.org/2000/svg"><metadata id="azprefix__metadata8"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><g transform="translate(0,-2)" id="azprefix__g4220"><rect id="azprefix__rect4191" width="2" height="2" x="2" y="7"/><rect id="azprefix__rect4191-2" width="2" height="2" x="7" y="7"/><rect id="azprefix__rect4191-4" width="2" height="2" x="12" y="7"/></g><g transform="translate(0,2)" id="azprefix__g4220-6"><rect id="azprefix__rect4191-40" width="2" height="2" x="2" y="7"/><rect id="azprefix__rect4191-2-3" width="2" height="2" x="7" y="7"/><rect id="azprefix__rect4191-4-9" width="2" height="2" x="12" y="7"/></g></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-column" xmlns="http://www.w3.org/2000/svg"><path d="M2 7h2v2H2zM7 7h2v2H7zM12 7h2v2h-2zM2 12h2v2H2zM7 12h2v2H7zM12 12h2v2h-2z" transform="rotate(90 9.25 9.25)"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-field" xmlns="http://www.w3.org/2000/svg"><path d="M9.5-6.5h2v2h-2zm-5 0h2v2h-2zm5-5h2v2h-2zm-5 0h2v2h-2z" transform="rotate(90)"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-row" xmlns="http://www.w3.org/2000/svg"><path d="M12 9.5h2v2h-2zm-5 0h2v2H7Zm-5 0h2v2H2Zm10-5h2v2h-2zm-5 0h2v2H7Zm-5 0h2v2H2Z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-stage" xmlns="http://www.w3.org/2000/svg"><path d="M2 4.5h2v2H2zM7 4.5h2v2H7zM12 4.5h2v2h-2zM2 9.5h2v2H2zM7 9.5h2v2H7zM12 9.5h2v2h-2zM2-.5h2v2H2zM7-.5h2v2H7zM12-.5h2v2h-2z" transform="translate(0 2.5)"/></symbol><symbol viewBox="0 0 448 512" id="f-i-hash" xmlns="http://www.w3.org/2000/svg"><g id="baprefix__icomoon-ignore"/><path fill="#000" d="M448 192v-64h-80.064l16-128h-64l-16 128h-127.968l16-128h-64l-16 128h-111.968v64h103.968l-15.968 128h-88v64h80l-16 128h64l16-128h127.968l-16 128h64.032l16-128h112v-64h-104l15.936-128h88.064zM279.968 320h-127.968l15.968-128h127.968l-15.968 128z"/></symbol><symbol viewBox="0 0 28 28" id="f-i-header" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M26.281 26q-0.688 0-2.070-0.055t-2.086-0.055q-0.688 0-2.063 0.055t-2.063 0.055q-0.375 0-0.578-0.32t-0.203-0.711q0-0.484 0.266-0.719t0.609-0.266 0.797-0.109 0.703-0.234q0.516-0.328 0.516-2.188l-0.016-6.109q0-0.328-0.016-0.484-0.203-0.063-0.781-0.063h-10.547q-0.594 0-0.797 0.063-0.016 0.156-0.016 0.484l-0.016 5.797q0 2.219 0.578 2.562 0.25 0.156 0.75 0.203t0.891 0.055 0.703 0.234 0.313 0.711q0 0.406-0.195 0.75t-0.57 0.344q-0.734 0-2.18-0.055t-2.164-0.055q-0.672 0-2 0.055t-1.984 0.055q-0.359 0-0.555-0.328t-0.195-0.703q0-0.469 0.242-0.703t0.562-0.273 0.742-0.117 0.656-0.234q0.516-0.359 0.516-2.234l-0.016-0.891v-12.703q0-0.047 0.008-0.406t0-0.57-0.023-0.602-0.055-0.656-0.102-0.57-0.172-0.492-0.25-0.281q-0.234-0.156-0.703-0.187t-0.828-0.031-0.641-0.219-0.281-0.703q0-0.406 0.187-0.75t0.562-0.344q0.719 0 2.164 0.055t2.164 0.055q0.656 0 1.977-0.055t1.977-0.055q0.391 0 0.586 0.344t0.195 0.75q0 0.469-0.266 0.68t-0.602 0.227-0.773 0.063-0.672 0.203q-0.547 0.328-0.547 2.5l0.016 5q0 0.328 0.016 0.5 0.203 0.047 0.609 0.047h10.922q0.391 0 0.594-0.047 0.016-0.172 0.016-0.5l0.016-5q0-2.172-0.547-2.5-0.281-0.172-0.914-0.195t-1.031-0.203-0.398-0.773q0-0.406 0.195-0.75t0.586-0.344q0.688 0 2.063 0.055t2.063 0.055q0.672 0 2.016-0.055t2.016-0.055q0.391 0 0.586 0.344t0.195 0.75q0 0.469-0.273 0.688t-0.625 0.227-0.805 0.047-0.688 0.195q-0.547 0.359-0.547 2.516l0.016 14.734q0 1.859 0.531 2.188 0.25 0.156 0.719 0.211t0.836 0.070 0.648 0.242 0.281 0.695q0 0.406-0.187 0.75t-0.562 0.344z"/></symbol><symbol viewBox="0 0 16 16" fill="none" id="f-i-header-t" xmlns="http://www.w3.org/2000/svg"><path d="M5.68412,13v-.72885l.221-.0181c.7641-.05812.947-.1896.98514-.22866.02573-.02668.1572-.202.1572-.99276V4.07755H6.47918A2.45938,2.45938,0,0,0,5.002,4.36909a2.26179,2.26179,0,0,0-.56259,1.35957l-.03811.19626H3.6038L3.70384,3h8.59994l.09242,2.92492h-.78411l-.02144-.09527a2.81746,2.81746,0,0,0-.58832-1.46532c-.14719-.13148-.52305-.28678-1.481-.28678H8.9606v7.12272c0,.67835.13815.8184.16578.83936a2.09154,2.09154,0,0,0,1.00943.21342l.223.0181V13Z" fill="currentColor"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-hidden" xmlns="http://www.w3.org/2000/svg"><path d="M0 12h1v-1H0Zm15-7h1V4h-1zm-1 7h1v-1h-1zm-2 0h1v-1h-1zm-2 0h1v-1h-1Zm-2 0h1v-1H8Zm-2 0h1v-1H6Zm-2 0h1v-1H4Zm-2 0h1v-1H2Zm13-1h1v-1h-1ZM0 10h1V9H0Zm15-1h1V8h-1ZM0 8h1V7H0Zm15-1h1V6h-1ZM0 6h1V5H0Zm13-1h1V4h-1zm-2 0h1V4h-1ZM9 5h1V4H9ZM7 5h1V4H7ZM5 5h1V4H5ZM3 5h1V4H3ZM1 5h1V4H1Z"/></symbol><symbol viewBox="0 0 384 512" id="f-i-menu" xmlns="http://www.w3.org/2000/svg"><g id="beprefix__icomoon-ignore"/><path d="M0 96v64h384v-64h-384zM0 288h384v-64h-384v64zM0 416h384v-64h-384v64z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-minus" xmlns="http://www.w3.org/2000/svg"><path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 512 512" id="f-i-move" xmlns="http://www.w3.org/2000/svg"><path d="M287.744 94.736v129.008h128v-64l96.256 96.256-96.256 96.24v-65.488h-128v129.008h64.496l-96.24 96.24-96.256-96.24h64v-129.008h-128v64.992l-95.744-95.744 95.744-95.744v63.488h128v-129.008h-62.496l94.752-94.736 94.752 94.736h-63.008z"/></symbol><symbol viewBox="0 0 512 512" id="f-i-move-vertical" xmlns="http://www.w3.org/2000/svg"><metadata id="bgprefix__metadata10"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><sodipodi:namedview pagecolor="#ffffff" bordercolor="#666666" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:window-width="3440" inkscape:window-height="1416" id="bgprefix__namedview6" showgrid="false" inkscape:zoom="1.84375" inkscape:cx="421.4312" inkscape:cy="218.56484" inkscape:window-x="0" inkscape:window-y="24" inkscape:window-maximized="1" inkscape:current-layer="svg2" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"/><path d="m 287.744,94.736 0,321.024 64.496,0 L 256,512 l -96.256,-96.24 64,0 0,-321.024 -62.496,0 L 256,0 350.752,94.736 Z" id="bgprefix__path4" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:connector-curvature="0" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" sodipodi:nodetypes="ccccccccccc"/></symbol><symbol viewBox="0 0 15 15" fill="none" id="f-i-new-eye" xmlns="http://www.w3.org/2000/svg"><path d="M0.5 7.5L0.0357612 7.31431C-0.0119204 7.43351 -0.0119204 7.56649 0.0357612 7.68569L0.5 7.5ZM14.5 7.5L14.9642 7.6857C15.0119 7.56649 15.0119 7.43351 14.9642 7.3143L14.5 7.5ZM7.49998 12C5.18597 12 3.56111 10.8483 2.49664 9.66552C1.96405 9.07375 1.57811 8.48029 1.32563 8.03474C1.19968 7.81247 1.10772 7.62838 1.04797 7.50164C1.01811 7.4383 0.996349 7.3894 0.98246 7.35735C0.975517 7.34133 0.970545 7.32953 0.967517 7.32225C0.966003 7.31861 0.964975 7.3161 0.96443 7.31477C0.964157 7.3141 0.964005 7.31372 0.963973 7.31364C0.963958 7.3136 0.963972 7.31364 0.964016 7.31375C0.964038 7.31381 0.964094 7.31394 0.964105 7.31397C0.964168 7.31413 0.964239 7.31431 0.5 7.5C0.0357612 7.68569 0.0358471 7.68591 0.0359408 7.68614C0.0359823 7.68625 0.036084 7.6865 0.0361671 7.68671C0.0363335 7.68712 0.0365311 7.68761 0.0367599 7.68818C0.0372175 7.68931 0.0377999 7.69075 0.0385076 7.69248C0.0399231 7.69595 0.0418401 7.70062 0.0442628 7.70644C0.0491078 7.71808 0.0559773 7.73436 0.0649031 7.75495C0.0827516 7.79614 0.108844 7.85467 0.143439 7.92805C0.212592 8.07474 0.315944 8.28128 0.455611 8.52776C0.734381 9.01971 1.16093 9.67625 1.75334 10.3345C2.93886 11.6517 4.814 13 7.49998 13V12ZM0.5 7.5C0.964239 7.68569 0.964168 7.68587 0.964105 7.68603C0.964094 7.68606 0.964038 7.68619 0.964016 7.68625C0.963972 7.68636 0.963958 7.6864 0.963973 7.68636C0.964005 7.68628 0.964157 7.6859 0.96443 7.68523C0.964975 7.6839 0.966003 7.68139 0.967517 7.67775C0.970545 7.67047 0.975517 7.65867 0.98246 7.64265C0.996349 7.6106 1.01811 7.5617 1.04797 7.49836C1.10772 7.37162 1.19968 7.18753 1.32563 6.96526C1.57811 6.51971 1.96405 5.92625 2.49664 5.33448C3.56111 4.15173 5.18597 3 7.49998 3V2C4.814 2 2.93886 3.34827 1.75334 4.66552C1.16093 5.32375 0.734381 5.98029 0.455611 6.47224C0.315944 6.71872 0.212592 6.92526 0.143439 7.07195C0.108844 7.14533 0.0827516 7.20386 0.0649031 7.24505C0.0559773 7.26564 0.0491078 7.28192 0.0442628 7.29356C0.0418401 7.29938 0.0399231 7.30405 0.0385076 7.30752C0.0377999 7.30925 0.0372175 7.31069 0.0367599 7.31182C0.0365311 7.31239 0.0363335 7.31288 0.0361671 7.31329C0.036084 7.3135 0.0359823 7.31375 0.0359408 7.31386C0.0358471 7.31409 0.0357612 7.31431 0.5 7.5ZM7.49998 3C9.814 3 11.4389 4.15173 12.5033 5.33448C13.0359 5.92625 13.4219 6.51971 13.6744 6.96526C13.8003 7.18754 13.8923 7.37162 13.952 7.49837C13.9819 7.5617 14.0037 7.6106 14.0175 7.64265C14.0245 7.65868 14.0295 7.67048 14.0325 7.67775C14.034 7.68139 14.035 7.6839 14.0356 7.68524C14.0358 7.6859 14.036 7.68628 14.036 7.68636C14.036 7.6864 14.036 7.68636 14.036 7.68625C14.036 7.6862 14.0359 7.68606 14.0359 7.68603C14.0358 7.68587 14.0358 7.6857 14.5 7.5C14.9642 7.3143 14.9642 7.31409 14.9641 7.31385C14.964 7.31375 14.9639 7.3135 14.9638 7.31329C14.9637 7.31288 14.9635 7.31239 14.9632 7.31182C14.9628 7.31069 14.9622 7.30925 14.9615 7.30752C14.9601 7.30405 14.9582 7.29938 14.9557 7.29356C14.9509 7.28192 14.944 7.26564 14.9351 7.24504C14.9172 7.20385 14.8912 7.14533 14.8566 7.07195C14.7874 6.92526 14.6841 6.71871 14.5444 6.47224C14.2656 5.98029 13.8391 5.32375 13.2466 4.66552C12.0611 3.34827 10.186 2 7.49998 2V3ZM14.5 7.5C14.0358 7.3143 14.0358 7.31413 14.0359 7.31397C14.0359 7.31394 14.036 7.3138 14.036 7.31375C14.036 7.31364 14.036 7.3136 14.036 7.31364C14.036 7.31372 14.0358 7.3141 14.0356 7.31476C14.035 7.3161 14.034 7.31861 14.0325 7.32225C14.0295 7.32952 14.0245 7.34132 14.0175 7.35735C14.0037 7.3894 13.9819 7.4383 13.952 7.50163C13.8923 7.62838 13.8003 7.81246 13.6744 8.03474C13.4219 8.48029 13.0359 9.07375 12.5033 9.66552C11.4389 10.8483 9.814 12 7.49998 12V13C10.186 13 12.0611 11.6517 13.2466 10.3345C13.8391 9.67625 14.2656 9.01971 14.5444 8.52776C14.6841 8.28129 14.7874 8.07474 14.8566 7.92805C14.8912 7.85467 14.9172 7.79615 14.9351 7.75496C14.944 7.73436 14.9509 7.71808 14.9557 7.70644C14.9582 7.70062 14.9601 7.69595 14.9615 7.69248C14.9622 7.69075 14.9628 7.68931 14.9632 7.68818C14.9635 7.68761 14.9637 7.68712 14.9638 7.68671C14.9639 7.6865 14.964 7.68625 14.9641 7.68615C14.9642 7.68591 14.9642 7.6857 14.5 7.5ZM7.5 9C6.67157 9 6 8.32843 6 7.5H5C5 8.88071 6.11929 10 7.5 10V9ZM9 7.5C9 8.32843 8.32843 9 7.5 9V10C8.88071 10 10 8.88071 10 7.5H9ZM7.5 6C8.32843 6 9 6.67157 9 7.5H10C10 6.11929 8.88071 5 7.5 5V6ZM7.5 5C6.11929 5 5 6.11929 5 7.5H6C6 6.67157 6.67157 6 7.5 6V5Z" fill="#000000"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-number-hash" xmlns="http://www.w3.org/2000/svg"><path d="M10 4L8 20M16 4L14 20M5 8H21M3 16H19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 32 32" fill="none" id="f-i-paragraph" xmlns="http://www.w3.org/2000/svg"><path d="M24 6H12c-2.761 0-5 2.239-5 5v0c0 2.761 2.239 5 5 5h5M17 27V6M21 27V6" fill="none" stroke="currentColor" stroke-width="2" stroke-miterlimit="10"/></symbol><symbol viewBox="0 0 32 32" fill="none" id="f-i-paragraph-lines" xmlns="http://www.w3.org/2000/svg"><path d="M24 6H12c-2.761 0-5 2.239-5 5v0c0 2.761 2.239 5 5 5h5M17 27V6M21 27V6" fill="none" stroke="currentColor" stroke-width="2" stroke-miterlimit="10"/></symbol><symbol id="f-i-phone-receiver" viewBox="0 0 578.106 578.106" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><g><g><path d="M577.83,456.128c1.225,9.385-1.635,17.545-8.568,24.48l-81.396,80.781 c-3.672,4.08-8.465,7.551-14.381,10.404c-5.916,2.857-11.729,4.693-17.439,5.508c-0.408,0-1.635,0.105-3.676,0.309 c-2.037,0.203-4.689,0.307-7.953,0.307c-7.754,0-20.301-1.326-37.641-3.979s-38.555-9.182-63.645-19.584 c-25.096-10.404-53.553-26.012-85.376-46.818c-31.823-20.805-65.688-49.367-101.592-85.68 c-28.56-28.152-52.224-55.08-70.992-80.783c-18.768-25.705-33.864-49.471-45.288-71.299 c-11.425-21.828-19.993-41.616-25.705-59.364S4.59,177.362,2.55,164.51s-2.856-22.95-2.448-30.294 c0.408-7.344,0.612-11.424,0.612-12.24c0.816-5.712,2.652-11.526,5.508-17.442s6.324-10.71,10.404-14.382L98.022,8.756 c5.712-5.712,12.24-8.568,19.584-8.568c5.304,0,9.996,1.53,14.076,4.59s7.548,6.834,10.404,11.322l65.484,124.236 c3.672,6.528,4.692,13.668,3.06,21.42c-1.632,7.752-5.1,14.28-10.404,19.584l-29.988,29.988c-0.816,0.816-1.53,2.142-2.142,3.978 s-0.918,3.366-0.918,4.59c1.632,8.568,5.304,18.36,11.016,29.376c4.896,9.792,12.444,21.726,22.644,35.802 s24.684,30.293,43.452,48.653c18.36,18.77,34.68,33.354,48.96,43.76c14.277,10.4,26.215,18.053,35.803,22.949 c9.588,4.896,16.932,7.854,22.031,8.871l7.648,1.531c0.816,0,2.145-0.307,3.979-0.918c1.836-0.613,3.162-1.326,3.979-2.143 l34.883-35.496c7.348-6.527,15.912-9.791,25.705-9.791c6.938,0,12.443,1.223,16.523,3.672h0.611l118.115,69.768 C571.098,441.238,576.197,447.968,577.83,456.128z"/></g></g><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-plus" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol fill="currentColor" viewBox="0 0 32 32" id="f-i-plus-square" xmlns="http://www.w3.org/2000/svg"><polygon points="15,20 17,20 17,17 20,17 20,15 17,15 17,12 15,12 15,15 12,15 12,17 15,17"/><path d="M7 7v18h18V7H7zM23 23H9V9h14V23z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-radio-circle" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></symbol><symbol id="f-i-radio-group" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M0,1h16V0H0V1z M0,3h16V2H0V3z M5,6h10V5H5V6z M15,9H5v1h10V9z M15,14v-1H5v1H15z M1.5,7C0.7,7,0,6.3,0,5.5S0.7,4,1.5,4 S3,4.7,3,5.5S2.3,7,1.5,7z M1.5,5C1.2,5,1,5.2,1,5.5S1.2,6,1.5,6S2,5.8,2,5.5S1.8,5,1.5,5z M1.5,11.1C0.7,11.1,0,10.4,0,9.6 s0.7-1.5,1.5-1.5S3,8.7,3,9.6S2.3,11.1,1.5,11.1z M1.5,9.1C1.2,9.1,1,9.3,1,9.6s0.2,0.5,0.5,0.5S2,9.8,2,9.6S1.8,9.1,1.5,9.1z M1.5,15C0.7,15,0,14.3,0,13.5S0.7,12,1.5,12S3,12.7,3,13.5S2.3,15,1.5,15z M1.5,13C1.2,13,1,13.2,1,13.5S1.2,14,1.5,14 S2,13.8,2,13.5S1.8,13,1.5,13z"/></symbol><symbol viewBox="0 0 512 512" id="f-i-remove" xmlns="http://www.w3.org/2000/svg"><path d="M193.694-139.2h87.322v510.916h-87.322zM-18.103 159.92V72.597h510.915v87.322z" transform="rotate(45 77.994 208.636)"/></symbol><symbol id="f-i-rich-text" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M15,1H1C0.4,1,0,1.4,0,2v12c0,0.6,0.4,1,1,1h14c0.6,0,1-0.4,1-1V2C16,1.4,15.6,1,15,1z M1,3.1h0.8v0.3H1V3.1z M1,3.6h0.8 v0.3H1V3.6z M15,14H1V5.1h14V14z M15,4.9H1V4.6h14V4.9z M15,4.4H1V4.1h0.8v0.2h1.5V4.1h1.3v0.2H6V4.1h1.3v0.2h1.5V4.1H10v0.2h1.5 V4.1h1.3v0.2h1.5V4.1H15V4.4z M4.5,3.6v0.3H3.3V3.6H4.5z M3.3,3.4V3.1h1.3v0.3H3.3z M7.3,3.6v0.3H6V3.6H7.3z M6,3.4V3.1h1.3v0.3H6z M10,3.6v0.3H8.8V3.6H10z M8.8,3.4V3.1H10v0.3H8.8z M12.8,3.6v0.3h-1.3V3.6H12.8z M11.5,3.4V3.1h1.3v0.3H11.5z M15,3.9h-0.8V3.6H15 V3.9z M15,3.4h-0.8V3.1H15V3.4z M15,2.9h-0.8V2.8h-1.5v0.2h-1.3V2.8H10v0.2H8.8V2.8H7.3v0.2H6V2.8H4.5v0.2H3.3V2.8H1.8v0.2H1V2.6h14 V2.9z M15,2.4H1V2.1h14V2.4z M3,12v-1h10v1H3z M13,10H3V9h10V10z M11,8H3V7h8V8z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-rows" xmlns="http://www.w3.org/2000/svg"><metadata id="btprefix__metadata4318"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><g transform="matrix(0,1,-1,0,3.0984025,11.835155)" id="btprefix__g7209"><path id="btprefix__rect4860-3-5" d="m 4.1640625,-12.402344 a 0.50004997,0.50004997 0 0 0 -0.5,-0.5 l -5,0 -5,0 -5.0000005,0 a 0.50004997,0.50004997 0 0 0 -0.5,0.5 l 0,15.0000002 a 0.50004997,0.50004997 0 0 0 0.5,0.5 l 4.9648442,0 a 0.50004997,0.50004997 0 0 0 0.035156,0 l 4.9648437,0 a 0.50004997,0.50004997 0 0 0 0.035156,0 l 5,0 a 0.50004997,0.50004997 0 0 0 0.5,-0.5 l 0,-15.0000002 z m -1,0.5 0,14.0000002 -4,0 0,-14.0000002 4,0 z m -5,0 0,14.0000002 -4,0 0,-14.0000002 4,0 z m -5,0 0,14.0000002 -4.0000005,0 0,-14.0000002 4.0000005,0 z"/></g></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-section" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 5.6L12 0.8L23.2 5.6M0.8 5.6L12 10.4M0.8 5.6V18.4L12 23.2M23.2 5.6L12 10.4M23.2 5.6V18.4L12 23.2M12 10.4V23.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol><symbol id="f-i-select" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path id="bvprefix__XMLID_1_" d="M0,0v14h0c0,0.6,0.4,1,1,1h10c0.6,0,1-0.4,1-1h0V5h4V0H0z M1,1h10v3H1V1z M1,7h10v3H1V7z M1,14v-3h10v3H1z M15,4h-3V1h3V4z M2,2h1v1H2V2z M2,12h1v1H2V12z M4,12h1v1H4V12z M6,12h1v1H6V12z M9,12v1H8v-1H9z M2,8h1v1H2V8z M4,8h1v1H4V8z M6,8 h1v1H6V8z M13.5,3.1l-1-1.1h1.9L13.5,3.1z M2,6V5h1v1H2L2,6z M4,6V5h1v1H4L4,6z"/></symbol><symbol viewBox="0 0 448 512" id="f-i-settings" xmlns="http://www.w3.org/2000/svg"><g id="bwprefix__icomoon-ignore"/><path d="M223.969 175c-44.703 0-80.969 36.266-80.969 81 0 44.688 36.266 81.031 80.969 81.031 44.719 0 80.719-36.344 80.719-81.031-0-44.734-36-81-80.719-81zM386.313 302.531l-14.594 35.156 29.469 57.875-36.094 36.094-59.218-27.969-35.156 14.438-17.844 54.625-2.281 7.25h-51.016l-22.078-61.656-35.156-14.5-57.952 29.344-36.078-36.063 27.938-59.25-14.484-35.125-61.767-20.156v-50.984l61.703-22.109 14.485-35.094-25.953-51.234-3.422-6.719 36.031-36.031 59.297 27.922 35.109-14.516 17.828-54.594 2.297-7.234h51l22.094 61.734 35.063 14.516 58.031-29.406 36.063 36.031-27.938 59.203 14.438 35.172 61.875 20.125v50.969l-61.688 22.187z"/></symbol><symbol id="f-i-text-input" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path id="byprefix__XMLID_10_" d="M15,4H4.5V3H6V2H4.5h-1H2v1h1.5v1H1C0.4,4,0,4.5,0,5v6c0,0.6,0.4,1,1,1h2.5v1H2v1h4v-1H4.5v-1H15 c0.6,0,1-0.4,1-1V5C16,4.5,15.6,4,15,4z M1,11V5h2.5v6H1z M15,11H4.5V5H15V11z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-text-input-pilcrow" xmlns="http://www.w3.org/2000/svg"><path d="M4 7a1 1 0 0 1 1-1h1a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1zm-5 5a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1zm-5 5a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1z" fill="currentColor"/></symbol><symbol id="f-i-textarea" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path id="bzprefix__XMLID_1_" d="M3,11v-1h8v1H3L3,11z M3,7h10V6H3V7L3,7z M3,8v1h10V8H3L3,8z M13,4H3v1h10V4L13,4z M16,14V2c0-0.6-0.4-1-1-1 H1C0.4,1,0,1.4,0,2v12c0,0.6,0.4,1,1,1h14C15.6,15,16,14.6,16,14z M15,2v12H1V2H15z"/></symbol><symbol viewBox="0 0 24 32" id="f-i-triangle-down" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M0 12l11.992 11.992 11.992-11.992h-23.984z"/></symbol><symbol viewBox="0 0 12 32" id="f-i-triangle-left" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M0 15.996l11.992 11.992v-23.984l-11.992 11.992z"/></symbol><symbol viewBox="0 0 12 32" id="f-i-triangle-right" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M0.002 4.008l11.992 11.992-11.992 11.992v-23.984z"/></symbol><symbol viewBox="0 0 24 32" id="f-i-triangle-up" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M11.992 8l-11.992 11.992h23.984l-11.992-11.992z"/></symbol><symbol viewBox="0 0 512 512" id="f-i-upload" xmlns="http://www.w3.org/2000/svg"><g id="ceprefix__icomoon-ignore"/><path d="M240 352h-240v128h480v-128h-240zM448 416h-64v-32h64v32zM112 160l128-128 128 128h-80v160h-96v-160z"/></symbol></svg>';
 const name = pkg.name;
 const version$1 = pkg.version;
 const PACKAGE_NAME = name;
@@ -2174,7 +2174,6 @@ const formeoSpriteId = "formeo-sprite";
 const SVG_SPRITE_URL = null;
 const FALLBACK_SVG_SPRITE_URL = `https://cdn.jsdelivr.net/npm/formeo@${version$1}/dist/${formeoSpriteId}.svg`;
 const CSS_URL = `https://cdn.jsdelivr.net/npm/formeo@${version$1}/dist/formeo.min.css`;
-const FALLBACK_CSS_URL = "https://draggable.github.io/formeo/assets/css/formeo.min.css";
 const PANEL_CLASSNAME = "f-panel";
 const CONTROL_GROUP_CLASSNAME = "control-group";
 const STAGE_CLASSNAME = `${PACKAGE_NAME}-stage`;
@@ -3744,7 +3743,7 @@ function lastChild(el, selector) {
   }
   return last || null;
 }
-function index$8(el, selector) {
+function index$9(el, selector) {
   var index2 = 0;
   if (!el || !el.parentNode) {
     return -1;
@@ -4355,8 +4354,8 @@ Sortable.prototype = /** @lends Sortable.prototype */
     if (lastDownEl === target) {
       return;
     }
-    oldIndex = index$8(target);
-    oldDraggableIndex = index$8(target, options.draggable);
+    oldIndex = index$9(target);
+    oldDraggableIndex = index$9(target, options.draggable);
     if (typeof filter === "function") {
       if (filter.call(this, evt, target, this)) {
         _dispatchEvent({
@@ -4776,8 +4775,8 @@ Sortable.prototype = /** @lends Sortable.prototype */
       return completedFired = true;
     }
     function changed() {
-      newIndex = index$8(dragEl);
-      newDraggableIndex = index$8(dragEl, options.draggable);
+      newIndex = index$9(dragEl);
+      newDraggableIndex = index$9(dragEl, options.draggable);
       _dispatchEvent({
         sortable: _this,
         name: "change",
@@ -4863,7 +4862,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
         direction = _getSwapDirection(evt, target, targetRect, vertical, differentRowCol ? 1 : options.swapThreshold, options.invertedSwapThreshold == null ? options.swapThreshold : options.invertedSwapThreshold, isCircumstantialInvert, lastTarget === target);
         var sibling;
         if (direction !== 0) {
-          var dragIndex = index$8(dragEl);
+          var dragIndex = index$9(dragEl);
           do {
             dragIndex -= direction;
             sibling = parentEl.children[dragIndex];
@@ -4925,14 +4924,14 @@ Sortable.prototype = /** @lends Sortable.prototype */
   },
   _onDrop: function _onDrop(evt) {
     var el = this.el, options = this.options;
-    newIndex = index$8(dragEl);
-    newDraggableIndex = index$8(dragEl, options.draggable);
+    newIndex = index$9(dragEl);
+    newDraggableIndex = index$9(dragEl, options.draggable);
     pluginEvent2("drop", this, {
       evt
     });
     parentEl = dragEl && dragEl.parentNode;
-    newIndex = index$8(dragEl);
-    newDraggableIndex = index$8(dragEl, options.draggable);
+    newIndex = index$9(dragEl);
+    newDraggableIndex = index$9(dragEl, options.draggable);
     if (Sortable.eventCanceled) {
       this._nulling();
       return;
@@ -5279,7 +5278,7 @@ function _getSwapDirection(evt, target, targetRect, vertical, swapThreshold, inv
   return 0;
 }
 function _getInsertDirection(target) {
-  if (index$8(dragEl) < index$8(target)) {
+  if (index$9(dragEl) < index$9(target)) {
     return 1;
   } else {
     return -1;
@@ -5327,7 +5326,7 @@ Sortable.utils = {
   closest,
   toggleClass,
   clone,
-  index: index$8,
+  index: index$9,
   nextTick: _nextTick,
   cancelNextTick: _cancelNextTick,
   detectDirection: _detectDirection,
@@ -5830,9 +5829,6 @@ const fetchFormeoStyle = async (cssUrl) => {
   }
   if (!loaded.css.has(cssUrl)) {
     await insertStyle(cssUrl);
-    if (!loaded.css.has(FALLBACK_CSS_URL)) {
-      return await insertStyle(FALLBACK_CSS_URL);
-    }
   }
 };
 const iconFontTemplates = {
@@ -8600,7 +8596,7 @@ class Component extends Data {
     const onAddConditions = {
       controls: async () => {
         if (!Controls$3) {
-          const { default: ControlsData } = await Promise.resolve().then(() => index$7);
+          const { default: ControlsData } = await Promise.resolve().then(() => index$8);
           Controls$3 = ControlsData;
         }
         const {
@@ -9516,7 +9512,7 @@ const DEFAULT_DATA$2 = () => Object.freeze({
     collapsed: false
   },
   children: [],
-  className: [SECTION_CLASSNAME]
+  className: [SECTION_CLASSNAME, STAGE_CLASSNAME]
 });
 class Section extends Component {
   /**
@@ -9529,8 +9525,8 @@ class Section extends Component {
     const children = this.createChildWrap();
     const sectionHeader = this.createSectionHeader();
     this.dom = dom.create({
-      tag: "li",
-      className: [SECTION_CLASSNAME, "empty"],
+      tag: "div",
+      className: [SECTION_CLASSNAME, STAGE_CLASSNAME, "empty"],
       dataset: {
         hoverTag: mi18n.get("section") || "Section",
         editingHoverTag: mi18n.get("editing.section") || "Editing Section"
@@ -9681,10 +9677,7 @@ class Section extends Component {
     };
     const editWindow = dom.create({
       className: `${this.name}-edit group-config`,
-      content: [
-        dom.create(dom.formGroup(nameInput)),
-        dom.create(dom.formGroup(instructionInput))
-      ]
+      content: [dom.create(dom.formGroup(nameInput)), dom.create(dom.formGroup(instructionInput))]
     });
     return editWindow;
   }
@@ -9950,6 +9943,8 @@ let Controls$1 = class Controls {
   constructor() {
     this.data = /* @__PURE__ */ new Map();
     this.isDragging = false;
+    this.selectedField = null;
+    this.settingsGroupIndex = -1;
     this.buttonActions = {
       // this is used for keyboard navigation. when tabbing through controls it
       // will auto navigated between the groups
@@ -10231,15 +10226,52 @@ let Controls$1 = class Controls {
         }
       });
     }
+    this.setupDocumentClickListener();
+    const settingsPanel = element.querySelector("#settings-control-group");
+    if (settingsPanel) {
+      const placeholder = dom.create({
+        className: "settings-placeholder",
+        children: [
+          {
+            tag: "p",
+            content: mi18n.get("settings.selectField") || "Select a field to edit its settings"
+          }
+        ]
+      });
+      settingsPanel.appendChild(placeholder);
+    }
     return element;
   }
+  /**
+   * Set up document click listener to clear field selection when clicking outside of fields
+   */
+  setupDocumentClickListener = () => {
+    document.addEventListener("formeo:field:selected", (evt) => {
+      const { field: field2 } = evt.detail;
+      this.showFieldSettings(field2);
+    });
+    document.addEventListener("click", (evt) => {
+      if (evt.target.closest(".formeo-field")) {
+        return;
+      }
+      if (evt.target.closest(".formeo-controls")) {
+        return;
+      }
+      if (evt.target.closest(".field-actions") || evt.target.closest("button")) {
+        return;
+      }
+      if (evt.target.closest(".formeo-stage")) {
+        this.clearFieldSelection();
+      }
+    });
+  };
   layoutTypes = {
     row: () => stages.active.addChild(),
     column: () => this.layoutTypes.row().addChild(),
     field: (controlData) => this.layoutTypes.column().addChild(controlData),
     section: () => {
       const section = sections.add();
-      stages.active.dom.querySelector(".stage-children").appendChild(section.dom);
+      stages.active.dom.querySelector(".children").appendChild(section.dom);
       return section;
     }
   };
@@ -10258,6 +10290,895 @@ let Controls$1 = class Controls {
     }
     return this.layoutTypes.field(elementData);
   };
+  /**
+   * Show field settings in the Settings tab
+   * @param {Object} field - The field component to show settings for
+   */
+  showFieldSettings = (field2) => {
+    const settingsPanel = this.dom?.querySelector("#settings-control-group");
+    if (!settingsPanel) {
+      return;
+    }
+    if (this.selectedField?.dom) {
+      this.selectedField.dom.classList.remove("field-selected");
+    }
+    this.selectedField = field2;
+    dom.empty(settingsPanel);
+    if (field2) {
+      field2.dom.classList.add("field-selected");
+      const fieldSettingsContent = this.createFieldSettingsUI(field2);
+      settingsPanel.appendChild(fieldSettingsContent);
+    } else {
+      const placeholder = dom.create({
+        className: "settings-placeholder",
+        children: [
+          {
+            tag: "p",
+            content: mi18n.get("settings.selectField") || "Select a field to edit its settings"
+          }
+        ]
+      });
+      settingsPanel.appendChild(placeholder);
+    }
+    this.switchToSettingsTab();
+  };
+  /**
+   * Get field type from field data
+   * @param {Object} field - The field component
+   * @return {String} The field type identifier
+   */
+  getFieldType = (field2) => {
+    const controlId = field2.get("config.controlId") || field2.get("meta.id") || "";
+    const tag = field2.get("tag") || "";
+    const inputType = field2.get("attrs.type") || "";
+    if (controlId.includes("header") || controlId === "html.header") return "header";
+    if (controlId === "paragraph") return "paragraph";
+    if (controlId === "select") return "select";
+    if (controlId === "checkbox") return "checkbox";
+    if (controlId === "radio") return "radio";
+    if (controlId === "textarea") return "textarea";
+    if (controlId === "text" || controlId === "input.text") return "text";
+    if (controlId === "number" || controlId === "input.number") return "number";
+    if (controlId === "date" || controlId === "input.date") return "date";
+    if (controlId === "file" || controlId === "input.file") return "file";
+    if (controlId === "hidden" || controlId === "input.hidden") return "hidden";
+    if (controlId === "button") return "button";
+    if (controlId === "hr") return "hr";
+    if (tag.match(/^h[1-6]$/)) return "header";
+    if (tag === "p") return "paragraph";
+    if (tag === "select") return "select";
+    if (tag === "textarea") return "textarea";
+    if (tag === "hr") return "hr";
+    if (tag === "button") return "button";
+    if (tag === "input") {
+      if (inputType === "checkbox") return "checkbox";
+      if (inputType === "radio") return "radio";
+      if (inputType === "file") return "file";
+      if (inputType === "hidden") return "hidden";
+      if (inputType === "number") return "number";
+      if (inputType === "date") return "date";
+      return "text";
+    }
+    return "text";
+  };
+  /**
+   * Create custom field settings UI matching Figma design
+   * @param {Object} field - The field component
+   * @return {HTMLElement} The settings UI element
+   */
+  createFieldSettingsUI = (field2) => {
+    const fieldType = this.getFieldType(field2);
+    const settingsRows = [];
+    const title = field2.get("config.label") || "";
+    const content = field2.get("content") || "";
+    switch (fieldType) {
+      case "header":
+        settingsRows.push(this.createHeaderTagRow(field2));
+        settingsRows.push(this.createContentRow(field2, content));
+        break;
+      case "paragraph":
+        settingsRows.push(this.createContentRow(field2, content));
+        break;
+      case "hr":
+        settingsRows.push({
+          className: "settings-row",
+          children: [
+            {
+              tag: "p",
+              className: "settings-info",
+              content: mi18n.get("settings.hrInfo") || "Horizontal rule has no editable properties"
+            }
+          ]
+        });
+        break;
+      case "select":
+        settingsRows.push(this.createRequiredRow(field2));
+        settingsRows.push(this.createTitleRow(field2, title));
+        settingsRows.push(this.createMultipleRow(field2));
+        settingsRows.push(this.createOptionsSection(field2));
+        break;
+      case "checkbox":
+      case "radio":
+        settingsRows.push(this.createRequiredRow(field2));
+        settingsRows.push(this.createTitleRow(field2, title));
+        settingsRows.push(this.createOptionsSection(field2));
+        break;
+      case "textarea":
+        settingsRows.push(this.createRequiredRow(field2));
+        settingsRows.push(this.createTitleRow(field2, title));
+        settingsRows.push(this.createPlaceholderRow(field2));
+        settingsRows.push(this.createRowsRow(field2));
+        break;
+      case "hidden":
+        settingsRows.push(this.createTitleRow(field2, title));
+        settingsRows.push(this.createValueRow(field2));
+        break;
+      case "button":
+        settingsRows.push(this.createTitleRow(field2, title));
+        settingsRows.push(this.createButtonTypeRow(field2));
+        break;
+      case "file":
+        settingsRows.push(this.createRequiredRow(field2));
+        settingsRows.push(this.createTitleRow(field2, title));
+        settingsRows.push(this.createAcceptRow(field2));
+        break;
+      case "number":
+        settingsRows.push(this.createRequiredRow(field2));
+        settingsRows.push(this.createTitleRow(field2, title));
+        settingsRows.push(this.createPlaceholderRow(field2));
+        settingsRows.push(this.createMinMaxRow(field2));
+        break;
+      case "date":
+        settingsRows.push(this.createRequiredRow(field2));
+        settingsRows.push(this.createTitleRow(field2, title));
+        break;
+      case "text":
+      default:
+        settingsRows.push(this.createRequiredRow(field2));
+        settingsRows.push(this.createTitleRow(field2, title));
+        settingsRows.push(this.createPlaceholderRow(field2));
+        break;
+    }
+    if (fieldType !== "hr") {
+      settingsRows.push(this.createConditionsSection(field2));
+    }
+    return dom.create({
+      className: "field-settings-content",
+      children: settingsRows.filter(Boolean)
+    });
+  };
+  // Settings row builders
+  createRequiredRow = (field2) => {
+    const isRequired = field2.get("attrs.required") || false;
+    return {
+      className: "settings-row settings-row-toggle",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("required") || "Required",
+          attrs: { for: `${field2.id}-required` }
+        },
+        {
+          tag: "input",
+          attrs: {
+            type: "checkbox",
+            id: `${field2.id}-required`,
+            checked: isRequired
+          },
+          action: {
+            change: ({ target }) => {
+              field2.set("attrs.required", target.checked);
+            }
+          }
+        }
+      ]
+    };
+  };
+  createTitleRow = (field2, title) => ({
+    className: "settings-row",
+    children: [
+      {
+        tag: "label",
+        content: mi18n.get("title") || "Title",
+        attrs: { for: `${field2.id}-title` }
+      },
+      {
+        tag: "input",
+        attrs: {
+          type: "text",
+          id: `${field2.id}-title`,
+          value: title,
+          placeholder: ""
+        },
+        action: {
+          input: ({ target }) => {
+            field2.set("config.label", target.value);
+          }
+        }
+      }
+    ]
+  });
+  createPlaceholderRow = (field2) => {
+    const placeholder = field2.get("attrs.placeholder") || "";
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("placeholder") || "Placeholder",
+          attrs: { for: `${field2.id}-placeholder` }
+        },
+        {
+          tag: "input",
+          attrs: {
+            type: "text",
+            id: `${field2.id}-placeholder`,
+            value: placeholder,
+            placeholder: ""
+          },
+          action: {
+            input: ({ target }) => {
+              field2.set("attrs.placeholder", target.value);
+            }
+          }
+        }
+      ]
+    };
+  };
+  createContentRow = (field2, content) => ({
+    className: "settings-row",
+    children: [
+      {
+        tag: "label",
+        content: mi18n.get("content") || "Content",
+        attrs: { for: `${field2.id}-content` }
+      },
+      {
+        tag: "textarea",
+        attrs: {
+          id: `${field2.id}-content`,
+          rows: 3
+        },
+        content,
+        action: {
+          input: ({ target }) => {
+            field2.set("content", target.value);
+          }
+        }
+      }
+    ]
+  });
+  createHeaderTagRow = (field2) => {
+    const currentTag = field2.get("tag") || "h1";
+    const tagOptions = ["h1", "h2", "h3", "h4"].map((tag) => ({
+      label: tag.toUpperCase(),
+      value: tag,
+      selected: tag === currentTag
+    }));
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("headerLevel") || "Header Level",
+          attrs: { for: `${field2.id}-tag` }
+        },
+        {
+          tag: "select",
+          attrs: { id: `${field2.id}-tag` },
+          options: tagOptions,
+          action: {
+            change: ({ target }) => {
+              field2.set("tag", target.value);
+            }
+          }
+        }
+      ]
+    };
+  };
+  createMultipleRow = (field2) => {
+    const isMultiple = field2.get("attrs.multiple") || false;
+    return {
+      className: "settings-row settings-row-toggle",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("allowMultiple") || "Allow Multiple",
+          attrs: { for: `${field2.id}-multiple` }
+        },
+        {
+          tag: "input",
+          attrs: {
+            type: "checkbox",
+            id: `${field2.id}-multiple`,
+            checked: isMultiple
+          },
+          action: {
+            change: ({ target }) => {
+              field2.set("attrs.multiple", target.checked);
+            }
+          }
+        }
+      ]
+    };
+  };
+  createOptionsSection = (field2) => {
+    const options = field2.get("options") || [];
+    const optionRows = options.map((opt, index2) => ({
+      className: "settings-option-row",
+      children: [
+        {
+          tag: "input",
+          attrs: {
+            type: "text",
+            value: opt.label || opt.value || "",
+            placeholder: mi18n.get("optionLabel") || "Option label"
+          },
+          action: {
+            input: ({ target }) => {
+              field2.set(`options[${index2}].label`, target.value);
+              if (!opt.value || opt.value === opt.label) {
+                field2.set(`options[${index2}].value`, target.value);
+              }
+            }
+          }
+        },
+        {
+          tag: "button",
+          className: "option-remove-btn",
+          attrs: { type: "button" },
+          content: "×",
+          action: {
+            click: () => {
+              const currentOptions = field2.get("options") || [];
+              currentOptions.splice(index2, 1);
+              field2.set("options", currentOptions);
+              this.showFieldSettings(field2);
+            }
+          }
+        }
+      ]
+    }));
+    return {
+      className: "settings-options-section",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("options") || "Options"
+        },
+        {
+          className: "settings-options-list",
+          children: optionRows
+        },
+        {
+          tag: "button",
+          className: "settings-add-option-btn",
+          attrs: { type: "button" },
+          children: [dom.icon("plus"), { tag: "span", content: mi18n.get("addOption") || "Add Option" }],
+          action: {
+            click: () => {
+              const currentOptions = field2.get("options") || [];
+              const newIndex2 = currentOptions.length + 1;
+              currentOptions.push({
+                label: `${mi18n.get("option") || "Option"} ${newIndex2}`,
+                value: `option-${newIndex2}`,
+                selected: false
+              });
+              field2.set("options", currentOptions);
+              this.showFieldSettings(field2);
+            }
+          }
+        }
+      ]
+    };
+  };
+  createRowsRow = (field2) => {
+    const rows2 = field2.get("attrs.rows") || 3;
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("rows") || "Rows",
+          attrs: { for: `${field2.id}-rows` }
+        },
+        {
+          tag: "input",
+          attrs: {
+            type: "number",
+            id: `${field2.id}-rows`,
+            value: rows2,
+            min: 1,
+            max: 20
+          },
+          action: {
+            input: ({ target }) => {
+              field2.set("attrs.rows", parseInt(target.value, 10));
+            }
+          }
+        }
+      ]
+    };
+  };
+  createValueRow = (field2) => {
+    const value = field2.get("attrs.value") || "";
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("value") || "Value",
+          attrs: { for: `${field2.id}-value` }
+        },
+        {
+          tag: "input",
+          attrs: {
+            type: "text",
+            id: `${field2.id}-value`,
+            value
+          },
+          action: {
+            input: ({ target }) => {
+              field2.set("attrs.value", target.value);
+            }
+          }
+        }
+      ]
+    };
+  };
+  createButtonTypeRow = (field2) => {
+    const buttonType = field2.get("attrs.type") || "button";
+    const typeOptions = [
+      { label: "Button", value: "button", selected: buttonType === "button" },
+      { label: "Submit", value: "submit", selected: buttonType === "submit" },
+      { label: "Reset", value: "reset", selected: buttonType === "reset" }
+    ];
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("buttonType") || "Button Type",
+          attrs: { for: `${field2.id}-button-type` }
+        },
+        {
+          tag: "select",
+          attrs: { id: `${field2.id}-button-type` },
+          options: typeOptions,
+          action: {
+            change: ({ target }) => {
+              field2.set("attrs.type", target.value);
+            }
+          }
+        }
+      ]
+    };
+  };
+  createAcceptRow = (field2) => {
+    const accept = field2.get("attrs.accept") || "";
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("acceptedFiles") || "Accepted Files",
+          attrs: { for: `${field2.id}-accept` }
+        },
+        {
+          tag: "input",
+          attrs: {
+            type: "text",
+            id: `${field2.id}-accept`,
+            value: accept,
+            placeholder: "e.g., .pdf,.doc,image/*"
+          },
+          action: {
+            input: ({ target }) => {
+              field2.set("attrs.accept", target.value);
+            }
+          }
+        }
+      ]
+    };
+  };
+  createMinMaxRow = (field2) => {
+    const min = field2.get("attrs.min") || "";
+    const max = field2.get("attrs.max") || "";
+    return {
+      className: "settings-row settings-row-double",
+      children: [
+        {
+          className: "settings-half",
+          children: [
+            {
+              tag: "label",
+              content: mi18n.get("min") || "Min",
+              attrs: { for: `${field2.id}-min` }
+            },
+            {
+              tag: "input",
+              attrs: {
+                type: "number",
+                id: `${field2.id}-min`,
+                value: min
+              },
+              action: {
+                input: ({ target }) => {
+                  field2.set("attrs.min", target.value);
+                }
+              }
+            }
+          ]
+        },
+        {
+          className: "settings-half",
+          children: [
+            {
+              tag: "label",
+              content: mi18n.get("max") || "Max",
+              attrs: { for: `${field2.id}-max` }
+            },
+            {
+              tag: "input",
+              attrs: {
+                type: "number",
+                id: `${field2.id}-max`,
+                value: max
+              },
+              action: {
+                input: ({ target }) => {
+                  field2.set("attrs.max", target.value);
+                }
+              }
+            }
+          ]
+        }
+      ]
+    };
+  };
+  /**
+   * Create conditions section UI matching Figma design
+   * @param {Object} field - The field component
+   * @return {Object} The conditions section config
+   */
+  createConditionsSection = (field2) => {
+    const conditions = field2.get("conditions") || [CONDITION_TEMPLATE()];
+    const hasConditions = conditions.length > 0 && conditions[0]?.[conditionTypeIf]?.[0]?.source;
+    this.conditionValues = this.conditionValues || /* @__PURE__ */ new Map();
+    if (!this.conditionValues.has(field2.id)) {
+      this.conditionValues.set(field2.id, { values: [], showConditions: hasConditions });
+    }
+    const fieldConditionState = this.conditionValues.get(field2.id);
+    if (!fieldConditionState.showConditions) {
+      return {
+        className: "settings-add-conditions",
+        children: [
+          {
+            tag: "button",
+            attrs: { type: "button" },
+            children: [{ tag: "span", className: "add-conditions-plus", content: "+" }, { tag: "span", content: mi18n.get("addConditions") || "Add conditions" }],
+            action: {
+              click: () => {
+                fieldConditionState.showConditions = true;
+                this.showFieldSettings(field2);
+              }
+            }
+          }
+        ]
+      };
+    }
+    return {
+      className: "settings-conditions-section",
+      children: [
+        // Conditions header with trash icon
+        {
+          className: "conditions-header",
+          children: [
+            { tag: "h4", content: mi18n.get("conditions") || "Conditions" },
+            {
+              tag: "button",
+              className: "conditions-delete-btn",
+              attrs: { type: "button", title: mi18n.get("deleteCondition") || "Delete condition" },
+              children: [dom.icon("bin")],
+              action: {
+                click: () => {
+                  field2.set("conditions", [CONDITION_TEMPLATE()]);
+                  fieldConditionState.showConditions = false;
+                  fieldConditionState.values = [];
+                  this.showFieldSettings(field2);
+                }
+              }
+            }
+          ]
+        },
+        // If section
+        this.createIfSection(field2, conditions, fieldConditionState),
+        // Divider
+        { className: "conditions-divider" },
+        // Then section
+        this.createThenSection(field2, conditions)
+      ]
+    };
+  };
+  /**
+   * Create "If" section for conditions
+   * @param {Object} field - The field component
+   * @param {Array} conditions - The conditions data
+   * @param {Object} fieldConditionState - State for this field's conditions
+   * @return {Object} The If section config
+   */
+  createIfSection = (field2, conditions, fieldConditionState) => {
+    const ifCondition = conditions[0]?.[conditionTypeIf]?.[0] || {};
+    const sourceOptions = this.getFieldOptions(field2.id);
+    const operatorOptions = [
+      { label: mi18n.get("comparison.equals") || "Is equal to", value: COMPARISON_OPERATORS.equals },
+      { label: mi18n.get("comparison.notEquals") || "Is not equal to", value: COMPARISON_OPERATORS.notEquals },
+      { label: mi18n.get("comparison.contains") || "Is contain", value: COMPARISON_OPERATORS.contains },
+      { label: mi18n.get("comparison.notContains") || "Does not contain", value: COMPARISON_OPERATORS.notContains }
+    ];
+    const currentValues = fieldConditionState.values.length > 0 ? fieldConditionState.values : [];
+    return {
+      className: "conditions-if-section",
+      children: [
+        // If label
+        { tag: "label", className: "condition-type-label", content: mi18n.get("if") || "If" },
+        // Source field dropdown
+        {
+          className: "settings-row",
+          children: [
+            {
+              tag: "select",
+              className: "condition-source-select",
+              attrs: { id: `${field2.id}-condition-source` },
+              options: sourceOptions,
+              action: {
+                change: ({ target }) => {
+                  const conditionData = field2.get("conditions") || [CONDITION_TEMPLATE()];
+                  if (!conditionData[0][conditionTypeIf]) {
+                    conditionData[0][conditionTypeIf] = [{}];
+                  }
+                  conditionData[0][conditionTypeIf][0].source = target.value;
+                  conditionData[0][conditionTypeIf][0].sourceProperty = "value";
+                  field2.set("conditions", conditionData);
+                }
+              }
+            }
+          ]
+        },
+        // Operator label
+        { tag: "label", className: "condition-field-label", content: mi18n.get("operator") || "Operator" },
+        // Operator dropdown
+        {
+          className: "settings-row",
+          children: [
+            {
+              tag: "select",
+              className: "condition-operator-select",
+              attrs: { id: `${field2.id}-condition-operator` },
+              options: operatorOptions.map((opt) => ({
+                ...opt,
+                selected: opt.value === ifCondition.comparison
+              })),
+              action: {
+                change: ({ target }) => {
+                  const conditionData = field2.get("conditions") || [CONDITION_TEMPLATE()];
+                  if (!conditionData[0][conditionTypeIf]) {
+                    conditionData[0][conditionTypeIf] = [{}];
+                  }
+                  conditionData[0][conditionTypeIf][0].comparison = target.value;
+                  field2.set("conditions", conditionData);
+                }
+              }
+            }
+          ]
+        },
+        // Value label
+        { tag: "label", className: "condition-field-label", content: mi18n.get("value") || "Value" },
+        // Value input with tag chips
+        {
+          className: "settings-row condition-value-row",
+          children: [
+            {
+              tag: "input",
+              className: "condition-value-input",
+              attrs: {
+                type: "text",
+                id: `${field2.id}-condition-value`,
+                placeholder: "",
+                value: ifCondition.target || ""
+              },
+              action: {
+                input: ({ target }) => {
+                  const conditionData = field2.get("conditions") || [CONDITION_TEMPLATE()];
+                  if (!conditionData[0][conditionTypeIf]) {
+                    conditionData[0][conditionTypeIf] = [{}];
+                  }
+                  conditionData[0][conditionTypeIf][0].target = target.value;
+                  field2.set("conditions", conditionData);
+                },
+                keydown: (evt) => {
+                  if (evt.key === "Enter" && evt.target.value.trim()) {
+                    evt.preventDefault();
+                    const value = evt.target.value.trim();
+                    if (!fieldConditionState.values.includes(value)) {
+                      fieldConditionState.values.push(value);
+                      this.showFieldSettings(field2);
+                    }
+                    evt.target.value = "";
+                  }
+                }
+              }
+            }
+          ]
+        },
+        // Tag chips for values
+        currentValues.length > 0 ? {
+          className: "condition-value-tags",
+          children: currentValues.map((value, index2) => ({
+            className: "condition-tag",
+            children: [
+              { tag: "span", content: value },
+              {
+                tag: "button",
+                className: "tag-remove-btn",
+                attrs: { type: "button" },
+                content: "×",
+                action: {
+                  click: () => {
+                    fieldConditionState.values.splice(index2, 1);
+                    this.showFieldSettings(field2);
+                  }
+                }
+              }
+            ]
+          }))
+        } : null
+      ].filter(Boolean)
+    };
+  };
+  /**
+   * Create "Then" section for conditions
+   * @param {Object} field - The field component
+   * @param {Array} conditions - The conditions data
+   * @return {Object} The Then section config
+   */
+  createThenSection = (field2, conditions) => {
+    const thenCondition = conditions[0]?.[conditionTypeThen]?.[0] || {};
+    const targetOptions = this.getFieldOptions(field2.id);
+    const actionOptions = [
+      { label: mi18n.get("action.show") || "Show", value: "isVisible" },
+      { label: mi18n.get("action.hide") || "Hide", value: "isNotVisible" },
+      { label: mi18n.get("action.setValue") || "Set value", value: "value" }
+    ];
+    return {
+      className: "conditions-then-section",
+      children: [
+        // Then label
+        { tag: "label", className: "condition-type-label", content: mi18n.get("then") || "Then" },
+        // Target field dropdown
+        {
+          className: "settings-row",
+          children: [
+            {
+              tag: "select",
+              className: "condition-target-select",
+              attrs: { id: `${field2.id}-condition-target` },
+              options: targetOptions.map((opt) => ({
+                ...opt,
+                selected: opt.value === thenCondition.target
+              })),
+              action: {
+                change: ({ target }) => {
+                  const conditionData = field2.get("conditions") || [CONDITION_TEMPLATE()];
+                  if (!conditionData[0][conditionTypeThen]) {
+                    conditionData[0][conditionTypeThen] = [{}];
+                  }
+                  conditionData[0][conditionTypeThen][0].target = target.value;
+                  field2.set("conditions", conditionData);
+                }
+              }
+            }
+          ]
+        },
+        // Action label
+        { tag: "label", className: "condition-field-label", content: mi18n.get("action") || "Action" },
+        // Action dropdown
+        {
+          className: "settings-row",
+          children: [
+            {
+              tag: "select",
+              className: "condition-action-select",
+              attrs: { id: `${field2.id}-condition-action` },
+              options: actionOptions.map((opt) => ({
+                ...opt,
+                selected: opt.value === thenCondition.targetProperty
+              })),
+              action: {
+                change: ({ target }) => {
+                  const conditionData = field2.get("conditions") || [CONDITION_TEMPLATE()];
+                  if (!conditionData[0][conditionTypeThen]) {
+                    conditionData[0][conditionTypeThen] = [{}];
+                  }
+                  conditionData[0][conditionTypeThen][0].targetProperty = target.value;
+                  conditionData[0][conditionTypeThen][0].assignment = "=";
+                  field2.set("conditions", conditionData);
+                }
+              }
+            }
+          ]
+        }
+      ]
+    };
+  };
+  /**
+   * Get available field options for condition dropdowns
+   * @param {String} excludeFieldId - Field ID to exclude from options
+   * @return {Array} Array of options for select
+   */
+  getFieldOptions = (excludeFieldId) => {
+    const options = [{ label: mi18n.get("selectField") || "Select field...", value: "" }];
+    Promise.resolve().then(() => index$7).then(({ default: Fields3 }) => {
+      const fieldsData = Fields3.getData() || {};
+      for (const [fieldId, fieldData] of Object.entries(fieldsData)) {
+        if (fieldId !== excludeFieldId) {
+          const label = fieldData.config?.label || fieldData.attrs?.placeholder || fieldId;
+          options.push({ label, value: `fields.${fieldId}` });
+        }
+      }
+    });
+    if (this.cachedFieldOptions) {
+      return this.cachedFieldOptions.filter((opt) => opt.value !== `fields.${excludeFieldId}`);
+    }
+    return options;
+  };
+  /**
+   * Refresh cached field options
+   */
+  refreshFieldOptions = async () => {
+    const { default: Fields3 } = await Promise.resolve().then(() => index$7);
+    const fieldsData = Fields3.getData() || {};
+    this.cachedFieldOptions = [{ label: mi18n.get("selectField") || "Select field...", value: "" }];
+    for (const [fieldId, fieldData] of Object.entries(fieldsData)) {
+      const label = fieldData.config?.label || fieldData.attrs?.placeholder || fieldId;
+      this.cachedFieldOptions.push({ label, value: `fields.${fieldId}` });
+    }
+  };
+  /**
+   * Switch to the Settings tab
+   */
+  switchToSettingsTab = () => {
+    if (this.settingsGroupIndex === -1) {
+      const groups = Array.from(this.groups || []);
+      this.settingsGroupIndex = groups.findIndex((g) => g.id === "settings-control-group");
+    }
+    if (this.settingsGroupIndex !== -1 && this.panels?.nav) {
+      this.panels.nav.refresh(this.settingsGroupIndex);
+    }
+  };
+  /**
+   * Clear field selection
+   */
+  clearFieldSelection = () => {
+    if (this.selectedField?.dom) {
+      this.selectedField.dom.classList.remove("field-selected");
+    }
+    this.selectedField = null;
+    const settingsPanel = this.dom?.querySelector("#settings-control-group");
+    if (settingsPanel) {
+      dom.empty(settingsPanel);
+      const placeholder = dom.create({
+        className: "settings-placeholder",
+        children: [
+          {
+            tag: "p",
+            content: mi18n.get("settings.selectField") || "Select a field to edit its settings"
+          }
+        ]
+      });
+      settingsPanel.appendChild(placeholder);
+    }
+  };
   applyOptions = async (controlOptions = {}) => {
     const { container, elements, groupOrder, ...options } = merge(defaultOptions, controlOptions);
     this.container = container;
@@ -10273,7 +11194,7 @@ let Controls$1 = class Controls {
   };
 };
 const Controls$2 = new Controls$1();
-const index$7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+const index$8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
   Controls: Controls$1,
   default: Controls$2
@@ -10297,7 +11218,7 @@ class Field extends Component {
     this.preview = this.fieldPreview();
     this.controlId = this.get("config.controlId") || this.get("meta.id");
     const actionButtons = this.getActionButtons();
-    const hasEditButton = this.actionButtons.some((child) => child.meta?.id === "edit");
+    this.actionButtons.some((child) => child.meta?.id === "edit");
     this.updateEditPanels();
     const field2 = dom.create({
       tag: "li",
@@ -10309,18 +11230,36 @@ class Field extends Component {
         this.label,
         this.getComponentTag(),
         actionButtons,
-        hasEditButton && this.editWindow,
-        // fieldEdit window,
         this.preview
       ].filter(Boolean),
       panelNav: this.panelNav,
       dataset: {
         hoverTag: mi18n.get("field")
+      },
+      action: {
+        click: (evt) => {
+          const target = evt.target;
+          if (target.closest(".field-actions") || target.closest("button")) {
+            return;
+          }
+          evt.stopPropagation();
+          this.selectField();
+        }
       }
     });
     this.dom = field2;
     this.isEditing = false;
   }
+  /**
+   * Select this field and show its settings in the Settings tab
+   */
+  selectField = () => {
+    const event = new CustomEvent("formeo:field:selected", {
+      detail: { field: this },
+      bubbles: true
+    });
+    document.dispatchEvent(event);
+  };
   get labelConfig() {
     const hideLabel = !!this.get("config.hideLabel");
     if (hideLabel) {
@@ -10468,7 +11407,8 @@ const field = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
 }, Symbol.toStringTag, { value: "Module" }));
 const DEFAULT_CONFIG = () => ({
   actionButtons: {
-    buttons: ["move", "edit", "clone", "remove"],
+    buttons: ["move", "clone", "remove"],
+    // 'edit' removed - field settings shown in Settings tab
     disabled: []
   },
   panels: {
@@ -10533,6 +11473,11 @@ let Fields$1 = class Fields extends ComponentData {
   };
 };
 const fields = new Fields$1();
+const index$7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  Fields: Fields$1,
+  default: fields
+}, Symbol.toStringTag, { value: "Module" }));
 const Stages2 = stages;
 const Rows2 = rows;
 const Columns2 = columns;
@@ -10950,161 +11895,6 @@ const defaults = {
     };
   }
 };
-new SmartTooltip();
-let FormeoEditor$1 = class FormeoEditor {
-  /**
-   * @param  {Object} options  formeo options
-   * @param  {String|Object}   userFormData loaded formData
-   * @return {Object}          formeo references and actions
-   */
-  constructor({ formData, ...options }, userFormData) {
-    const mergedOptions = merge(defaults.editor, options);
-    const { actions: actions$1, events: events$1, debug, config, editorContainer, ...opts } = mergedOptions;
-    if (editorContainer) {
-      this.editorContainer = typeof editorContainer === "string" ? document.querySelector(editorContainer) : editorContainer;
-    }
-    this.opts = opts;
-    dom.setOptions = opts;
-    components.config = config;
-    this.userFormData = userFormData || formData;
-    this.Components = components;
-    this.dom = dom;
-    events.init({ debug, ...events$1 });
-    actions.init({ debug, sessionStorage: opts.sessionStorage, ...actions$1 });
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", this.loadResources.bind(this));
-    } else {
-      this.loadResources();
-    }
-  }
-  get formData() {
-    return this.Components.formData;
-  }
-  set formData(data = {}) {
-    this.userFormData = cleanFormData(data);
-    this.load(this.userFormData, this.opts);
-  }
-  loadData(data = {}) {
-    this.formData = data;
-  }
-  get json() {
-    return this.Components.json;
-  }
-  /**
-   * Clear the editor and reset to initial state
-   * @return {void}
-   */
-  clear() {
-    this.userFormData = DEFAULT_FORMDATA();
-    this.Components.load(this.userFormData, this.opts);
-    this.render();
-  }
-  /**
-   * Load remote resources
-   * @return {Promise} asynchronously loaded remote resources
-   */
-  async loadResources() {
-    document.removeEventListener("DOMContentLoaded", this.loadResources);
-    const promises = [];
-    promises.push(
-      fetchIcons(this.opts.svgSprite),
-      fetchFormeoStyle(this.opts.style),
-      mi18n.init({ ...this.opts.i18n, locale: globalThis.sessionStorage?.getItem(SESSION_LOCALE_KEY) })
-    );
-    await Promise.all(promises);
-    if (this.opts.allowEdit) {
-      this.init();
-    }
-  }
-  /**
-   * Formeo initializer
-   * @return {Object} References to formeo instance,
-   * dom elements, actions events and more.
-   */
-  init() {
-    return Controls$2.init(this.opts.controls, this.opts.stickyControls).then((controls) => {
-      this.controls = controls;
-      this.load(this.userFormData, this.opts);
-      this.formId = components.get("id");
-      this.i18n = {
-        setLang: (formeoLocale) => {
-          window.sessionStorage?.setItem(SESSION_LOCALE_KEY, formeoLocale);
-          const loadLang = mi18n.setCurrent(formeoLocale);
-          loadLang.then(() => {
-            this.init();
-          }, console.error);
-        }
-      };
-      this.opts.onLoad?.(this);
-    });
-  }
-  load(formData = this.userFormData, opts = this.opts) {
-    this.Components.load(formData, opts);
-    this.render();
-  }
-  /**
-   * Render the formeo sections
-   * @return {void}
-   */
-  render() {
-    if (!this.controls) {
-      return window.requestAnimationFrame(() => this.render());
-    }
-    this.stages = Object.values(components.get("stages"));
-    if (this.opts.controlOnLeft) {
-      for (const stage of this.stages) {
-        stage.dom.style.order = 1;
-      }
-    }
-    const previewButton = dom.create({
-      tag: "button",
-      className: "formeo-preview-btn",
-      attrs: {
-        type: "button",
-        title: mi18n.get("Preview")
-      },
-      children: [dom.icon("new-eye")],
-      action: {
-        click: () => {
-          events.formeoUpdated({ type: "preview" }, "formeoPreview");
-        }
-      }
-    });
-    const stageHeader = dom.create({
-      tag: "div",
-      className: "formeo-stage-header",
-      children: [previewButton]
-    });
-    const elemConfig = {
-      attrs: {
-        className: "formeo formeo-editor",
-        id: this.formId
-      },
-      content: [this.stages.map(({ dom: dom2 }) => dom2)]
-    };
-    if (mi18n.current.dir) {
-      elemConfig.attrs.dir = mi18n.current.dir;
-      dom.dir = mi18n.current.dir;
-    }
-    this.editor = dom.create(elemConfig);
-    const controlsContainer = this.controls.container || this.editor;
-    controlsContainer.appendChild(this.controls.dom);
-    const stageArea = this.stages[0]?.dom;
-    if (stageArea) {
-      stageArea.insertBefore(stageHeader, stageArea.firstChild);
-    }
-    if (this.editorContainer) {
-      dom.empty(this.editorContainer);
-      this.editorContainer.appendChild(this.editor);
-    }
-    events.formeoLoaded = new globalThis.CustomEvent("formeoLoaded", {
-      detail: {
-        formeo: this
-      }
-    });
-    document.dispatchEvent(events.formeoLoaded);
-  }
-};
 const RENDER_PREFIX = "f-";
 const containerLookup = (container) => typeof container === "string" ? document.querySelector(container) : container;
 const processOptions = ({ editorContainer, renderContainer, formData, ...opts }) => {
@@ -11378,13 +12168,52 @@ let FormeoRenderer$1 = class FormeoRenderer {
     return cached;
   });
   get processedData() {
-    return Object.values(this.form.stages).map((stage) => {
+    const processedStages = Object.values(this.form.stages).map((stage) => {
       stage.children = this.processRows(stage.id);
       stage.className = STAGE_CLASSNAME;
       this.components[baseId(stage.id)] = stage;
       return stage;
     });
+    const processedSections = this.form.sections ? Object.values(this.form.sections).map((section) => this.processSection(section)) : [];
+    return [...processedStages, ...processedSections];
   }
+  /**
+   * Process a section for rendering
+   * @param {Object} section - The section data
+   * @return {Object} Processed section config
+   */
+  processSection = (section) => {
+    const { id, config = {}, children = [] } = section;
+    const processedRows = children.reduce((acc, rowId) => {
+      const row = this.form.rows[rowId];
+      if (row) {
+        acc.push(this.processRow(row));
+      }
+      return acc;
+    }, []);
+    const sectionHeader = [];
+    if (config.name) {
+      sectionHeader.push({
+        tag: "h3",
+        className: "formeo-section-name",
+        children: config.name
+      });
+    }
+    if (config.instruction) {
+      sectionHeader.push({
+        tag: "p",
+        className: "formeo-section-instruction",
+        children: config.instruction
+      });
+    }
+    const sectionData = {
+      id: this.prefixId(id),
+      className: [SECTION_CLASSNAME, STAGE_CLASSNAME, "formeo-rendered-section"],
+      children: [...sectionHeader, ...processedRows]
+    };
+    this.components[baseId(id)] = sectionData;
+    return sectionData;
+  };
   /**
    * Evaulate and execute conditions for fields by creating listeners for input and changes
    * @return {Array} flattened array of conditions
@@ -11427,7 +12256,7 @@ let FormeoRenderer$1 = class FormeoRenderer {
     }
   };
   applyConditions = () => {
-    for (const [componentId, componentData] of Object.entries(this.components)) {
+    for (const [_componentId, componentData] of Object.entries(this.components)) {
       const { conditions } = componentData;
       if (conditions) {
         for (const condition of conditions) {
@@ -11534,6 +12363,201 @@ const LISTEN_TYPE_MAP = (component) => {
   ];
   const [listenerEvent] = typesMap.find((typeMap) => typeMap[1](component)) || [false];
   return listenerEvent;
+};
+new SmartTooltip();
+let FormeoEditor$1 = class FormeoEditor {
+  /**
+   * @param  {Object} options  formeo options
+   * @param  {String|Object}   userFormData loaded formData
+   * @return {Object}          formeo references and actions
+   */
+  constructor({ formData, ...options }, userFormData) {
+    const mergedOptions = merge(defaults.editor, options);
+    const { actions: actions$1, events: events$1, debug, config, editorContainer, ...opts } = mergedOptions;
+    if (editorContainer) {
+      this.editorContainer = typeof editorContainer === "string" ? document.querySelector(editorContainer) : editorContainer;
+    }
+    this.opts = opts;
+    dom.setOptions = opts;
+    components.config = config;
+    this.userFormData = userFormData || formData;
+    this.Components = components;
+    this.dom = dom;
+    events.init({ debug, ...events$1 });
+    actions.init({ debug, sessionStorage: opts.sessionStorage, ...actions$1 });
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", this.loadResources.bind(this));
+    } else {
+      this.loadResources();
+    }
+  }
+  get formData() {
+    return this.Components.formData;
+  }
+  set formData(data = {}) {
+    this.userFormData = cleanFormData(data);
+    this.load(this.userFormData, this.opts);
+  }
+  loadData(data = {}) {
+    this.formData = data;
+  }
+  get json() {
+    return this.Components.json;
+  }
+  /**
+   * Clear the editor and reset to initial state
+   * @return {void}
+   */
+  clear() {
+    this.userFormData = DEFAULT_FORMDATA();
+    this.Components.load(this.userFormData, this.opts);
+    this.render();
+  }
+  /**
+   * Load remote resources
+   * @return {Promise} asynchronously loaded remote resources
+   */
+  async loadResources() {
+    document.removeEventListener("DOMContentLoaded", this.loadResources);
+    const promises = [];
+    promises.push(
+      fetchIcons(this.opts.svgSprite),
+      fetchFormeoStyle(this.opts.style),
+      mi18n.init({ ...this.opts.i18n, locale: globalThis.sessionStorage?.getItem(SESSION_LOCALE_KEY) })
+    );
+    await Promise.all(promises);
+    if (this.opts.allowEdit) {
+      this.init();
+    }
+  }
+  /**
+   * Formeo initializer
+   * @return {Object} References to formeo instance,
+   * dom elements, actions events and more.
+   */
+  init() {
+    return Controls$2.init(this.opts.controls, this.opts.stickyControls).then((controls) => {
+      this.controls = controls;
+      this.load(this.userFormData, this.opts);
+      this.formId = components.get("id");
+      this.i18n = {
+        setLang: (formeoLocale) => {
+          window.sessionStorage?.setItem(SESSION_LOCALE_KEY, formeoLocale);
+          const loadLang = mi18n.setCurrent(formeoLocale);
+          loadLang.then(() => {
+            this.init();
+          }, console.error);
+        }
+      };
+      this.opts.onLoad?.(this);
+    });
+  }
+  load(formData = this.userFormData, opts = this.opts) {
+    this.Components.load(formData, opts);
+    this.render();
+  }
+  /**
+   * Render the formeo sections
+   * @return {void}
+   */
+  render() {
+    if (!this.controls) {
+      return window.requestAnimationFrame(() => this.render());
+    }
+    this.stages = Object.values(components.get("stages"));
+    if (this.opts.controlOnLeft) {
+      for (const stage of this.stages) {
+        stage.dom.style.order = 1;
+      }
+    }
+    if (this.isPreviewMode === void 0) {
+      this.isPreviewMode = false;
+    }
+    this.previewContainer = dom.create({
+      tag: "div",
+      className: "formeo-preview-container",
+      attrs: {
+        style: "display: none;"
+      }
+    });
+    this.previewButton = dom.create({
+      tag: "button",
+      className: "formeo-preview-btn",
+      attrs: {
+        type: "button",
+        title: mi18n.get("Preview")
+      },
+      children: [dom.icon("new-eye")],
+      action: {
+        click: () => {
+          this.togglePreview();
+        }
+      }
+    });
+    const stageHeader = dom.create({
+      tag: "div",
+      className: "formeo-stage-header",
+      children: [this.previewButton]
+    });
+    const elemConfig = {
+      attrs: {
+        className: "formeo formeo-editor",
+        id: this.formId
+      },
+      content: [this.stages.map(({ dom: dom2 }) => dom2)]
+    };
+    if (mi18n.current.dir) {
+      elemConfig.attrs.dir = mi18n.current.dir;
+      dom.dir = mi18n.current.dir;
+    }
+    this.editor = dom.create(elemConfig);
+    const controlsContainer = this.controls.container || this.editor;
+    controlsContainer.appendChild(this.controls.dom);
+    const stageArea = this.stages[0]?.dom;
+    if (stageArea) {
+      stageArea.insertBefore(stageHeader, stageArea.firstChild);
+      stageHeader.after(this.previewContainer);
+      this.stageContent = stageArea.querySelector(".children");
+    }
+    if (this.editorContainer) {
+      dom.empty(this.editorContainer);
+      this.editorContainer.appendChild(this.editor);
+    }
+    events.formeoLoaded = new globalThis.CustomEvent("formeoLoaded", {
+      detail: {
+        formeo: this
+      }
+    });
+    document.dispatchEvent(events.formeoLoaded);
+  }
+  /**
+   * Toggle between edit mode and preview mode
+   * @return {void}
+   */
+  togglePreview() {
+    this.isPreviewMode = !this.isPreviewMode;
+    const iconName = this.isPreviewMode ? "eye-open" : "new-eye";
+    this.previewButton.innerHTML = dom.icon(iconName);
+    this.previewButton.classList.toggle("active", this.isPreviewMode);
+    if (this.isPreviewMode) {
+      if (this.stageContent) {
+        this.stageContent.style.display = "none";
+      }
+      this.previewContainer.style.display = "block";
+      const renderer = new FormeoRenderer$1({
+        renderContainer: this.previewContainer
+      });
+      renderer.render(this.formData);
+      events.formeoUpdated({ type: "preview", isPreviewMode: true }, "formeoPreview");
+    } else {
+      if (this.stageContent) {
+        this.stageContent.style.display = "";
+      }
+      this.previewContainer.style.display = "none";
+      dom.empty(this.previewContainer);
+      events.formeoUpdated({ type: "preview", isPreviewMode: false }, "formeoPreview");
+    }
+  }
 };
 if (window !== void 0) {
   window.FormeoEditor = FormeoEditor$1;

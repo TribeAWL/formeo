@@ -16,7 +16,7 @@ export const POLYFILLS = [
 export const SVG_SPRITE_URL = null // No longer fetching by default - using bundled sprite
 export const FALLBACK_SVG_SPRITE_URL = `https://cdn.jsdelivr.net/npm/formeo@${version}/dist/${formeoSpriteId}.svg`
 export const CSS_URL = `https://cdn.jsdelivr.net/npm/formeo@${version}/dist/formeo.min.css`
-export const FALLBACK_CSS_URL = 'https://draggable.github.io/formeo/assets/css/formeo.min.css'
+// export const FALLBACK_CSS_URL = 'https://draggable.github.io/formeo/assets/css/formeo.min.css'
 
 export const PANEL_CLASSNAME = 'f-panel'
 export const CONTROL_GROUP_CLASSNAME = 'control-group'

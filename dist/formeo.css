@@ -41,7 +41,7 @@ button[class*=-clone]:hover .svg-icon {
 }
 
 .edit-toggle:hover {
-  background-color: rgb(50, 93, 136) !important;
+  background-color: #975DAA !important;
 }
 .edit-toggle:hover .svg-icon {
   fill: #fff;
@@ -173,7 +173,7 @@ button[class*=-clone]:hover .svg-icon {
 }
 .formeo-panels-wrap nav button:focus {
   outline: none;
-  border: 1px solid rgb(102, 175, 233);
+  border: 1px solid #975DAA;
   box-shadow: none;
 }
 .formeo-panels-wrap nav button .svg-icon {
@@ -258,7 +258,7 @@ button[class*=-clone]:hover .svg-icon {
   transform: none !important;
   width: 100%;
   overflow: hidden;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #DADDE2;
   min-height: 48px;
 }
 .tabbed-panels .panel-labels h5 {
@@ -284,7 +284,7 @@ button[class*=-clone]:hover .svg-icon {
 .tabbed-panels .panel-labels h5.active-tab {
   color: #1F2937;
   box-shadow: none !important;
-  background-color: #EFF6FF !important;
+  background-color: #F3EAF6 !important;
   border-bottom: none;
 }
 .tabbed-panels .panel-labels h5:hover, .tabbed-panels .panel-labels h5:focus {
@@ -298,6 +298,7 @@ button[class*=-clone]:hover .svg-icon {
 }
 
 .formeo {
+  accent-color: #975DAA;
   /*
     Mixins
   */
@@ -346,7 +347,7 @@ button[class*=-clone]:hover .svg-icon {
   box-sizing: border-box;
 }
 .formeo select:focus {
-  border: 1px solid rgb(102, 175, 233);
+  border: 1px solid #975DAA;
   outline: none;
 }
 .formeo select[multiple] {
@@ -366,7 +367,7 @@ button[class*=-clone]:hover .svg-icon {
   box-sizing: border-box;
 }
 .formeo input:focus {
-  border: 1px solid rgb(102, 175, 233);
+  border: 1px solid #975DAA;
   outline: none;
 }
 .formeo input[type=checkbox], .formeo input[type=radio] {
@@ -393,7 +394,7 @@ button[class*=-clone]:hover .svg-icon {
   height: auto;
 }
 .formeo textarea:focus {
-  border: 1px solid rgb(102, 175, 233);
+  border: 1px solid #975DAA;
   outline: none;
 }
 .formeo button {
@@ -414,8 +415,8 @@ button[class*=-clone]:hover .svg-icon {
   color: #fff;
 }
 .formeo button.primary {
-  background-color: rgb(50, 93, 136);
-  border-color: rgb(36.2903225806, 67.5, 98.7096774194);
+  background-color: #975DAA;
+  border-color: rgb(122.7368421053, 72.955465587, 139.044534413);
 }
 .formeo button.success {
   background-color: rgb(147, 197, 75);
@@ -434,7 +435,7 @@ button[class*=-clone]:hover .svg-icon {
   color: #fff;
 }
 .formeo button:focus {
-  border: 1px solid rgb(102, 175, 233);
+  border: 1px solid #975DAA;
 }
 .formeo button:hover, .formeo button:focus {
   outline: 0 none;
@@ -454,7 +455,7 @@ button[class*=-clone]:hover .svg-icon {
   width: auto;
 }
 .formeo .f-addon:focus {
-  border: 1px solid rgb(102, 175, 233);
+  border: 1px solid #975DAA;
   outline: none;
 }
 .formeo .f-addon label {
@@ -543,10 +544,10 @@ button[class*=-clone]:hover .svg-icon {
 .formeo .f-input-group input:focus + select,
 .formeo .f-input-group select:focus + input,
 .formeo .f-input-group select:focus + select {
-  border-left: 1px solid rgb(102, 175, 233);
+  border-left: 1px solid #975DAA;
 }
 .formeo .text-primary {
-  color: rgb(50, 93, 136);
+  color: #975DAA;
 }
 .formeo .text-success {
   color: rgb(147, 197, 75);
@@ -575,7 +576,7 @@ button[class*=-clone]:hover .svg-icon {
   max-width: 16px;
   max-height: 16px;
   aspect-ratio: 1/1;
-  border: 1.5px solid var(--checkbox-border-color, #E5E7EB);
+  border: 1.5px solid var(--checkbox-border-color, #DADDE2);
   border-radius: 3px;
   background-color: var(--checkbox-bg, #fff);
   cursor: pointer;
@@ -634,7 +635,7 @@ button[class*=-clone]:hover .svg-icon {
   max-width: 16px;
   max-height: 16px;
   aspect-ratio: 1/1;
-  border: 1.5px solid var(--radio-border-color, #E5E7EB);
+  border: 1.5px solid var(--radio-border-color, #DADDE2);
   border-radius: 50%;
   background-color: var(--radio-bg, #fff);
   cursor: pointer;
@@ -722,10 +723,10 @@ button[class*=-clone]:hover .svg-icon {
 }
 @keyframes EDIT_PULSE {
   from, to {
-    border-color: rgb(102, 175, 233);
+    border-color: #975DAA;
   }
   50% {
-    border-color: rgb(191.1771428571, 221.6285714286, 245.8228571429);
+    border-color: rgb(193.9473684211, 159.8987854251, 205.1012145749);
   }
 }
 @keyframes COMPONENT_HIGHLIGHT_PULSE {
@@ -1189,7 +1190,7 @@ button[class*=-clone]:hover .svg-icon {
   border-radius: 4px;
   border-bottom-color: transparent;
   outline: none;
-  box-shadow: 0 0 0 1px rgb(102, 175, 233) inset;
+  box-shadow: 0 0 0 1px #975DAA inset;
 }
 .formeo.formeo-editor .formeo-field [contenteditable]:focus::after {
   display: none;
@@ -1232,6 +1233,22 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .editing-field .field-handle,
 .formeo.formeo-editor .hovering-field .field-handle {
   display: none;
+}
+.formeo.formeo-editor .field-selected {
+  box-shadow: 0 0 0 2px #975DAA;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.formeo.formeo-editor .field-selected .field-tag {
+  display: flex;
+  background-color: #975DAA;
+  color: #fff;
+}
+.formeo.formeo-editor .field-selected .field-tag .svg-icon {
+  fill: #fff;
+}
+.formeo.formeo-editor .field-selected .field-action-btn-wrap {
+  display: flex;
 }
 .formeo.formeo-editor .field-actions {
   border-color: transparent;
@@ -1496,7 +1513,7 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .f-condition-row input:focus,
 .formeo.formeo-editor .f-condition-row select:focus,
 .formeo.formeo-editor .f-condition-row [contenteditable]:focus {
-  box-shadow: 0 0 0 1px rgb(102, 175, 233) inset;
+  box-shadow: 0 0 0 1px #975DAA inset;
 }
 .formeo.formeo-editor .f-condition-row div.condition-source,
 .formeo.formeo-editor .f-condition-row div.condition-target {
@@ -1808,29 +1825,36 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .f-field-group {
   margin-bottom: 0;
 }
-.formeo.formeo-editor .formeo-stage.empty > .children {
+.formeo.formeo-editor .formeo-stage.empty:not(.formeo-section) > .children {
   position: relative;
+  min-height: 400px;
+}
+.formeo.formeo-editor .formeo-stage.empty:not(.formeo-section) > .children:empty {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  height: 100%;
 }
-.formeo.formeo-editor .formeo-stage.empty > .children::before {
+.formeo.formeo-editor .formeo-stage.empty:not(.formeo-section) > .children:empty::before {
   content: "+";
   font-size: 28px;
   color: #9CA3AF;
   font-weight: 300;
   margin-bottom: 8px;
 }
-.formeo.formeo-editor .formeo-stage.empty > .children::after {
+.formeo.formeo-editor .formeo-stage.empty:not(.formeo-section) > .children:empty::after {
   font-size: 14px;
   color: #9CA3AF;
-  content: "Drag and drop fields here";
+  content: "Drag and drop a section first, then add fields to it";
   font-weight: 400;
 }
-.formeo.formeo-editor .formeo-stage.empty[class*=editing-] > .children::after,
-.formeo.formeo-editor .formeo-stage.empty[class*=editing-] > .children::before {
+.formeo.formeo-editor .formeo-stage.empty:not(.formeo-section)[class*=editing-] > .children::after,
+.formeo.formeo-editor .formeo-stage.empty:not(.formeo-section)[class*=editing-] > .children::before {
   opacity: 0;
+}
+.formeo.formeo-editor .section-actions {
+  display: none;
 }
 .formeo.formeo-editor .formeo-settings {
   display: none;
@@ -1841,14 +1865,14 @@ button[class*=-clone]:hover .svg-icon {
   align-items: center;
   padding: 0 16px;
   min-height: 48px;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #DADDE2;
   background-color: #fff;
 }
 .formeo.formeo-editor .formeo-preview-btn {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #E5E7EB;
+  border: 1px solid #DADDE2;
   background-color: #fff;
   cursor: pointer;
   display: flex;
@@ -1871,24 +1895,48 @@ button[class*=-clone]:hover .svg-icon {
 }
 .formeo.formeo-editor .formeo-preview-btn:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgb(102, 175, 233);
+  box-shadow: 0 0 0 2px #975DAA;
+}
+.formeo.formeo-editor .formeo-preview-btn.active {
+  border-color: #975DAA;
+}
+.formeo.formeo-editor .formeo-preview-container {
+  padding: 24px;
+  background-color: #fff;
+  min-height: 400px;
+  flex: 1;
+}
+.formeo.formeo-editor .formeo-preview-container .formeo-row {
+  box-shadow: none;
+}
+.formeo.formeo-editor .formeo-section.formeo-stage {
+  width: 100%;
+  min-height: auto;
+  flex: none;
+  border: 1px solid #DADDE2;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.formeo.formeo-editor .formeo-section.formeo-stage > .children {
+  padding: 16px 24px;
+  min-height: 60px;
 }
 .formeo.formeo-editor .formeo-section {
   list-style: none;
-  margin: 0 0 16px 0;
+  margin: 0;
   padding: 0;
   background: #fff;
-  border: 1px solid #E5E7EB;
+  border: 1px solid #DADDE2;
   border-radius: 8px;
   transition: all 0.15s ease;
+  width: 100%;
+  display: block;
+  box-sizing: border-box;
 }
 .formeo.formeo-editor .formeo-section:hover {
   border-color: #D1D5DB;
 }
-.formeo.formeo-editor .formeo-section.empty .section-children {
-  min-height: 60px;
-}
-.formeo.formeo-editor .formeo-section.collapsed .section-children {
+.formeo.formeo-editor .formeo-section.collapsed > .children {
   display: none;
 }
 .formeo.formeo-editor .formeo-section.collapsed .section-collapse-toggle .svg-icon {
@@ -1896,11 +1944,10 @@ button[class*=-clone]:hover .svg-icon {
 }
 .formeo.formeo-editor .formeo-section .section-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 8px;
-  padding: 16px;
-  border-bottom: 1px solid #E5E7EB;
-  background: #F9FAFB;
+  padding: 16px 24px;
+  background: #fff;
   border-radius: 8px 8px 0 0;
 }
 .formeo.formeo-editor .formeo-section .section-collapse-toggle {
@@ -1949,11 +1996,11 @@ button[class*=-clone]:hover .svg-icon {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   min-width: 0;
 }
 .formeo.formeo-editor .formeo-section .section-name-input {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
   color: #1F2937;
   border: none;
@@ -1987,18 +2034,22 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .formeo-section .section-instruction-input:focus {
   outline: none;
 }
-.formeo.formeo-editor .formeo-section .section-children {
-  padding: 16px;
-  min-height: 40px;
+.formeo.formeo-editor .formeo-section > .children {
+  padding: 16px 24px;
+  min-height: 60px;
+  list-style: none;
+  margin: 0;
 }
-.formeo.formeo-editor .formeo-section .section-children:empty::before {
-  content: "Drag fields here";
+.formeo.formeo-editor .formeo-section > .children:empty::before {
+  content: "Drag fields here to build this section";
   display: block;
   text-align: center;
   color: #9CA3AF;
-  padding: 32px;
-  border: 2px dashed #E5E7EB;
+  font-size: 14px;
+  padding: 32px 16px;
+  border: 1px dashed #D1D5DB;
   border-radius: 8px;
+  background: #FAFAFA;
 }
 .formeo.formeo-editor .formeo-section .action-buttons {
   position: absolute;
@@ -2013,7 +2064,21 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .formeo-section .section-edit {
   padding: 16px;
   background: #F9FAFB;
-  border-top: 1px solid #E5E7EB;
+  border-top: 1px solid #DADDE2;
+}
+.formeo.formeo-editor .formeo-section .formeo-row {
+  box-shadow: none;
+  padding: 0;
+  background: transparent;
+}
+.formeo.formeo-editor .formeo-section .formeo-row > .children {
+  min-height: 0;
+}
+.formeo.formeo-editor .formeo-section .formeo-row .row-handle,
+.formeo.formeo-editor .formeo-section .formeo-row .row-actions,
+.formeo.formeo-editor .formeo-section .formeo-row .row-tag,
+.formeo.formeo-editor .formeo-section .formeo-row .action-btn-wrap {
+  display: none;
 }
 .formeo.formeo-editor [dir=rtl] {
   /*
@@ -2203,6 +2268,27 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-render .formeo-column:last-of-type {
   padding-right: 0;
 }
+.formeo.formeo-render .formeo-rendered-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  border: 1px solid #DADDE2;
+  border-radius: 8px;
+  background-color: #fff;
+}
+.formeo.formeo-render .formeo-rendered-section:last-child {
+  margin-bottom: 0;
+}
+.formeo.formeo-render .formeo-rendered-section .formeo-section-name {
+  margin: 0 0 8px 0;
+  font-size: 1.25em;
+  font-weight: 600;
+  color: #1F2937;
+}
+.formeo.formeo-render .formeo-rendered-section .formeo-section-instruction {
+  margin: 0 0 16px 0;
+  font-size: 0.95em;
+  color: #6B7280;
+}
 .formeo button .svg-icon {
   max-width: 100%;
   max-height: 100%;
@@ -2220,7 +2306,7 @@ button[class*=-clone]:hover .svg-icon {
   container-name: controls;
   order: -1;
   border: 0 none;
-  border-right: 1px solid #E5E7EB;
+  border-right: 1px solid #DADDE2;
   background-color: #fff;
   box-shadow: none;
 }
@@ -2421,7 +2507,7 @@ button[class*=-clone]:hover .svg-icon {
 }
 
 .formeo-controls .form-actions .save-form:hover {
-  background-color: rgb(50, 93, 136);
+  background-color: #975DAA;
 }
 
 .formeo-controls .form-actions .clear-form:hover {
@@ -2485,7 +2571,7 @@ button[class*=-clone]:hover .svg-icon {
   cursor: move;
   list-style: none;
   margin: 0;
-  border: 1px solid #E5E7EB;
+  border: 1px solid #DADDE2;
   border-radius: 8px !important;
   text-align: center;
   background: #fff;
@@ -2618,11 +2704,454 @@ button[class*=-clone]:hover .svg-icon {
     border-top-left-radius: 0 !important;
   }
 }
+#settings-control-group {
+  display: block !important;
+  padding: 0 !important;
+  grid-template-columns: 1fr !important;
+}
+
+#settings-control-group.active-panel {
+  padding: 0 !important;
+}
+
+.settings-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+  color: #9CA3AF;
+  min-height: 200px;
+}
+
+.settings-placeholder p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.field-settings-content {
+  padding: 24px;
+}
+
+.field-settings-content .settings-row {
+  margin-bottom: 24px;
+}
+
+.field-settings-content .settings-row label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1F2937;
+  margin-bottom: 8px;
+}
+
+.field-settings-content .settings-row input[type=text],
+.field-settings-content .settings-row input[type=number],
+.field-settings-content .settings-row select,
+.field-settings-content .settings-row textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #DADDE2;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.field-settings-content .settings-row input[type=text]:focus,
+.field-settings-content .settings-row input[type=number]:focus,
+.field-settings-content .settings-row select:focus,
+.field-settings-content .settings-row textarea:focus {
+  outline: none;
+  border-color: #975DAA;
+  box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
+}
+
+.field-settings-content .settings-row input[type=text]::placeholder,
+.field-settings-content .settings-row input[type=number]::placeholder,
+.field-settings-content .settings-row select::placeholder,
+.field-settings-content .settings-row textarea::placeholder {
+  color: #9CA3AF;
+}
+
+.field-settings-content .settings-row.settings-row-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.field-settings-content .settings-row.settings-row-toggle label {
+  margin-bottom: 0;
+}
+
+.field-settings-content .settings-row.settings-row-toggle input[type=checkbox] {
+  appearance: none;
+  width: 44px;
+  height: 24px;
+  background: #DADDE2;
+  border-radius: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.field-settings-content .settings-row.settings-row-toggle input[type=checkbox]::before {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.field-settings-content .settings-row.settings-row-toggle input[type=checkbox]:checked {
+  background: #975DAA;
+}
+
+.field-settings-content .settings-row.settings-row-toggle input[type=checkbox]:checked::before {
+  transform: translateX(20px);
+}
+
+.field-settings-content .settings-add-conditions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #DADDE2;
+}
+
+.field-settings-content .settings-add-conditions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #975DAA;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.field-settings-content .settings-add-conditions button:hover {
+  color: rgb(122.7368421053, 72.955465587, 139.044534413);
+}
+
+.field-settings-content .settings-add-conditions button .add-conditions-plus {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.field-settings-content .settings-add-conditions button span {
+  color: inherit;
+}
+
+.field-settings-content .settings-conditions-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #DADDE2;
+}
+
+.field-settings-content .settings-conditions-section .conditions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.field-settings-content .settings-conditions-section .conditions-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.field-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #6B7280;
+}
+
+.field-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn:hover {
+  background: #F3F4F6;
+  color: #EF4444;
+}
+
+.field-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn .svg-icon {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.field-settings-content .settings-conditions-section .condition-type-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1F2937;
+  margin-bottom: 16px;
+}
+
+.field-settings-content .settings-conditions-section .condition-field-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #6B7280;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+.field-settings-content .settings-conditions-section .settings-row {
+  margin-bottom: 8px;
+}
+
+.field-settings-content .settings-conditions-section .settings-row select {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #DADDE2;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.field-settings-content .settings-conditions-section .settings-row select:focus {
+  outline: none;
+  border-color: #975DAA;
+  box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
+}
+
+.field-settings-content .settings-conditions-section .settings-row input[type=text] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #DADDE2;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.field-settings-content .settings-conditions-section .settings-row input[type=text]:focus {
+  outline: none;
+  border-color: #975DAA;
+  box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
+}
+
+.field-settings-content .settings-conditions-section .condition-value-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.field-settings-content .settings-conditions-section .condition-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  background: #F3F4F6;
+  border-radius: 16px;
+  font-size: 14px;
+  color: #1F2937;
+}
+
+.field-settings-content .settings-conditions-section .condition-tag .tag-remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  color: #6B7280;
+  padding: 0;
+  line-height: 1;
+}
+
+.field-settings-content .settings-conditions-section .condition-tag .tag-remove-btn:hover {
+  background: #DADDE2;
+  color: #1F2937;
+}
+
+.field-settings-content .settings-conditions-section .conditions-divider {
+  height: 1px;
+  background: #DADDE2;
+  margin: 24px 0;
+}
+
+.field-settings-content .settings-options-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #DADDE2;
+}
+
+.field-settings-content .settings-options-section > label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1F2937;
+  margin-bottom: 16px;
+}
+
+.field-settings-content .settings-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.field-settings-content .settings-option-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.field-settings-content .settings-option-row input[type=text] {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1px solid #DADDE2;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.field-settings-content .settings-option-row input[type=text]:focus {
+  outline: none;
+  border-color: #975DAA;
+  box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
+}
+
+.field-settings-content .settings-option-row .option-remove-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #9CA3AF;
+  font-size: 18px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.field-settings-content .settings-option-row .option-remove-btn:hover {
+  background: #F3F4F6;
+  color: #EF4444;
+}
+
+.field-settings-content .settings-add-option-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #975DAA;
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.field-settings-content .settings-add-option-btn:hover {
+  color: rgb(122.7368421053, 72.955465587, 139.044534413);
+}
+
+.field-settings-content .settings-add-option-btn .svg-icon {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.field-settings-content .settings-row-double {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.field-settings-content .settings-row-double .settings-half {
+  flex: 1;
+}
+
+.field-settings-content .settings-row-double .settings-half label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1F2937;
+  margin-bottom: 8px;
+}
+
+.field-settings-content .settings-row-double .settings-half input[type=number] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #DADDE2;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.field-settings-content .settings-row-double .settings-half input[type=number]:focus {
+  outline: none;
+  border-color: #975DAA;
+  box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
+}
+
+.field-settings-content .settings-info {
+  color: #6B7280;
+  font-size: 14px;
+  margin: 0;
+  padding: 16px;
+  background: #F9FAFB;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.field-settings-content textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #DADDE2;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+  box-sizing: border-box;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.field-settings-content textarea:focus {
+  outline: none;
+  border-color: #975DAA;
+  box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
+}
+
 .field-control {
   cursor: move;
   list-style: none;
   margin: 0;
-  border: 1px solid #E5E7EB;
+  border: 1px solid #DADDE2;
   border-radius: 8px !important;
   text-align: center;
   background: #fff;

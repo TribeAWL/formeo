@@ -18,8 +18,8 @@ export const editorOptions = {
   config,
   events: {
     // onUpdate: console.log,
-    onSave: console.log,
-    onChange: console.log,
+    // onSave: console.log,
+    // onChange: console.log,
   },
   // svgSprite: `./${devPrefix}assets/img/formeo-sprite.svg`,
   // style: 'https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/css/bootstrap.min.css',
@@ -27,9 +27,7 @@ export const editorOptions = {
   sessionStorage: true,
   editPanelOrder: ['attrs', 'options'],
   // controlOnLeft: true,
-  onLoad: () => {
-    console.log('demo loaded')
-  },
+  // onLoad: () => {},
 }
 
 // document.addEventListener('formeoLoaded', evt => {

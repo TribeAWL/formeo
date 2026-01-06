@@ -44,16 +44,21 @@ export default class Field extends Component {
         className: FIELD_CLASSNAME,
       },
       id: this.id,
-      children: [
-        this.label,
-        this.getComponentTag(),
-        actionButtons,
-        hasEditButton && this.editWindow, // fieldEdit window,
-        this.preview,
-      ].filter(Boolean),
+      children: [this.label, this.getComponentTag(), actionButtons, this.preview].filter(Boolean),
       panelNav: this.panelNav,
       dataset: {
         hoverTag: i18n.get('field'),
+      },
+      action: {
+        click: evt => {
+          // Don't trigger selection when clicking on action buttons
+          const target = evt.target
+          if (target.closest('.field-actions') || target.closest('button')) {
+            return
+          }
+          evt.stopPropagation()
+          this.selectField()
+        },
       },
     })
 
@@ -61,6 +66,18 @@ export default class Field extends Component {
 
     this.dom = field
     this.isEditing = false
+  }
+
+  /**
+   * Select this field and show its settings in the Settings tab
+   */
+  selectField = () => {
+    // Dispatch custom event that Controls will listen for
+    const event = new CustomEvent('formeo:field:selected', {
+      detail: { field: this },
+      bubbles: true,
+    })
+    document.dispatchEvent(event)
   }
 
   get labelConfig() {

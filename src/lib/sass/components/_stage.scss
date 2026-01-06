@@ -153,15 +153,22 @@
   margin-bottom: 0;
 }
 
-.formeo-stage.empty {
+// Main stage empty state - exclude sections which also have formeo-stage class
+.formeo-stage.empty:not(.formeo-section) {
   > .children {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+    min-height: 400px;
 
-    &::before {
+    // Only center when truly empty
+    &:empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    &:empty::before {
       content: '+';
       font-size: 28px;
       color: #9CA3AF;
@@ -169,10 +176,10 @@
       margin-bottom: mixins.space(1);
     }
 
-    &::after {
+    &:empty::after {
       font-size: 14px;
       color: #9CA3AF;
-      content: 'Drag and drop fields here';
+      content: 'Drag and drop a section first, then add fields to it';
       font-weight: 400;
     }
   }
@@ -185,6 +192,11 @@
   }
 }
 
+// Hide section actions
+.section-actions {
+  display: none;
+}
+
 .formeo-settings {
   display: none;
 }
@@ -195,7 +207,7 @@
   align-items: center;
   padding: 0 mixins.space(2);
   min-height: 48px;
-  border-bottom: 1px solid #E5E7EB;
+  border-bottom: 1px solid #DADDE2;
   background-color: #fff;
 }
 
@@ -203,7 +215,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #E5E7EB;
+  border: 1px solid #DADDE2;
   background-color: #fff;
   cursor: pointer;
   display: flex;
@@ -230,5 +242,20 @@
   &:focus {
     outline: none;
     box-shadow: 0 0 0 2px color.$input-focus;
+  }
+
+  &.active {
+    border-color: #975DAA;
+  }
+}
+
+.formeo-preview-container {
+  padding: mixins.space(3);
+  background-color: #fff;
+  min-height: 400px;
+  flex: 1;
+
+  .formeo-row {
+    box-shadow: none;
   }
 }

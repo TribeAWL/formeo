@@ -112,6 +112,27 @@
   }
 }
 
+// Field selected state - shows when field is selected for editing in Settings tab
+.field-selected {
+  box-shadow: 0 0 0 2px color.$brand-primary;
+  border-radius: var.$input-border-radius;
+  cursor: pointer;
+
+  .field-tag {
+    display: flex;
+    background-color: color.$brand-primary;
+    color: color.$white;
+
+    .svg-icon {
+      fill: color.$white;
+    }
+  }
+
+  .field-action-btn-wrap {
+    display: flex;
+  }
+}
+
 .field-actions {
   border-color: transparent;
   border-width: 1px 1px 0 0;

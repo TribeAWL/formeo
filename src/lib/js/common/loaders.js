@@ -1,4 +1,4 @@
-import { BUNDLED_SVG_SPRITE, FALLBACK_CSS_URL, FALLBACK_SVG_SPRITE_URL, SVG_SPRITE_URL } from '../constants.js'
+import { BUNDLED_SVG_SPRITE, /* FALLBACK_CSS_URL, */ FALLBACK_SVG_SPRITE_URL, SVG_SPRITE_URL } from '../constants.js'
 import dom from './dom.js'
 import { noop } from './utils/index.mjs'
 
@@ -187,8 +187,8 @@ export const fetchFormeoStyle = async cssUrl => {
   if (!loaded.css.has(cssUrl)) {
     await insertStyle(cssUrl)
     // check again and use fallback if necessary styles were not loaded
-    if (!loaded.css.has(FALLBACK_CSS_URL)) {
-      return await insertStyle(FALLBACK_CSS_URL)
-    }
+    // if (!loaded.css.has(FALLBACK_CSS_URL)) {
+    //   return await insertStyle(FALLBACK_CSS_URL)
+    // }
   }
 }

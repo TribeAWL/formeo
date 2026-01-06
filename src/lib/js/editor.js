@@ -10,6 +10,7 @@ import Controls from './components/controls/index.js'
 import Components from './components/index.js'
 import { defaults } from './config.js'
 import { DEFAULT_FORMDATA, SESSION_LOCALE_KEY } from './constants.js'
+import FormeoRenderer from './renderer/index.js'
 
 new SmartTooltip()
 
@@ -146,8 +147,22 @@ export class FormeoEditor {
       }
     }
 
+    // Track preview state (only initialize if not already set)
+    if (this.isPreviewMode === undefined) {
+      this.isPreviewMode = false
+    }
+
+    // Create preview container
+    this.previewContainer = dom.create({
+      tag: 'div',
+      className: 'formeo-preview-container',
+      attrs: {
+        style: 'display: none;',
+      },
+    })
+
     // Create preview button for the stage header
-    const previewButton = dom.create({
+    this.previewButton = dom.create({
       tag: 'button',
       className: 'formeo-preview-btn',
       attrs: {
@@ -157,7 +172,7 @@ export class FormeoEditor {
       children: [dom.icon('new-eye')],
       action: {
         click: () => {
-          Events.formeoUpdated({ type: 'preview' }, 'formeoPreview')
+          this.togglePreview()
         },
       },
     })
@@ -166,7 +181,7 @@ export class FormeoEditor {
     const stageHeader = dom.create({
       tag: 'div',
       className: 'formeo-stage-header',
-      children: [previewButton],
+      children: [this.previewButton],
     })
 
     const elemConfig = {
@@ -187,10 +202,14 @@ export class FormeoEditor {
     const controlsContainer = this.controls.container || this.editor
     controlsContainer.appendChild(this.controls.dom)
 
-    // Insert the stage header at the top of the stage
+    // Insert the stage header and preview container at the top of the stage
     const stageArea = this.stages[0]?.dom
     if (stageArea) {
       stageArea.insertBefore(stageHeader, stageArea.firstChild)
+      // Insert preview container after the header
+      stageHeader.after(this.previewContainer)
+      // Store reference to stage content (children container)
+      this.stageContent = stageArea.querySelector('.children')
     }
 
     if (this.editorContainer) {
@@ -205,6 +224,46 @@ export class FormeoEditor {
     })
 
     document.dispatchEvent(Events.formeoLoaded)
+  }
+
+  /**
+   * Toggle between edit mode and preview mode
+   * @return {void}
+   */
+  togglePreview() {
+    this.isPreviewMode = !this.isPreviewMode
+
+    // Update the icon and button state based on mode
+    const iconName = this.isPreviewMode ? 'eye-open' : 'new-eye'
+    this.previewButton.innerHTML = dom.icon(iconName)
+    this.previewButton.classList.toggle('active', this.isPreviewMode)
+
+    if (this.isPreviewMode) {
+      // Hide stage content, show preview
+      if (this.stageContent) {
+        this.stageContent.style.display = 'none'
+      }
+      this.previewContainer.style.display = 'block'
+
+      // Render the form in preview container
+      const renderer = new FormeoRenderer({
+        renderContainer: this.previewContainer,
+      })
+      renderer.render(this.formData)
+
+      // Dispatch preview event
+      Events.formeoUpdated({ type: 'preview', isPreviewMode: true }, 'formeoPreview')
+    } else {
+      // Show stage content, hide preview
+      if (this.stageContent) {
+        this.stageContent.style.display = ''
+      }
+      this.previewContainer.style.display = 'none'
+      dom.empty(this.previewContainer)
+
+      // Dispatch preview event
+      Events.formeoUpdated({ type: 'preview', isPreviewMode: false }, 'formeoPreview')
+    }
   }
 }
 

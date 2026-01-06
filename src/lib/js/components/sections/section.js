@@ -1,7 +1,7 @@
 import i18n from '@draggable/i18n'
 import Sortable from 'sortablejs'
 import dom from '../../common/dom.js'
-import { ROW_CLASSNAME } from '../../constants.js'
+import { ROW_CLASSNAME, STAGE_CLASSNAME } from '../../constants.js'
 import Component from '../component.js'
 
 export const SECTION_CLASSNAME = 'formeo-section'
@@ -14,7 +14,7 @@ const DEFAULT_DATA = () =>
       collapsed: false,
     },
     children: [],
-    className: [SECTION_CLASSNAME],
+    className: [SECTION_CLASSNAME, STAGE_CLASSNAME],
   })
 
 /**
@@ -35,8 +35,8 @@ export default class Section extends Component {
     const sectionHeader = this.createSectionHeader()
 
     this.dom = dom.create({
-      tag: 'li',
-      className: [SECTION_CLASSNAME, 'empty'],
+      tag: 'div',
+      className: [SECTION_CLASSNAME, STAGE_CLASSNAME, 'empty'],
       dataset: {
         hoverTag: i18n.get('section') || 'Section',
         editingHoverTag: i18n.get('editing.section') || 'Editing Section',

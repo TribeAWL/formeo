@@ -6,7 +6,7 @@ import Field from './field.js'
 
 const DEFAULT_CONFIG = () => ({
   actionButtons: {
-    buttons: ['move', 'edit', 'clone', 'remove'],
+    buttons: ['move', 'clone', 'remove'], // 'edit' removed - field settings shown in Settings tab
     disabled: [],
   },
   panels: {

@@ -2,6 +2,7 @@ import dom from '../common/dom.js'
 import { fetchDependencies } from '../common/loaders'
 import { cleanFormData, isAddress, merge, uuid } from '../common/utils/index.mjs'
 import { splitAddress } from '../common/utils/string.mjs'
+import { SECTION_CLASSNAME } from '../components/sections/section.js'
 import { STAGE_CLASSNAME } from '../constants'
 import {
   baseId,
@@ -232,13 +233,66 @@ export default class FormeoRenderer {
     })
 
   get processedData() {
-    return Object.values(this.form.stages).map(stage => {
+    const processedStages = Object.values(this.form.stages).map(stage => {
       stage.children = this.processRows(stage.id)
       stage.className = STAGE_CLASSNAME
 
       this.components[baseId(stage.id)] = stage
       return stage
     })
+
+    // Process sections if they exist
+    const processedSections = this.form.sections
+      ? Object.values(this.form.sections).map(section => this.processSection(section))
+      : []
+
+    return [...processedStages, ...processedSections]
+  }
+
+  /**
+   * Process a section for rendering
+   * @param {Object} section - The section data
+   * @return {Object} Processed section config
+   */
+  processSection = section => {
+    const { id, config = {}, children = [] } = section
+
+    // Process rows within the section
+    const processedRows = children.reduce((acc, rowId) => {
+      const row = this.form.rows[rowId]
+      if (row) {
+        acc.push(this.processRow(row))
+      }
+      return acc
+    }, [])
+
+    // Build section header
+    const sectionHeader = []
+
+    if (config.name) {
+      sectionHeader.push({
+        tag: 'h3',
+        className: 'formeo-section-name',
+        children: config.name,
+      })
+    }
+
+    if (config.instruction) {
+      sectionHeader.push({
+        tag: 'p',
+        className: 'formeo-section-instruction',
+        children: config.instruction,
+      })
+    }
+
+    const sectionData = {
+      id: this.prefixId(id),
+      className: [SECTION_CLASSNAME, STAGE_CLASSNAME, 'formeo-rendered-section'],
+      children: [...sectionHeader, ...processedRows],
+    }
+
+    this.components[baseId(id)] = sectionData
+    return sectionData
   }
 
   /**

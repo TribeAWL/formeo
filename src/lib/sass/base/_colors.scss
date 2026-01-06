@@ -12,7 +12,7 @@
 
 
 // Colors
-$brand-primary: rgb(50, 93, 136) !default;
+$brand-primary: #975DAA !default;
 $brand-primary-dark: color.adjust($brand-primary, $lightness: -10%) !default;
 $brand-primary-light: color.adjust($brand-primary, $lightness: 20%) !default;
 
@@ -58,7 +58,7 @@ $column-highlight-color-text: text-color($column-highlight-color) !default;
 $field-highlight-color-text: text-color($field-highlight-color) !default;
 $option-highlight-color-text: text-color($option-highlight-color) !default;
 
-$input-focus: rgba(102, 175, 233, 1);
+$input-focus: #975DAA;
 
 // Grayscale and brand colors for use across Bootstrap.
 $black: #000;
@@ -73,7 +73,7 @@ $gray-lighter: color.scale($black, $lightness: 80%) !default;
 $gray-lightest: color.scale($black, $lightness: 90%) !default;
 
 // Tab colors
-$tab-active-bg: #E8F4FD;
+$tab-active-bg: #F3EAF6;
 $tab-inactive-bg: #fff;
 
 // Stage
