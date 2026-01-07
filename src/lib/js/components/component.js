@@ -342,7 +342,7 @@ export default class Component extends Data {
           },
         }
       },
-      remove: (icon = 'remove') => {
+      remove: (icon = 'bin') => {
         return {
           ...dom.btnTemplate({ content: dom.icon(icon) }),
           className: ['item-remove'],
@@ -595,7 +595,15 @@ export default class Component extends Data {
         }
         const depth = get(targets, `${this.name}.${controlType}`)
         const action = depthMap.get(depth)()
-        dom.remove(item)
+
+        // Only remove the item if it's not in the controls panel (i.e., it's the clone, not the original)
+        // With pull: 'clone', the original stays in controls and the clone is what gets dropped
+        const isInControlsPanel = from && from.contains && from.contains(item)
+        if (!isInControlsPanel) {
+          // Item is the clone in the drop target, safe to remove
+          dom.remove(item)
+        }
+
         const component = action(elementData, newIndex)
 
         return component

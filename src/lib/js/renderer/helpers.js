@@ -54,7 +54,7 @@ export const propertyMap = {
 export const createRemoveButton = () =>
   dom.btnTemplate({
     className: 'remove-input-group',
-    children: dom.icon('remove'),
+    children: dom.icon('bin'),
     action: {
       mouseover: ({ target }) => target.parentElement.classList.add('will-remove'),
       mouseleave: ({ target }) => target.parentElement.classList.remove('will-remove'),

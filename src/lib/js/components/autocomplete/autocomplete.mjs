@@ -189,7 +189,7 @@ export default class Autocomplete {
 
     this.clearButton = dom.create({
       tag: 'span',
-      content: dom.icon('remove'),
+      content: dom.icon('bin'),
       className: 'clear-button hidden',
       action: { click: () => this.clearValue() },
     })

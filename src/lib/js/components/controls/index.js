@@ -334,9 +334,27 @@ export class Controls {
           document.documentElement.style.overflow = 'hidden'
         },
         onEnd: ({ from, item, clone }) => {
-          if (from.contains(clone)) {
+          // With pull: 'clone', item is the original and clone is the dragged element
+          // Ensure the original item stays in the controls panel
+          if (from && item && !from.contains(item)) {
+            // If original item is not in from, it might have been moved - restore it
+            // This shouldn't happen with pull: 'clone', but handle it just in case
+            if (from.contains(clone)) {
+              from.replaceChild(item, clone)
+            } else if (clone && clone.parentNode === from) {
+              // Clone is still in from, replace it with original
+              from.replaceChild(item, clone)
+            }
+          } else if (from && clone && from.contains(clone)) {
+            // Clone is still in from (drop was cancelled), replace with original
             from.replaceChild(item, clone)
           }
+
+          // Ensure original item is visible and in the correct position
+          if (item && item.parentNode && item.style.display === 'none') {
+            item.style.display = ''
+          }
+
           // Restore overflow after drag completes
           document.documentElement.style.overflow = this.originalDocumentOverflow
           this.originalDocumentOverflow = null

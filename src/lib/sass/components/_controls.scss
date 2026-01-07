@@ -13,9 +13,11 @@
   container-name: controls;
   order: -1;
   border: 0 none;
-  border-right: 1px solid #DADDE2;
+  border-right: 1px solid #dadde2;
   background-color: #fff;
   box-shadow: none;
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
 
   &.formeo-sticky {
     position: sticky;
@@ -366,7 +368,7 @@
   justify-content: center;
   padding: mixins.space(4) mixins.space(2);
   text-align: center;
-  color: #9CA3AF;
+  color: #9ca3af;
   min-height: 200px;
 
   p {
@@ -386,7 +388,7 @@
       display: block;
       font-size: 14px;
       font-weight: 500;
-      color: #1F2937;
+      color: #1f2937;
       margin-bottom: mixins.space(1);
     }
 
@@ -396,7 +398,7 @@
     textarea {
       width: 100%;
       padding: mixins.space(1.5) mixins.space(2);
-      border: 1px solid #DADDE2;
+      border: 1px solid #dadde2;
       border-radius: 8px;
       font-size: 14px;
       background: color.$white;
@@ -409,7 +411,7 @@
       }
 
       &::placeholder {
-        color: #9CA3AF;
+        color: #9ca3af;
       }
     }
 
@@ -428,7 +430,7 @@
         appearance: none;
         width: 44px;
         height: 24px;
-        background: #DADDE2;
+        background: #dadde2;
         border-radius: 12px;
         position: relative;
         cursor: pointer;
@@ -436,7 +438,7 @@
         flex-shrink: 0;
 
         &::before {
-          content: '';
+          content: "";
           position: absolute;
           width: 20px;
           height: 20px;
@@ -463,7 +465,7 @@
   .settings-add-conditions {
     margin-top: mixins.space(4);
     padding-top: mixins.space(3);
-    border-top: 1px solid #DADDE2;
+    border-top: 1px solid #dadde2;
 
     button {
       display: inline-flex;
@@ -497,7 +499,7 @@
   .settings-conditions-section {
     margin-top: mixins.space(4);
     padding-top: mixins.space(3);
-    border-top: 1px solid #DADDE2;
+    border-top: 1px solid #dadde2;
 
     .conditions-header {
       display: flex;
@@ -509,7 +511,7 @@
         margin: 0;
         font-size: 16px;
         font-weight: 600;
-        color: #1F2937;
+        color: #1f2937;
       }
 
       .conditions-delete-btn {
@@ -522,11 +524,11 @@
         border: none;
         border-radius: 6px;
         cursor: pointer;
-        color: #6B7280;
+        color: #6b7280;
 
         &:hover {
-          background: #F3F4F6;
-          color: #EF4444;
+          background: #f3f4f6;
+          color: #ef4444;
         }
 
         .svg-icon {
@@ -541,7 +543,7 @@
       display: block;
       font-size: 16px;
       font-weight: 600;
-      color: #1F2937;
+      color: #1f2937;
       margin-bottom: mixins.space(2);
     }
 
@@ -549,7 +551,7 @@
       display: block;
       font-size: 14px;
       font-weight: 500;
-      color: #6B7280;
+      color: #6b7280;
       margin-top: mixins.space(2);
       margin-bottom: mixins.space(1);
     }
@@ -560,7 +562,7 @@
       select {
         width: 100%;
         padding: mixins.space(1.5) mixins.space(2);
-        border: 1px solid #DADDE2;
+        border: 1px solid #dadde2;
         border-radius: 8px;
         font-size: 14px;
         background: color.$white;
@@ -582,7 +584,7 @@
       input[type="text"] {
         width: 100%;
         padding: mixins.space(1.5) mixins.space(2);
-        border: 1px solid #DADDE2;
+        border: 1px solid #dadde2;
         border-radius: 8px;
         font-size: 14px;
         background: color.$white;
@@ -608,10 +610,10 @@
       align-items: center;
       gap: mixins.space(0.5);
       padding: mixins.space(0.5) mixins.space(1.5);
-      background: #F3F4F6;
+      background: #f3f4f6;
       border-radius: 16px;
       font-size: 14px;
-      color: #1F2937;
+      color: #1f2937;
 
       .tag-remove-btn {
         display: flex;
@@ -624,20 +626,20 @@
         border-radius: 50%;
         cursor: pointer;
         font-size: 14px;
-        color: #6B7280;
+        color: #6b7280;
         padding: 0;
         line-height: 1;
 
         &:hover {
-          background: #DADDE2;
-          color: #1F2937;
+          background: #dadde2;
+          color: #1f2937;
         }
       }
     }
 
     .conditions-divider {
       height: 1px;
-      background: #DADDE2;
+      background: #dadde2;
       margin: mixins.space(3) 0;
     }
 
@@ -651,13 +653,13 @@
   .settings-options-section {
     margin-top: mixins.space(3);
     padding-top: mixins.space(3);
-    border-top: 1px solid #DADDE2;
+    border-top: 1px solid #dadde2;
 
     > label {
       display: block;
       font-size: 14px;
       font-weight: 500;
-      color: #1F2937;
+      color: #1f2937;
       margin-bottom: mixins.space(2);
     }
   }
@@ -677,7 +679,7 @@
     input[type="text"] {
       flex: 1;
       padding: mixins.space(1.5) mixins.space(2);
-      border: 1px solid #DADDE2;
+      border: 1px solid #dadde2;
       border-radius: 8px;
       font-size: 14px;
       background: color.$white;
@@ -696,7 +698,7 @@
       padding: 0;
       border: none;
       background: transparent;
-      color: #9CA3AF;
+      color: #9ca3af;
       font-size: 18px;
       cursor: pointer;
       border-radius: 4px;
@@ -705,8 +707,8 @@
       justify-content: center;
 
       &:hover {
-        background: #F3F4F6;
-        color: #EF4444;
+        background: #f3f4f6;
+        color: #ef4444;
       }
     }
   }
@@ -747,14 +749,14 @@
         display: block;
         font-size: 14px;
         font-weight: 500;
-        color: #1F2937;
+        color: #1f2937;
         margin-bottom: mixins.space(1);
       }
 
       input[type="number"] {
         width: 100%;
         padding: mixins.space(1.5) mixins.space(2);
-        border: 1px solid #DADDE2;
+        border: 1px solid #dadde2;
         border-radius: 8px;
         font-size: 14px;
         background: color.$white;
@@ -771,11 +773,11 @@
 
   // Info text for fields with no settings
   .settings-info {
-    color: #6B7280;
+    color: #6b7280;
     font-size: 14px;
     margin: 0;
     padding: mixins.space(2);
-    background: #F9FAFB;
+    background: #f9fafb;
     border-radius: 8px;
     text-align: center;
   }
@@ -784,7 +786,7 @@
   textarea {
     width: 100%;
     padding: mixins.space(1.5) mixins.space(2);
-    border: 1px solid #DADDE2;
+    border: 1px solid #dadde2;
     border-radius: 8px;
     font-size: 14px;
     background: color.$white;

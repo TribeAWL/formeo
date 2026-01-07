@@ -11,7 +11,7 @@
 }
 
 .formeo {
-  accent-color: #975DAA;
+  accent-color: #975daa;
 
   * {
     box-sizing: inherit;
@@ -25,7 +25,6 @@
     flex-direction: row;
     text-align: left;
     gap: 0;
-    background-color: #fff;
 
     @include meta.load-css("components/component");
     @include meta.load-css("components/stage");

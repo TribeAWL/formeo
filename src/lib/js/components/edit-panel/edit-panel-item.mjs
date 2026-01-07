@@ -202,7 +202,7 @@ export default class EditPanelItem {
           this.dom.classList.remove('to-remove')
         },
       },
-      content: dom.icon('remove'),
+      content: dom.icon('bin'),
     }
     const controls = {
       className: `${this.panelName}-prop-controls prop-controls`,
