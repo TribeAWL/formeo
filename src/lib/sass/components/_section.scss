@@ -211,4 +211,20 @@
       display: none;
     }
   }
+
+  // Limit height when section is being dragged
+  &.sortable-ghost,
+  &.control-moving,
+  &[class*="sortable"] {
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
+  }
+}
+
+// Limit height of dragged sections (clones appended to body)
+body > .formeo-section {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
 }

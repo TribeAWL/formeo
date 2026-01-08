@@ -77,10 +77,26 @@
   &.sortable-ghost {
     background-color: color.$field-highlight-color;
     box-shadow: 0 0 0 1px color.$field-outline-color;
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
 
     * {
       opacity: 0;
     }
+  }
+}
+
+// Limit height of dragged fields (clones appended to body)
+body > .formeo-field {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+
+  .field-preview {
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
   }
 }
 

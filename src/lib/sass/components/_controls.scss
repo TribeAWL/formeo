@@ -308,6 +308,55 @@
   }
 }
 
+// Limit height of dragged placeholder/preview to 80px for form fields
+.field-control.sortable-ghost,
+.field-control.control-moving,
+.field-control[class*="sortable"] {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+
+  .field-preview {
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    * {
+      max-height: 80px !important;
+      overflow: hidden !important;
+    }
+  }
+}
+
+// Also target the clone element when it's being dragged (SortableJS creates clones)
+// This targets clones that are appended to body during drag
+body > .field-control,
+body > [class*="field-control"],
+body > .formeo-section,
+body > .formeo-row,
+body > .formeo-column {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+
+  .field-preview {
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    * {
+      max-height: 80px !important;
+      overflow: hidden !important;
+    }
+  }
+}
+
 @container controls (max-width: 300px) {
   .control-group {
     grid-template-columns: 1fr !important;

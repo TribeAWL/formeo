@@ -469,6 +469,26 @@ export class Controls {
       return this.layoutTypes[metaId.replace('layout-', '')]()
     }
 
+    // Validate form field restrictions (same as drag-and-drop validation)
+    // Check if it's a form field (not a layout control)
+    const isFormField = group !== 'layout' && !metaId.startsWith('layout-')
+
+    if (isFormField) {
+      // Check if there's at least one section in the stage
+      const activeStage = Stages.active
+      if (!activeStage || !activeStage.hasSection()) {
+        // Show alert message
+        alert(
+          'Please add a section first before adding form fields. Select "Section" from the layout fields, then you can add form fields into it.'
+        )
+        return null
+      } else {
+        // There are sections but trying to add directly to stage - show alert
+        alert('Please add form fields into a section. Form fields can only be added inside sections.')
+        return null
+      }
+    }
+
     return this.layoutTypes.field(elementData)
   }
 

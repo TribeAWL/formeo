@@ -77,11 +77,21 @@
   &.sortable-ghost {
     background-color: color.$row-highlight-color;
     box-shadow: 0 0 0 1px color.$row-outline-color;
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
 
     * {
       opacity: 0;
     }
   }
+}
+
+// Limit height of dragged rows (clones appended to body)
+body > .formeo-row {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
 
   &:has(.editing-field) {
     .row-actions {
