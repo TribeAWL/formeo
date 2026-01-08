@@ -309,9 +309,13 @@
 }
 
 // Limit height of dragged placeholder/preview to 80px for form fields
-.field-control.sortable-ghost,
-.field-control.control-moving,
-.field-control[class*="sortable"] {
+// Only target dragged clones, NOT the original controls in the left panel (.formeo-controls)
+// Target clones that are appended to body during drag - these are definitely not in the left panel
+body > .field-control,
+body > [class*="field-control"],
+body > .formeo-section,
+body > .formeo-row,
+body > .formeo-column {
   max-height: 80px !important;
   height: 80px !important;
   overflow: hidden !important;
@@ -331,13 +335,10 @@
   }
 }
 
-// Also target the clone element when it's being dragged (SortableJS creates clones)
-// This targets clones that are appended to body during drag
-body > .field-control,
-body > [class*="field-control"],
-body > .formeo-section,
-body > .formeo-row,
-body > .formeo-column {
+// Also target dragged elements in the stage area (right side), but exclude controls panel (left side)
+.formeo-stage .field-control.sortable-ghost,
+.formeo-stage .field-control.control-moving,
+.formeo-stage .field-control[class*="sortable"] {
   max-height: 80px !important;
   height: 80px !important;
   overflow: hidden !important;
@@ -690,11 +691,6 @@ body > .formeo-column {
       height: 1px;
       background: #dadde2;
       margin: mixins.space(3) 0;
-    }
-
-    .conditions-if-section,
-    .conditions-then-section {
-      // Section styling
     }
   }
 

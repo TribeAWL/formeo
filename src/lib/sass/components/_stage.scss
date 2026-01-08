@@ -101,7 +101,7 @@
   padding: mixins.space(3) var.$action-btn-width + mixins.space(1)
     mixins.space(3) mixins.space(1);
   right: 0px;
-  top: -36px;
+  top: -48px;
   transition: width var.$animation-speed-base ease-in-out;
   width: auto;
   border-bottom-width: 0;
@@ -127,8 +127,8 @@
 }
 
 .stage-actions {
-  right: -1px;
-  top: -35px;
+  right: 3px;
+  top: -42px;
   text-align: right;
   border-bottom-left-radius: var.$input-border-radius;
   border-bottom-right-radius: 0;
