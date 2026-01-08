@@ -23,6 +23,7 @@
   padding: 0;
   overflow: visible;
   border-radius: 0;
+  border-bottom-right-radius: 15px;
   min-height: 500px;
   display: flex;
   flex-direction: column;
@@ -296,6 +297,7 @@
   background-color: #fff;
   min-height: 400px;
   flex: 1;
+  border-bottom-right-radius: 15px;
 
   .formeo-row {
     box-shadow: none;
