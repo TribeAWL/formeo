@@ -1,6 +1,6 @@
-@use '../base/mixins';
-@use '../base/colors' as color;
-@use '../base/variables' as var;
+@use "../base/mixins";
+@use "../base/colors" as color;
+@use "../base/variables" as var;
 
 // Section acts as a stage but with its own styling
 .formeo-section.formeo-stage {
@@ -8,7 +8,7 @@
   width: 100%;
   min-height: auto;
   flex: none;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: mixins.space(1);
   margin-bottom: mixins.space(2);
 
@@ -23,7 +23,7 @@
   margin: 0;
   padding: 0;
   background: color.$white;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: mixins.space(1);
   transition: all 0.15s ease;
   width: 100%;
@@ -31,7 +31,7 @@
   box-sizing: border-box;
 
   &:hover {
-    border-color: #D1D5DB;
+    border-color: #d1d5db;
   }
 
   &.collapsed {
@@ -66,7 +66,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6B7280;
+    color: #6b7280;
     transition: color 0.15s ease;
 
     &:hover {
@@ -92,10 +92,10 @@
     align-items: center;
     justify-content: center;
     cursor: move;
-    color: #9CA3AF;
+    color: #9ca3af;
 
     &:hover {
-      color: #6B7280;
+      color: #6b7280;
     }
 
     .svg-icon {
@@ -115,7 +115,7 @@
   .section-name-input {
     font-size: 15px;
     font-weight: 500;
-    color: #1F2937;
+    color: #1f2937;
     border: none;
     background: transparent;
     padding: 0;
@@ -123,7 +123,7 @@
     outline: none;
 
     &::placeholder {
-      color: #9CA3AF;
+      color: #9ca3af;
       font-weight: 400;
     }
 
@@ -138,7 +138,7 @@
 
   .section-instruction-input {
     font-size: 14px;
-    color: #6B7280;
+    color: #6b7280;
     border: none;
     background: transparent;
     padding: 0;
@@ -146,7 +146,7 @@
     outline: none;
 
     &::placeholder {
-      color: #9CA3AF;
+      color: #9ca3af;
     }
 
     &:focus {
@@ -162,15 +162,15 @@
     margin: 0;
 
     &:empty::before {
-      content: 'Drag fields here to build this section';
+      content: "Drag fields here to build this section";
       display: block;
       text-align: center;
-      color: #9CA3AF;
+      color: #9ca3af;
       font-size: 14px;
       padding: mixins.space(4) mixins.space(2);
-      border: 1px dashed #D1D5DB;
+      border: 1px dashed #d1d5db;
       border-radius: mixins.space(1);
-      background: #FAFAFA;
+      background: #fafafa;
     }
   }
 
@@ -190,8 +190,8 @@
   // Edit window
   .section-edit {
     padding: mixins.space(2);
-    background: #F9FAFB;
-    border-top: 1px solid #DADDE2;
+    background: #f9fafb;
+    border-top: 1px solid #dadde2;
   }
 
   // Hide row styling when inside section
@@ -204,11 +204,39 @@
       min-height: 0;
     }
 
+    // Only hide row-specific action buttons, not generic ones used by columns/fields
     .row-handle,
     .row-actions,
     .row-tag,
-    .action-btn-wrap {
+    .row-action-btn-wrap {
       display: none;
+    }
+  }
+
+  // Ensure column action buttons work inside sections (don't hide them)
+  .formeo-column {
+    // Allow column action buttons to show on hover (same as outside sections)
+    &.hovering-column,
+    &.editing-column {
+      .column-actions,
+      .column-action-btn-wrap,
+      .action-btn-wrap {
+        display: flex;
+      }
+    }
+  }
+
+  // Ensure field action buttons work inside sections (don't hide them)
+  .formeo-field {
+    // Allow field action buttons to show on hover (same as outside sections)
+    &.hovering-field,
+    &.editing-field,
+    &.field-selected {
+      .field-actions,
+      .field-action-btn-wrap,
+      .action-btn-wrap {
+        display: flex;
+      }
     }
   }
 
