@@ -92,7 +92,10 @@ export class FormeoEditor {
     promises.push(
       fetchIcons(this.opts.svgSprite),
       fetchFormeoStyle(this.opts.style),
-      i18n.init({ ...this.opts.i18n, locale: globalThis.sessionStorage?.getItem(SESSION_LOCALE_KEY) })
+      i18n.init({
+        ...this.opts.i18n,
+        locale: globalThis.sessionStorage?.getItem(SESSION_LOCALE_KEY),
+      })
     )
 
     await Promise.all(promises)
@@ -201,9 +204,10 @@ export class FormeoEditor {
 
     const controlsContainer = this.controls.container || this.editor
     controlsContainer.appendChild(this.controls.dom)
-
+    // this code renders stage where we insert fields
     // Insert the stage header and preview container at the top of the stage
     const stageArea = this.stages[0]?.dom
+    console.log('🚀 ~ FormeoEditor ~ render ~ stageArea:', stageArea)
     if (stageArea) {
       stageArea.insertBefore(stageHeader, stageArea.firstChild)
       // Insert preview container after the header

@@ -31,7 +31,7 @@ import Panels from './panels.js'
 let Controls = null
 
 const propertyOptions = objectFromStringArray(PROPERTY_OPTIONS)
-
+// this file have methods to hanlde drag and drop component
 export default class Component extends Data {
   constructor(name, dataArg = {}) {
     const data = { ...dataArg, id: dataArg.id || uuid() }
@@ -460,8 +460,21 @@ export default class Component extends Data {
 
     const childComponentType = `${childGroup}s`
 
-    const child =
-      Components.getAddress(`${childComponentType}.${childId}`) || Components[childComponentType].add(childId, data)
+    // Special handling for stage: check if child exists as a section first
+    let child = null
+    if (this.name === 'stage') {
+      // Check if it's a section
+      const section = Components.getAddress(`sections.${childId}`)
+      if (section) {
+        child = section
+      }
+    }
+
+    // If not found as section (or not a stage), use normal lookup
+    if (!child) {
+      child =
+        Components.getAddress(`${childComponentType}.${childId}`) || Components[childComponentType].add(childId, data)
+    }
 
     if (index >= childWrap.children.length) {
       childWrap.appendChild(child.dom)
@@ -572,12 +585,54 @@ export default class Component extends Data {
         set(elementData, 'config.controlId', metaId)
 
         const controlType = metaId.startsWith('layout-') ? metaId.replace(/^layout-/, '') : 'field'
+
+        // Special handling for section control - create Section component instead of Row
+        if (controlType === 'section' && this.name === 'stage') {
+          // Lazy import Sections to avoid circular dependency
+          const { default: Sections } = await import('./sections/index.js')
+          const section = Sections.add()
+
+          // Get the stage's children container
+          const childWrap = this.dom.querySelector('.children')
+          if (childWrap) {
+            // Insert at the specified index
+            if (newIndex >= childWrap.children.length) {
+              childWrap.appendChild(section.dom)
+            } else {
+              childWrap.children[newIndex].before(section.dom)
+            }
+          }
+
+          // Update stage's children array to include the section
+          const currentChildren = this.get('children') || []
+          const updatedChildren = [...currentChildren]
+          updatedChildren.splice(newIndex !== undefined ? newIndex : updatedChildren.length, 0, section.id)
+          this.set('children', updatedChildren)
+
+          // Remove empty class from stage since it now has content
+          this.removeClasses('empty')
+
+          // Remove the clone item
+          const isInControlsPanel = from && from.contains && from.contains(item)
+          if (!isInControlsPanel) {
+            dom.remove(item)
+          }
+
+          return section
+        }
+
         const targets = {
           stage: {
             row: 0,
             column: -1,
             field: -2,
             section: 0, // section is a specialized row
+          },
+          section: {
+            row: 0, // sections can contain rows directly
+            column: -1, // columns need a row first
+            field: -2, // fields need row -> column first
+            section: 0, // sections can contain other sections
           },
           row: {
             row: 1,

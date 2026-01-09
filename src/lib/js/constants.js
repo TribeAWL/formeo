@@ -36,7 +36,7 @@ export const CHILD_CLASSNAME_MAP = new Map([
   [COLUMN_CLASSNAME, FIELD_CLASSNAME],
 ])
 
-export const INTERNAL_COMPONENT_TYPES = ['stage', 'row', 'column', 'field']
+export const INTERNAL_COMPONENT_TYPES = ['stage', 'section', 'row', 'column', 'field']
 export const INTERNAL_COMPONENT_INDEX_TYPES = INTERNAL_COMPONENT_TYPES.map(type => `${type}s`)
 export const INTERNAL_COMPONENT_INDEX_TYPE_MAP = new Map(
   INTERNAL_COMPONENT_INDEX_TYPES.map((type, index) => [type, INTERNAL_COMPONENT_TYPES[index]])
@@ -58,6 +58,7 @@ export const COMPONENT_TYPE_MAP = COMPONENT_TYPES.reduce((acc, type) => {
 export const COMPONENT_TYPE_CONFIGS = [
   { name: 'controls', className: CONTROL_GROUP_CLASSNAME },
   { name: 'stage', className: STAGE_CLASSNAME },
+  { name: 'section', className: SECTION_CLASSNAME },
   { name: 'row', className: ROW_CLASSNAME },
   { name: 'column', className: COLUMN_CLASSNAME },
   { name: 'field', className: FIELD_CLASSNAME },
@@ -66,6 +67,7 @@ export const COMPONENT_TYPE_CONFIGS = [
 export const COMPONENT_TYPE_CLASSNAMES = {
   controls: CONTROL_GROUP_CLASSNAME,
   stage: STAGE_CLASSNAME,
+  section: SECTION_CLASSNAME,
   row: ROW_CLASSNAME,
   column: COLUMN_CLASSNAME,
   field: FIELD_CLASSNAME,
@@ -100,8 +102,21 @@ const parentTypeMap = childTypeMapVals
   .map(typeMap => typeMap.slice().reverse())
   .reverse()
 
-export const CHILD_TYPE_MAP = new Map(childTypeMapVals)
-export const CHILD_TYPE_INDEX_MAP = new Map(childTypeIndexMapVals)
+// Build base CHILD_TYPE_MAP from sequential types
+const baseChildTypeMap = new Map(childTypeMapVals)
+const baseChildTypeIndexMap = new Map(childTypeIndexMapVals)
+
+// Override stage -> section mapping to stage -> row (stage's default children are rows)
+// Sections are handled specially in component.js when layout-section is dropped
+baseChildTypeMap.set('stage', 'row')
+baseChildTypeIndexMap.set('stages', 'rows')
+
+// Add section -> row mapping (sections can contain rows, similar to stage)
+baseChildTypeMap.set('section', 'row')
+baseChildTypeIndexMap.set('sections', 'rows')
+
+export const CHILD_TYPE_MAP = baseChildTypeMap
+export const CHILD_TYPE_INDEX_MAP = baseChildTypeIndexMap
 
 export const PARENT_TYPE_MAP = new Map(parentTypeMap.slice())
 
@@ -229,6 +244,7 @@ export const DEFAULT_FORMDATA = () => ({
   rows: {},
   columns: {},
   fields: {},
+  sections: {},
 })
 
 export const CHECKED_TYPES = ['selected', 'checked']

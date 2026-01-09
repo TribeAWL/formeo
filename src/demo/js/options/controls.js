@@ -1,3 +1,4 @@
+// this code render form fields
 const controls = {
   sortable: false,
   groupOrder: ['common', 'layout', 'settings'],

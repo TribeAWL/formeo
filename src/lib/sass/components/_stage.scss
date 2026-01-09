@@ -24,14 +24,17 @@
   overflow: visible;
   border-radius: 0;
   border-bottom-right-radius: 15px;
-  min-height: 500px;
   display: flex;
   flex-direction: column;
+
+  // Only apply min-height when stage is empty (has empty class)
+  &.empty:not(.formeo-section) {
+    min-height: 500px;
+  }
 
   > .children {
     @include mixins.display-column;
     gap: var.$component-gap;
-    min-height: 100%;
     padding: mixins.space(3);
     flex: 1;
   }

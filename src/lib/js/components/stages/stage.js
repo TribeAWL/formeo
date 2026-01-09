@@ -95,7 +95,7 @@ export default class Stage extends Component {
       group: {
         name: 'stage',
         pull: true,
-        put: ['row', 'column', 'controls'],
+        put: ['row', 'column', 'controls', 'section'],
       },
       sort: true,
       disabled: false,
@@ -106,7 +106,7 @@ export default class Stage extends Component {
       },
       onSort: this.onSort.bind(this),
       onEnd: this.onEndValidation.bind(this),
-      draggable: `.${ROW_CLASSNAME}`,
+      draggable: `.${ROW_CLASSNAME}, .${SECTION_CLASSNAME}`,
       handle: '.item-move',
     })
   }
