@@ -268,10 +268,15 @@ export default class Component extends Data {
         },
       },
       children: [
-        {
-          ...dom.btnTemplate({ content: dom.icon(`handle-${this.name}`) }),
-          className: ['component-handle', `${this.name}-handle`],
-        },
+        // Only show component-handle for stage, hide for sections, rows, columns, and fields
+        ...(this.name === 'stage'
+          ? [
+              {
+                ...dom.btnTemplate({ content: dom.icon(`handle-${this.name}`) }),
+                className: ['component-handle', `${this.name}-handle`],
+              },
+            ]
+          : []),
         {
           className: ['action-btn-wrap', `${this.name}-action-btn-wrap`],
           children: this.buttons,

@@ -404,6 +404,8 @@ body > .formeo-column {
 
   &.active-panel {
     padding: 0 !important;
+    // Add top padding to create space between tabs and content
+    padding-top: mixins.space(3) !important;
   }
 
   // Override grid layout for settings panel
@@ -428,18 +430,23 @@ body > .formeo-column {
 }
 
 // Field settings content container - matches Figma design
-.field-settings-content {
-  padding: mixins.space(3);
+.field-settings-content,
+.section-settings-content {
+  padding: mixins.space(1) mixins.space(3) mixins.space(4);
 
   .settings-row {
-    margin-bottom: mixins.space(3);
+    margin-bottom: mixins.space(4);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
 
     label {
       display: block;
       font-size: 14px;
       font-weight: 500;
       color: #1f2937;
-      margin-bottom: mixins.space(1);
+      margin-bottom: mixins.space(1.5);
     }
 
     input[type="text"],
@@ -453,6 +460,9 @@ body > .formeo-column {
       font-size: 14px;
       background: color.$white;
       box-sizing: border-box;
+      font-family: inherit;
+      line-height: 1.5;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
       &:focus {
         outline: none;
@@ -463,6 +473,14 @@ body > .formeo-column {
       &::placeholder {
         color: #9ca3af;
       }
+    }
+
+    // Textarea specific styling
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+      padding-top: mixins.space(2);
+      padding-bottom: mixins.space(2);
     }
 
     // Toggle switch row layout

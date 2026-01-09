@@ -257,38 +257,56 @@ export default class FormeoRenderer {
   processSection = section => {
     const { id, config = {}, children = [] } = section
 
-    // Process rows within the section
-    const processedRows = children.reduce((acc, rowId) => {
-      const row = this.form.rows[rowId]
+    // Process children - can be either rows (old format) or fields (new format)
+    const processedChildren = children.reduce((acc, childId) => {
+      // Check if it's a row first (old format)
+      const row = this.form.rows?.[childId]
       if (row) {
         acc.push(this.processRow(row))
+        return acc
       }
+
+      // Check if it's a field (new format - sections contain fields directly)
+      const field = this.form.fields?.[childId]
+      if (field) {
+        // Process the field
+        const processedField = this.processFields([childId])[0]
+        if (processedField) {
+          acc.push(processedField)
+        }
+        return acc
+      }
+
       return acc
     }, [])
 
     // Build section header
     const sectionHeader = []
 
-    if (config.name) {
+    // Use title first, then fall back to name
+    const sectionTitle = config.title || config.name
+    if (sectionTitle) {
       sectionHeader.push({
         tag: 'h3',
         className: 'formeo-section-name',
-        children: config.name,
+        children: sectionTitle,
       })
     }
 
-    if (config.instruction) {
+    // Use description first, then fall back to instruction
+    const sectionDescription = config.description || config.instruction
+    if (sectionDescription) {
       sectionHeader.push({
         tag: 'p',
         className: 'formeo-section-instruction',
-        children: config.instruction,
+        children: sectionDescription,
       })
     }
 
     const sectionData = {
       id: this.prefixId(id),
       className: [SECTION_CLASSNAME, STAGE_CLASSNAME, 'formeo-rendered-section'],
-      children: [...sectionHeader, ...processedRows],
+      children: [...sectionHeader, ...processedChildren],
     }
 
     this.components[baseId(id)] = sectionData

@@ -238,10 +238,8 @@
   }
 }
 
-// Hide section actions
-.section-actions {
-  display: none;
-}
+// Section actions are styled in _section.scss
+// Don't hide them here - let sections control their own visibility
 
 .formeo-settings {
   display: none;

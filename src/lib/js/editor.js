@@ -58,6 +58,16 @@ export class FormeoEditor {
     this.load(this.userFormData, this.opts)
   }
 
+  /**
+   * Returns the legacy Formeo format for rendering/preview
+   * This is the old structure (stages, rows, columns, fields, sections)
+   * that the FormeoRenderer expects
+   * @return {Object} legacy Formeo formData structure
+   */
+  getLegacyFormData() {
+    return this.Components.getLegacyFormData()
+  }
+
   loadData(data = {}) {
     this.formData = data
   }
@@ -250,10 +260,11 @@ export class FormeoEditor {
       this.previewContainer.style.display = 'block'
 
       // Render the form in preview container
+      // Use legacy format for preview (renderer expects old Formeo structure)
       const renderer = new FormeoRenderer({
         renderContainer: this.previewContainer,
       })
-      renderer.render(this.formData)
+      renderer.render(this.Components.getLegacyFormData())
 
       // Dispatch preview event
       Events.formeoUpdated({ type: 'preview', isPreviewMode: true }, 'formeoPreview')

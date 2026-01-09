@@ -36,12 +36,14 @@ $stage-outline-color: #4F46E5; // base indigo
 $row-outline-color: color.adjust($stage-outline-color, $hue: 72deg);
 $column-outline-color: color.adjust($stage-outline-color, $hue: 144deg);
 $field-outline-color: color.adjust($stage-outline-color, $hue: 216deg);
+$section-outline-color: color.adjust($stage-outline-color, $hue: 180deg);
 $option-outline-color: color.adjust($stage-outline-color, $hue: 288deg);
 
 $stage-outline-color-text: text-color($stage-outline-color) !default;
 $row-outline-color-text: text-color($row-outline-color) !default;
 $column-outline-color-text: text-color($column-outline-color) !default;
 $field-outline-color-text: text-color($field-outline-color) !default;
+$section-outline-color-text: text-color($section-outline-color) !default;
 $option-outline-color-text: text-color($option-outline-color) !default;
 
 
@@ -49,6 +51,7 @@ $stage-highlight-color: color.adjust($stage-outline-color, $lightness: 25%) !def
 $row-highlight-color: color.adjust($row-outline-color, $lightness: 25%) !default;
 $column-highlight-color: color.adjust($column-outline-color, $lightness: 25%) !default;
 $field-highlight-color: color.adjust($field-outline-color, $lightness: 25%) !default;
+$section-highlight-color: color.adjust($section-outline-color, $lightness: 25%) !default;
 $option-highlight-color: color.adjust($option-outline-color, $lightness: 25%) !default;
 
 

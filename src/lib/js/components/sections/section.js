@@ -1,8 +1,10 @@
 import i18n from '@draggable/i18n'
 import Sortable from 'sortablejs'
+import animate from '../../common/animation.js'
 import dom from '../../common/dom.js'
 import { componentType } from '../../common/utils/index.mjs'
 import {
+  ANIMATION_SPEED_BASE,
   COLUMN_CLASSNAME,
   CONTROL_GROUP_CLASSNAME,
   FIELD_CLASSNAME,
@@ -11,6 +13,7 @@ import {
   STAGE_CLASSNAME,
 } from '../../constants.js'
 import Component from '../component.js'
+import Components from '../index.js'
 
 // Re-export SECTION_CLASSNAME for backward compatibility with renderer
 export { SECTION_CLASSNAME }
@@ -41,6 +44,15 @@ export default class Section extends Component {
   constructor(sectionData) {
     super('section', { ...DEFAULT_DATA(), ...sectionData })
 
+    // Override getComponentTag to ensure it shows only "Section" (not "Handle-SectionSection")
+    this.getComponentTag = () => {
+      return dom.create({
+        tag: 'span',
+        className: ['component-tag', `${this.name}-tag`],
+        children: ['Section'],
+      })
+    }
+
     // Initialize order if not set (will be updated based on position in stage)
     if (this.get('order') === undefined || this.get('order') === 0) {
       this.updateOrder()
@@ -59,7 +71,23 @@ export default class Section extends Component {
         editingHoverTag: i18n.get('editing.section') || 'Editing Section',
       },
       id: this.id,
-      content: [sectionHeader, this.getActionButtons(), this.editWindow, children],
+      content: [this.getComponentTag(), sectionHeader, this.getActionButtons(), children],
+      action: {
+        click: evt => {
+          // Don't trigger selection when clicking on action buttons or inputs
+          const target = evt.target
+          if (
+            target.closest('.section-actions') ||
+            target.closest('button') ||
+            target.closest('input') ||
+            target.closest('textarea')
+          ) {
+            return
+          }
+          evt.stopPropagation()
+          this.selectSection()
+        },
+      },
     })
 
     // Make children sortable (can only contain fields, not rows or columns)
@@ -171,67 +199,15 @@ export default class Section extends Component {
   }
 
   /**
-   * Edit window for Section
-   * @return {Object} edit window dom config for Section
+   * Select this section and show its settings in the Settings tab
    */
-  get editWindow() {
-    const titleInput = {
-      tag: 'input',
-      id: `${this.id}-title`,
-      attrs: {
-        type: 'text',
-        value: this.get('config.title') || this.get('config.name') || '',
-        placeholder: 'Section title',
-        required: true,
-      },
-      config: {
-        label: i18n.get('section.title') || 'Section Title (required)',
-      },
-      action: {
-        input: ({ target }) => {
-          this.set('config.title', target.value)
-          // Also update name for backwards compatibility
-          this.set('config.name', target.value)
-          // Update the inline input as well
-          const inlineInput = this.dom.querySelector('.section-title-input')
-          if (inlineInput) {
-            inlineInput.value = target.value
-          }
-        },
-      },
-    }
-
-    const descriptionInput = {
-      tag: 'textarea',
-      id: `${this.id}-description`,
-      attrs: {
-        value: this.get('config.description') || this.get('config.instruction') || '',
-        placeholder: 'Add description for this section',
-        rows: 3,
-      },
-      config: {
-        label: i18n.get('section.description') || 'Section Description (optional)',
-      },
-      action: {
-        input: ({ target }) => {
-          this.set('config.description', target.value)
-          // Also update instruction for backwards compatibility
-          this.set('config.instruction', target.value)
-          // Update the inline input as well
-          const inlineInput = this.dom.querySelector('.section-description-input')
-          if (inlineInput) {
-            inlineInput.value = target.value
-          }
-        },
-      },
-    }
-
-    const editWindow = dom.create({
-      className: `${this.name}-edit group-config`,
-      content: [dom.create(dom.formGroup(titleInput)), dom.create(dom.formGroup(descriptionInput))],
+  selectSection = () => {
+    // Dispatch custom event that Controls will listen for
+    const event = new CustomEvent('formeo:section:selected', {
+      detail: { section: this },
+      bubbles: true,
     })
-
-    return editWindow
+    document.dispatchEvent(event)
   }
 
   /**
@@ -370,5 +346,89 @@ export default class Section extends Component {
   onSort() {
     this.updateOrder()
     return super.onSort()
+  }
+
+  /**
+   * Override getComponentTag to show just "Section" text
+   */
+  getComponentTag() {
+    return dom.create({
+      tag: 'span',
+      className: ['component-tag', `${this.name}-tag`],
+      children: ['Section'],
+    })
+  }
+
+  /**
+   * Override buttons getter for sections
+   */
+  get buttons() {
+    if (this.actionButtons) {
+      return this.actionButtons
+    }
+
+    const buttonConfig = {
+      move: (icon = 'move') => {
+        return {
+          ...dom.btnTemplate({ content: dom.icon(icon) }),
+          className: ['item-move'],
+          meta: {
+            id: 'move',
+          },
+        }
+      },
+      edit: (icon = 'edit') => {
+        return {
+          ...dom.btnTemplate({ content: dom.icon(icon) }),
+          className: ['edit-toggle'],
+          meta: {
+            id: 'edit',
+          },
+          action: {
+            click: () => {
+              this.selectSection()
+            },
+          },
+        }
+      },
+      remove: (icon = 'bin') => {
+        return {
+          ...dom.btnTemplate({ content: dom.icon(icon) }),
+          className: ['item-remove'],
+          meta: {
+            id: 'remove',
+          },
+          action: {
+            click: () => {
+              animate.slideUp(this.dom, ANIMATION_SPEED_BASE, () => {
+                this.remove()
+              })
+            },
+          },
+        }
+      },
+      clone: (icon = 'copy') => {
+        return {
+          ...dom.btnTemplate({ content: dom.icon(icon) }),
+          className: ['item-clone'],
+          meta: {
+            id: 'clone',
+          },
+          action: {
+            click: () => {
+              this.clone(this.parent)
+            },
+          },
+        }
+      },
+    }
+
+    const { buttons, disabled } = this.config.actionButtons
+    const activeButtons = buttons.filter(btn => !disabled.includes(btn))
+    const actionButtonsConfigs = activeButtons.map(btn => buttonConfig[btn]?.() || btn)
+
+    this.actionButtons = actionButtonsConfigs
+
+    return this.actionButtons
   }
 }

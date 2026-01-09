@@ -29,6 +29,7 @@ export class Controls {
     this.data = new Map()
     this.isDragging = false
     this.selectedField = null
+    this.selectedSection = null
     this.settingsGroupIndex = -1
 
     this.buttonActions = {
@@ -419,9 +420,20 @@ export class Controls {
       this.showFieldSettings(field)
     })
 
+    // Listen for section selection events
+    document.addEventListener('formeo:section:selected', evt => {
+      const { section } = evt.detail
+      this.showSectionSettings(section)
+    })
+
     document.addEventListener('click', evt => {
       // If clicking on a field, the field's click handler will handle it
       if (evt.target.closest('.formeo-field')) {
+        return
+      }
+
+      // If clicking on a section, the section's click handler will handle it
+      if (evt.target.closest('.formeo-section')) {
         return
       }
 
@@ -431,7 +443,11 @@ export class Controls {
       }
 
       // If clicking on action buttons, don't clear selection
-      if (evt.target.closest('.field-actions') || evt.target.closest('button')) {
+      if (
+        evt.target.closest('.field-actions') ||
+        evt.target.closest('.section-actions') ||
+        evt.target.closest('button')
+      ) {
         return
       }
 
@@ -507,9 +523,13 @@ export class Controls {
     if (this.selectedField?.dom) {
       this.selectedField.dom.classList.remove('field-selected')
     }
+    if (this.selectedSection?.dom) {
+      this.selectedSection.dom.classList.remove('section-selected')
+    }
 
     // Store the selected field
     this.selectedField = field
+    this.selectedSection = null
 
     // Clear existing settings content
     dom.empty(settingsPanel)
@@ -537,6 +557,167 @@ export class Controls {
 
     // Switch to settings tab
     this.switchToSettingsTab()
+  }
+
+  /**
+   * Show section settings in the Settings tab
+   * @param {Object} section - The section component to show settings for
+   */
+  showSectionSettings = section => {
+    // Find the settings group panel
+    const settingsPanel = this.dom?.querySelector('#settings-control-group')
+    if (!settingsPanel) {
+      return
+    }
+
+    // Clear previous selection highlight
+    if (this.selectedField?.dom) {
+      this.selectedField.dom.classList.remove('field-selected')
+    }
+    if (this.selectedSection?.dom) {
+      this.selectedSection.dom.classList.remove('section-selected')
+    }
+
+    // Store the selected section
+    this.selectedSection = section
+    this.selectedField = null
+
+    // Clear existing settings content
+    dom.empty(settingsPanel)
+
+    if (section) {
+      // Add selected highlight to section
+      section.dom.classList.add('section-selected')
+
+      // Create custom settings UI
+      const sectionSettingsContent = this.createSectionSettingsUI(section)
+      settingsPanel.appendChild(sectionSettingsContent)
+    } else {
+      // Show placeholder when no section is selected
+      const placeholder = dom.create({
+        className: 'settings-placeholder',
+        children: [
+          {
+            tag: 'p',
+            content: i18n.get('settings.selectSection') || 'Select a section to edit its settings',
+          },
+        ],
+      })
+      settingsPanel.appendChild(placeholder)
+    }
+
+    // Switch to settings tab
+    this.switchToSettingsTab()
+  }
+
+  /**
+   * Create the settings UI for a section
+   * @param {Object} section - The section component
+   * @return {HTMLElement} The settings UI element
+   */
+  createSectionSettingsUI = section => {
+    const settingsRows = []
+
+    // Section Title
+    const title = section.get('config.title') || section.get('config.name') || ''
+    settingsRows.push(this.createSectionTitleRow(section, title))
+
+    // Section Description
+    const description = section.get('config.description') || section.get('config.instruction') || ''
+    settingsRows.push(this.createSectionDescriptionRow(section, description))
+
+    return dom.create({
+      className: 'section-settings-content',
+      children: settingsRows.filter(Boolean),
+    })
+  }
+
+  /**
+   * Create a settings row for section title
+   * @param {Object} section - The section component
+   * @param {String} title - Current title value
+   * @return {Object} Settings row config
+   */
+  createSectionTitleRow = (section, title) => {
+    return {
+      className: 'settings-row',
+      children: [
+        {
+          tag: 'label',
+          content: (i18n.get('section.title') || 'Section Title') + ' *',
+          attrs: { for: `${section.id}-title` },
+        },
+        {
+          tag: 'input',
+          attrs: {
+            type: 'text',
+            id: `${section.id}-title`,
+            value: title,
+            placeholder: i18n.get('section.title.placeholder') || 'Section title (required)',
+            required: true,
+          },
+          action: {
+            input: ({ target }) => {
+              section.set('config.title', target.value)
+              // Also update name for backwards compatibility
+              section.set('config.name', target.value)
+              // Update the inline input in section header as well
+              const inlineInput = section.dom.querySelector('.section-title-input')
+              if (inlineInput) {
+                inlineInput.value = target.value
+              }
+            },
+            blur: ({ target }) => {
+              if (!target.value.trim()) {
+                target.classList.add('invalid')
+              } else {
+                target.classList.remove('invalid')
+              }
+            },
+          },
+        },
+      ],
+    }
+  }
+
+  /**
+   * Create a settings row for section description
+   * @param {Object} section - The section component
+   * @param {String} description - Current description value
+   * @return {Object} Settings row config
+   */
+  createSectionDescriptionRow = (section, description) => {
+    return {
+      className: 'settings-row',
+      children: [
+        {
+          tag: 'label',
+          content: i18n.get('section.description') || 'Section Description',
+          attrs: { for: `${section.id}-description` },
+        },
+        {
+          tag: 'textarea',
+          attrs: {
+            id: `${section.id}-description`,
+            placeholder: i18n.get('section.description.placeholder') || 'Add description for this section',
+            rows: 3,
+          },
+          content: description,
+          action: {
+            input: ({ target }) => {
+              section.set('config.description', target.value)
+              // Also update instruction for backwards compatibility
+              section.set('config.instruction', target.value)
+              // Update the inline input in section header as well
+              const inlineInput = section.dom.querySelector('.section-description-input')
+              if (inlineInput) {
+                inlineInput.value = target.value
+              }
+            },
+          },
+        },
+      ],
+    }
   }
 
   /**
@@ -1467,6 +1648,10 @@ export class Controls {
       this.selectedField.dom.classList.remove('field-selected')
     }
     this.selectedField = null
+    if (this.selectedSection?.dom) {
+      this.selectedSection.dom.classList.remove('section-selected')
+    }
+    this.selectedSection = null
 
     // Show placeholder in settings panel
     const settingsPanel = this.dom?.querySelector('#settings-control-group')

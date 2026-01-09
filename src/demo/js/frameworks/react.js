@@ -393,7 +393,8 @@ async function initializeReactApp() {
 
     if (renderBtn) {
       renderBtn.addEventListener('click', () => {
-        const formData = editor.formData
+        // Use legacy format for rendering (renderer expects old Formeo structure)
+        const formData = editor.getLegacyFormData()
         if (formData && Object.keys(formData).length > 0) {
           renderElement.style.display = 'block'
           renderer.render(formData)
@@ -517,6 +518,13 @@ export function useFormeoEditor(options = {}) {
     }
   }, []);
 
+  const getLegacyFormData = useCallback(() => {
+    if (editorRef.current) {
+      return editorRef.current.getLegacyFormData();
+    }
+    return null;
+  }, []);
+
   useEffect(() => {
     initializeEditor();
     return destroyEditor;
@@ -528,6 +536,7 @@ export function useFormeoEditor(options = {}) {
     saveForm,
     loadForm,
     clearForm,
+    getLegacyFormData,
     editor: editorRef.current
   };
 }
@@ -612,7 +621,8 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
     formData,
     saveForm,
     loadForm,
-    clearForm
+    clearForm,
+    getLegacyFormData
   } = useFormeoEditor({
     onSave: (data) => {
       console.log('Form saved:', data);
@@ -651,8 +661,10 @@ export const FormBuilder: React.FC<FormBuilderProps> = ({
   };
 
   const handleRender = () => {
-    if (formData && Object.keys(formData).length > 0) {
-      renderForm(formData);
+    // Use legacy format for rendering (renderer expects old Formeo structure)
+    const legacyFormData = getLegacyFormData();
+    if (legacyFormData && Object.keys(legacyFormData).length > 0) {
+      renderForm(legacyFormData);
       setShowRenderer(true);
     } else {
       alert('Please create a form first');

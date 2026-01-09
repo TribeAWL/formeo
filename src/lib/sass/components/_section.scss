@@ -34,6 +34,29 @@
     border-color: #d1d5db;
   }
 
+  // Hover highlighting - same as fields, rows, and columns
+  &.hovering-section,
+  &.editing-section {
+    box-shadow: 0 0 0 1px color.$section-outline-color;
+
+    .section-tag {
+      display: flex;
+    }
+
+    .section-action-btn-wrap {
+      display: flex;
+    }
+
+    .section-handle {
+      display: none;
+    }
+  }
+
+  // Highlight component state (when selected)
+  &.highlight-component {
+    box-shadow: 0 0 mixins.space() 2px color.$section-outline-color;
+  }
+
   &.collapsed {
     > .children {
       display: none;
@@ -174,17 +197,57 @@
     }
   }
 
-  // Action buttons positioning
-  .action-buttons {
+  // Action buttons positioning - override stage.scss display:none
+  // Position relative to section container
+  position: relative;
+
+  .section-actions,
+  .group-actions {
+    display: flex !important;
     position: absolute;
     top: mixins.space(1);
     right: mixins.space(1);
     opacity: 0;
     transition: opacity 0.15s ease;
+    z-index: 10;
   }
 
-  &:hover .action-buttons {
+  &:hover .section-actions,
+  &:hover .group-actions,
+  &.hovering-section .section-actions,
+  &.hovering-section .group-actions {
     opacity: 1;
+  }
+
+  // Show action button wrap on hover
+  &:hover .section-action-btn-wrap,
+  &.hovering-section .section-action-btn-wrap,
+  &:hover .action-btn-wrap,
+  &.hovering-section .action-btn-wrap {
+    display: flex;
+  }
+
+  // Section tag (similar to row-tag, column-tag, field-tag)
+  .section-tag {
+    display: none;
+    position: absolute;
+    left: -1px;
+    top: -1px;
+    background-color: color.$section-outline-color;
+    color: color.$section-outline-color-text;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: var.$border-radius 0 var.$border-radius 0;
+    z-index: 11;
+  }
+
+  &.hovering-section .section-tag,
+  &.editing-section .section-tag {
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
   // Edit window

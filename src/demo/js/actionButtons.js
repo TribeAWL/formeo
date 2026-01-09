@@ -22,7 +22,8 @@ const editorActions = (editor, renderer) => {
     renderForm: () => {
       const renderFormWrap = document.querySelector('.render-form')
       renderFormWrap.style.display = 'block'
-      renderer.render(editor.formData)
+      // Use legacy format for rendering (renderer expects old Formeo structure)
+      renderer.render(editor.getLegacyFormData())
     },
     // logJSON: () => console.log(JSON.stringify(JSON.parse(editor.json), null, 2)),
     // viewData: () => {
@@ -31,7 +32,8 @@ const editorActions = (editor, renderer) => {
     //   }
     // },
     getHtml: () => {
-      renderer.formData = editor.formData
+      // Use legacy format for rendering (renderer expects old Formeo structure)
+      renderer.formData = editor.getLegacyFormData()
       const html = renderer.html
       const win = window.open('', '_blank')
       win.document.body.innerHTML = html

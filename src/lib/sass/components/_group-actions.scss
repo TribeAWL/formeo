@@ -51,6 +51,24 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    // Hide any text content - only show icons
+    font-size: 0;
+    color: transparent;
+    text-indent: -9999px;
+    overflow: hidden;
+
+    // Ensure SVG icons are visible
+    .svg-icon {
+      font-size: initial;
+      line-height: initial;
+      color: initial;
+      text-indent: initial;
+    }
+
+    // Hide any text nodes or non-SVG content
+    > *:not(.svg-icon) {
+      display: none;
+    }
 
     &:hover {
       transform: translateY(-1px);
@@ -107,6 +125,18 @@
       &:hover {
         background-color: color.$brand-error;
         border-color: color.$brand-error;
+        
+        .svg-icon {
+          fill: color.$white;
+        }
+      }
+    }
+
+    &.item-move-up,
+    &.item-move-down {
+      &:hover {
+        background-color: color.$brand-info;
+        border-color: color.$brand-info;
         
         .svg-icon {
           fill: color.$white;
