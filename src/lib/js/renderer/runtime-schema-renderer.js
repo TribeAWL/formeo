@@ -555,7 +555,13 @@ function initializeStepNavigation(wrapper, totalSteps, schema) {
 
     // Update navigation buttons
     prevButton.style.display = stepIndex === 0 ? 'none' : 'block'
-    nextButton.textContent = stepIndex === totalSteps - 1 ? 'Submit' : 'Next'
+    if (stepIndex === 0) {
+      nextButton.textContent = 'Start'
+    } else if (stepIndex === totalSteps - 1) {
+      nextButton.textContent = 'Submit'
+    } else {
+      nextButton.textContent = 'Next'
+    }
 
     currentStep = stepIndex
 

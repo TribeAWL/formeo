@@ -188,7 +188,7 @@ function getRuntimeSchemaStyles() {
       display: flex;
       min-height: 600px;
       background: #f5f7fa;
-      border-radius: 8px;
+      border-radius: 15px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
@@ -211,29 +211,29 @@ function getRuntimeSchemaStyles() {
       position: relative;
       display: flex;
       align-items: center;
-      padding: 12px 24px;
+      padding: 16px 24px;
       cursor: pointer;
       transition: background-color 0.2s ease;
-      margin-bottom: 4px;
+      margin-bottom: 0;
     }
     
     .runtime-schema-step-item:hover:not(.active) {
-      background-color: #f8f9fa;
+      background-color: transparent;
     }
     
     .runtime-schema-step-item.active {
-      background-color: #f0f0f0;
-      border-left: 3px solid #8b4513;
-      padding-left: 21px;
+      background-color: transparent;
+      border-left: none;
+      padding-left: 24px;
     }
     
     .runtime-schema-step-item.active .runtime-schema-step-number {
-      background-color: #8b4513;
+      background-color: #8b1538;
       color: #ffffff;
     }
     
     .runtime-schema-step-item.active .runtime-schema-step-label {
-      color: #8b4513;
+      color: #8b1538;
       font-weight: 600;
     }
     
@@ -251,6 +251,8 @@ function getRuntimeSchemaStyles() {
       margin-right: 12px;
       flex-shrink: 0;
       transition: all 0.2s ease;
+      position: relative;
+      z-index: 1;
     }
     
     .runtime-schema-step-label {
@@ -260,12 +262,17 @@ function getRuntimeSchemaStyles() {
       transition: color 0.2s ease;
     }
     
+    .runtime-schema-step-item.active .runtime-schema-step-label {
+      color: #8b1538;
+      font-weight: 600;
+    }
+    
     .runtime-schema-step-connector {
       position: absolute;
       left: 40px;
-      bottom: -4px;
+      top: 48px;
       width: 2px;
-      height: 20px;
+      height: 24px;
       background-color: #e0e0e0;
       z-index: 0;
     }
@@ -273,7 +280,7 @@ function getRuntimeSchemaStyles() {
     .runtime-schema-form-content {
       flex: 1;
       background: #ffffff;
-      padding: 40px;
+      padding: 40px 48px;
       overflow-y: auto;
       width: 100%;
     }
@@ -287,9 +294,9 @@ function getRuntimeSchemaStyles() {
       font-size: 28px;
       font-weight: 700;
       color: #1a1a1a;
-      margin: 0 0 8px 0;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #e0e0e0;
+      margin: 0 0 24px 0;
+      padding-bottom: 0;
+      border-bottom: none;
     }
     
     .runtime-schema-step-description {
@@ -301,7 +308,7 @@ function getRuntimeSchemaStyles() {
     .runtime-schema-fields-container {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 24px;
+      gap: 20px 24px;
       margin-bottom: 32px;
     }
     
@@ -327,8 +334,8 @@ function getRuntimeSchemaStyles() {
       width: 100%;
       padding: 12px 16px;
       font-size: 14px;
-      border: 1px solid #d0d0d0;
-      border-radius: 6px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
       background-color: #ffffff;
       color: #1a1a1a;
       transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -337,12 +344,14 @@ function getRuntimeSchemaStyles() {
     
     .runtime-schema-field-input:focus {
       outline: none;
-      border-color: #8b4513;
-      box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+      border-color: #8b1538;
+      box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
     }
     
-    .runtime-schema-field-input:invalid.error {
+    .runtime-schema-field-input:invalid.error,
+    .runtime-schema-field-input.error {
       border-color: #d32f2f;
+      box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
     }
     
     .runtime-schema-field-input::placeholder {
@@ -401,6 +410,13 @@ function getRuntimeSchemaStyles() {
       cursor: pointer;
     }
     
+    input[type="radio"].error,
+    input[type="checkbox"].error {
+      outline: 2px solid #d32f2f;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+    
     .runtime-schema-radio-option label,
     .runtime-schema-checkbox-option label {
       font-weight: 400;
@@ -417,11 +433,11 @@ function getRuntimeSchemaStyles() {
     
     .runtime-schema-navigation {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       gap: 16px;
       margin-top: 32px;
-      padding-top: 24px;
-      border-top: 1px solid #e0e0e0;
+      padding-top: 0;
+      border-top: none;
     }
     
     .runtime-schema-nav-button {
@@ -429,7 +445,7 @@ function getRuntimeSchemaStyles() {
       font-size: 16px;
       font-weight: 600;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s ease;
       font-family: inherit;
@@ -444,12 +460,12 @@ function getRuntimeSchemaStyles() {
     
     .runtime-schema-nav-button.runtime-schema-nav-prev:hover {
       background-color: #f8f9fa;
-      border-color: #8b4513;
-      color: #8b4513;
+      border-color: #8b1538;
+      color: #8b1538;
     }
     
     .runtime-schema-nav-button.runtime-schema-nav-next {
-      background-color: #1a1a1a;
+      background-color: #000000;
       color: #ffffff;
     }
     
@@ -494,7 +510,7 @@ function getRuntimeSchemaStyles() {
       
       .runtime-schema-step-item.active {
         border-left: none;
-        border-bottom: 3px solid #8b4513;
+        border-bottom: 3px solid #8b1538;
         padding-left: 8px;
         padding-bottom: 5px;
       }

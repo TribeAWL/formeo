@@ -19,6 +19,7 @@ import {
   EVENT_FORMEO_REMOVED_ROW,
   PARENT_TYPE_MAP,
   PROPERTY_OPTIONS,
+  SECTION_CLASSNAME,
 } from '../constants.js'
 import Data from './data.js'
 import EditPanel from './edit-panel/edit-panel.js'
@@ -622,6 +623,73 @@ export default class Component extends Data {
 
           // Lazy import Sections to avoid circular dependency
           const { default: Sections } = await import('./sections/index.js')
+
+          // Check if there are existing sections and validate previous section has a title
+          // Get sections from DOM order (more reliable than stage.children array)
+          const stageChildrenContainer = this.dom?.querySelector('.children')
+          const domChildren = stageChildrenContainer ? Array.from(stageChildrenContainer.children) : []
+
+          // Find existing sections in DOM order
+          const existingSections = []
+          for (const domChild of domChildren) {
+            const childId = domChild.id
+            if (!childId) continue
+
+            // Check if this DOM element is a section by class name
+            if (domChild.classList && domChild.classList.contains(SECTION_CLASSNAME)) {
+              const section = Components.getAddress(`sections.${childId}`)
+              if (section) {
+                existingSections.push({ section, domIndex: domChildren.indexOf(domChild) })
+              }
+            }
+          }
+
+          // If there are existing sections, check the previous section (before the insertion point)
+          if (existingSections.length > 0) {
+            let previousSection = null
+
+            // Determine which section would be immediately before the new one
+            if (newIndex === undefined || newIndex >= domChildren.length) {
+              // Adding at the end - check the last section
+              previousSection = existingSections[existingSections.length - 1].section
+            } else {
+              // Adding at a specific index - find the section that appears immediately before newIndex
+              // Sort sections by DOM index to find the one right before the insertion point
+              const sortedSections = [...existingSections].sort((a, b) => b.domIndex - a.domIndex)
+
+              // Find the last section that appears before newIndex
+              for (const sectionData of sortedSections) {
+                if (sectionData.domIndex < newIndex) {
+                  previousSection = sectionData.section
+                  break
+                }
+              }
+
+              // If inserting at the beginning (newIndex is 0 or before first section),
+              // there's no previous section, so we allow it
+              // But if there are sections and we're inserting between them, we need to check
+              if (!previousSection && newIndex > 0) {
+                // This shouldn't happen, but as fallback, check the first section
+                previousSection = existingSections[0].section
+              }
+            }
+
+            // Validate previous section has a title (only if we found a previous section)
+            if (previousSection) {
+              const previousSectionTitle =
+                previousSection.get('config.title') || previousSection.get('config.name') || ''
+
+              if (!previousSectionTitle.trim()) {
+                alert('Please add a title to the previous section before adding a new section.')
+                const isInControlsPanel = from && from.contains && from.contains(item)
+                if (!isInControlsPanel) {
+                  dom.remove(item)
+                }
+                return undefined
+              }
+            }
+          }
+
           const section = Sections.add()
 
           // Get the stage's children container
