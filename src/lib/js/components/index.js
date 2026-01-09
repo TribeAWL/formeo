@@ -9,6 +9,7 @@ import RowsData from './rows/index.js'
 import SectionsData from './sections/index.js'
 import StagesData from './stages/index.js'
 import ControlsData from './controls/index.js'
+import { buildRuntimeSchema } from './runtime-schema.js'
 
 export const Stages = StagesData
 export const Rows = RowsData
@@ -89,13 +90,13 @@ export class Components extends Data {
   }
 
   get formData() {
-    return {
-      id: this.get('id'),
-      stages: StagesData.getData(),
-      rows: RowsData.getData(),
-      columns: ColumnsData.getData(),
-      fields: FieldsData.getData(),
-      sections: SectionsData.getData(),
+    // Use runtime schema serializer instead of default Formeo structure
+    // This generates a step-based schema optimized for React stepper UI
+    try {
+      return buildRuntimeSchema(this)
+    } catch (error) {
+      console.error('Error building runtime schema:', error)
+      throw error // Re-throw to prevent invalid exports
     }
   }
 

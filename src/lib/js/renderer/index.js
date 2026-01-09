@@ -2,8 +2,8 @@ import dom from '../common/dom.js'
 import { fetchDependencies } from '../common/loaders'
 import { cleanFormData, isAddress, merge, uuid } from '../common/utils/index.mjs'
 import { splitAddress } from '../common/utils/string.mjs'
-import { SECTION_CLASSNAME } from '../components/sections/section.js'
 import { STAGE_CLASSNAME } from '../constants'
+import { SECTION_CLASSNAME } from '../constants.js'
 import {
   baseId,
   comparisonMap,

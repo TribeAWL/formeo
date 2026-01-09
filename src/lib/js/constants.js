@@ -111,9 +111,9 @@ const baseChildTypeIndexMap = new Map(childTypeIndexMapVals)
 baseChildTypeMap.set('stage', 'row')
 baseChildTypeIndexMap.set('stages', 'rows')
 
-// Add section -> row mapping (sections can contain rows, similar to stage)
-baseChildTypeMap.set('section', 'row')
-baseChildTypeIndexMap.set('sections', 'rows')
+// Add section -> field mapping (sections can only contain fields directly, not rows/columns)
+baseChildTypeMap.set('section', 'field')
+baseChildTypeIndexMap.set('sections', 'fields')
 
 export const CHILD_TYPE_MAP = baseChildTypeMap
 export const CHILD_TYPE_INDEX_MAP = baseChildTypeIndexMap

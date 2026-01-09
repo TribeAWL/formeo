@@ -556,7 +556,17 @@ export default class Component extends Data {
           return newChild.addChild.bind(newChild)
         },
       ],
-      [0, () => this.addChild.bind(this)],
+      [
+        0,
+        controlData => {
+          // For sections, depth 0 means add field directly to section
+          if (this.name === 'section') {
+            return (fieldData, fieldIndex) => this.addChild(fieldData, fieldIndex)
+          }
+          // For other components, use normal behavior
+          return (childData, childIndex) => this.addChild(childData, childIndex)
+        },
+      ],
       [
         1,
         controlData => {
@@ -565,6 +575,13 @@ export default class Component extends Data {
         },
       ],
       [2, controlData => () => this.parent.parent.addChild(controlData)],
+      [
+        -999,
+        () => {
+          // Invalid drop - should not happen due to validation, but return no-op
+          return () => undefined
+        },
+      ],
     ])
 
     const onAddConditions = {
@@ -587,7 +604,17 @@ export default class Component extends Data {
         const controlType = metaId.startsWith('layout-') ? metaId.replace(/^layout-/, '') : 'field'
 
         // Special handling for section control - create Section component instead of Row
-        if (controlType === 'section' && this.name === 'stage') {
+        if (controlType === 'section') {
+          // Sections can only be added to stage, not to other sections
+          if (this.name !== 'stage') {
+            alert('Sections can only be added at the root level (stage), not inside other sections.')
+            const isInControlsPanel = from && from.contains && from.contains(item)
+            if (!isInControlsPanel) {
+              dom.remove(item)
+            }
+            return undefined
+          }
+
           // Lazy import Sections to avoid circular dependency
           const { default: Sections } = await import('./sections/index.js')
           const section = Sections.add()
@@ -626,13 +653,13 @@ export default class Component extends Data {
             row: 0,
             column: -1,
             field: -2,
-            section: 0, // section is a specialized row
+            section: 0, // sections can be added to stage
           },
           section: {
-            row: 0, // sections can contain rows directly
-            column: -1, // columns need a row first
-            field: -2, // fields need row -> column first
-            section: 0, // sections can contain other sections
+            row: -999, // sections cannot contain rows
+            column: -999, // sections cannot contain columns
+            field: 0, // sections can only contain fields directly
+            section: -999, // sections cannot contain other sections
           },
           row: {
             row: 1,

@@ -12,6 +12,7 @@ import {
   STAGE_CLASSNAME,
 } from '../../constants.js'
 import Component from '../component.js'
+import Components from '../index.js'
 import Sections from '../sections/index.js'
 import Stages from './index.js'
 
@@ -108,6 +109,10 @@ export default class Stage extends Component {
       onEnd: this.onEndValidation.bind(this),
       draggable: `.${ROW_CLASSNAME}, .${SECTION_CLASSNAME}`,
       handle: '.item-move',
+      onUpdate: () => {
+        // Update section orders when sections are reordered
+        this.updateSectionOrders()
+      },
     })
   }
   empty(isAnimated = true) {
@@ -280,6 +285,27 @@ export default class Stage extends Component {
     if (component?.name === 'column') {
       component.parent.autoColumnWidths()
     }
+
+    // Update section orders after adding
+    if (component?.name === 'section') {
+      this.updateSectionOrders()
+    }
+
     return component
+  }
+
+  /**
+   * Update the order property of all sections based on their position in the stage
+   */
+  updateSectionOrders() {
+    const children = this.get('children') || []
+
+    // Use Components to get sections
+    children.forEach((childId, index) => {
+      const section = Components.getAddress(`sections.${childId}`)
+      if (section) {
+        section.set('order', index + 1)
+      }
+    })
   }
 }
