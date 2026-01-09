@@ -1,3 +1,5 @@
+@use "./runtime-schema-form.scss";
+
 * {
   margin: 0;
   padding: 0;
@@ -60,7 +62,8 @@ body {
 }
 
 #main_content {
-  padding: 70px 0;
+  padding-top: 70px;
+  padding-bottom: 30px;
   flex: 1;
   width: 100%;
   display: flex;
@@ -138,9 +141,8 @@ body {
 .render-form {
   display: none;
   width: 100%;
-  max-width: 800px;
-  margin: auto;
-  padding: 32px 0;
+  padding-top: 32px;
+  padding-bottom: 0;
 }
 
 .form-rendered .render-form {
