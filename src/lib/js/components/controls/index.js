@@ -626,6 +626,9 @@ export class Controls {
     const description = section.get('config.description') || section.get('config.instruction') || ''
     settingsRows.push(this.createSectionDescriptionRow(section, description))
 
+    // Note: Column layout is now automatically determined from row/column structure
+    // No need for manual column selector
+
     return dom.create({
       className: 'section-settings-content',
       children: settingsRows.filter(Boolean),

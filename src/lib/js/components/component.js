@@ -435,6 +435,20 @@ export default class Component extends Data {
     }
     const domChildren = this.domChildren
     const childGroup = CHILD_TYPE_MAP.get(this.name)
+
+    // Special handling for sections: return both rows and fields
+    if (this.name === 'section') {
+      return map(domChildren, child => {
+        // Try rows first
+        const row = Components.getAddress(`rows.${child.id}`)
+        if (row) return row
+        // Then try fields
+        const field = Components.getAddress(`fields.${child.id}`)
+        if (field) return field
+        return null
+      }).filter(Boolean)
+    }
+
     return map(domChildren, child => Components.getAddress(`${childGroup}s.${child.id}`)).filter(Boolean)
   }
 
@@ -565,9 +579,50 @@ export default class Component extends Data {
       [
         0,
         controlData => {
-          // For sections, depth 0 means add field directly to section
+          // For sections, depth 0 can mean add field, row, or other component directly to section
           if (this.name === 'section') {
-            return (fieldData, fieldIndex) => this.addChild(fieldData, fieldIndex)
+            return (childData, childIndex) => {
+              // Determine component type from childData.config.controlId
+              const controlId = childData?.config?.controlId || ''
+              const controlType = controlId.startsWith('layout-')
+                ? controlId.replace(/^layout-/, '')
+                : controlId || 'field'
+
+              // If it's a row, create a Row component
+              if (controlType === 'row') {
+                const Rows = Components.rows
+                const row = Rows.add(uuid(), childData)
+                const childWrap = this.dom.querySelector('.children')
+                if (childIndex >= childWrap.children.length) {
+                  childWrap.appendChild(row.dom)
+                } else {
+                  childWrap.children[childIndex].before(row.dom)
+                }
+                this.removeClasses('empty')
+                this.saveChildOrder()
+                return row
+              } else {
+                // For fields and other types, use normal addChild (which will create a field)
+                // But we need to ensure it creates the right type
+                // For fields, addChild with CHILD_TYPE_MAP will try to create a row, so we need special handling
+                if (controlType === 'field' || !controlId.startsWith('layout-')) {
+                  // It's a field - create it directly using Fields
+                  const Fields = Components.fields
+                  const field = Fields.add(uuid(), childData)
+                  const childWrap = this.dom.querySelector('.children')
+                  if (childIndex >= childWrap.children.length) {
+                    childWrap.appendChild(field.dom)
+                  } else {
+                    childWrap.children[childIndex].before(field.dom)
+                  }
+                  this.removeClasses('empty')
+                  this.saveChildOrder()
+                  return field
+                }
+                // For other types, use normal addChild
+                return this.addChild(childData, childIndex)
+              }
+            }
           }
           // For other components, use normal behavior
           return (childData, childIndex) => this.addChild(childData, childIndex)
@@ -729,9 +784,9 @@ export default class Component extends Data {
             section: 0, // sections can be added to stage
           },
           section: {
-            row: -999, // sections cannot contain rows
-            column: -999, // sections cannot contain columns
-            field: 0, // sections can only contain fields directly
+            row: 0, // sections can contain rows
+            column: -1, // columns must be inside rows
+            field: 0, // sections can contain fields directly
             section: -999, // sections cannot contain other sections
           },
           row: {

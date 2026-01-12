@@ -133,19 +133,31 @@ function renderStep(step, isActive = false) {
   const fieldsContainer = document.createElement('div')
   fieldsContainer.className = 'runtime-schema-fields-container'
 
-  // Determine column layout
-  const columns = step.layout?.columns || 2
-  if (columns === 1) {
-    fieldsContainer.style.gridTemplateColumns = '1fr'
-  } else {
-    fieldsContainer.style.gridTemplateColumns = `repeat(${Math.min(columns, 3)}, 1fr)`
-  }
+  // Render rows (each row has its own column layout)
+  if (step.rows && Array.isArray(step.rows) && step.rows.length > 0) {
+    step.rows.forEach(row => {
+      const rowContainer = document.createElement('div')
+      rowContainer.className = 'runtime-schema-row'
 
-  // Render fields
-  step.fields.forEach(field => {
-    const fieldElement = renderField(field)
-    fieldsContainer.appendChild(fieldElement)
-  })
+      // Set column layout for this specific row
+      const rowColumns = row.columns || 1
+      if (rowColumns === 1) {
+        rowContainer.style.gridTemplateColumns = '1fr'
+      } else {
+        rowContainer.style.gridTemplateColumns = `repeat(${Math.min(rowColumns, 3)}, 1fr)`
+      }
+
+      // Render fields in this row
+      if (row.fields && Array.isArray(row.fields)) {
+        row.fields.forEach(field => {
+          const fieldElement = renderField(field)
+          rowContainer.appendChild(fieldElement)
+        })
+      }
+
+      fieldsContainer.appendChild(rowContainer)
+    })
+  }
 
   stepElement.appendChild(fieldsContainer)
 
@@ -427,6 +439,18 @@ function validateField(input, fieldSchema) {
 }
 
 /**
+ * Gets all fields from a step's rows
+ * @param {Object} stepSchema - Step schema from runtime schema
+ * @return {Array} Array of all fields
+ */
+function getAllFieldsFromStep(stepSchema) {
+  if (!stepSchema.rows || !Array.isArray(stepSchema.rows)) {
+    return []
+  }
+  return stepSchema.rows.flatMap(row => row.fields || [])
+}
+
+/**
  * Validates all fields in a step
  * @param {HTMLElement} stepElement - Step element
  * @param {Object} stepSchema - Step schema from runtime schema
@@ -435,8 +459,9 @@ function validateField(input, fieldSchema) {
 function validateStep(stepElement, stepSchema) {
   const errors = []
   const invalidFields = []
+  const fields = getAllFieldsFromStep(stepSchema)
 
-  stepSchema.fields.forEach(fieldSchema => {
+  fields.forEach(fieldSchema => {
     // Find the input element for this field
     const input = stepElement.querySelector(`#field-${fieldSchema.id}`)
 
@@ -496,7 +521,8 @@ function collectFormData(form, schema) {
   const formData = {}
 
   schema.steps.forEach(step => {
-    step.fields.forEach(field => {
+    const fields = step.rows ? step.rows.flatMap(row => row.fields || []) : []
+    fields.forEach(field => {
       const fieldId = `field-${field.id}`
       let value = ''
 
@@ -733,11 +759,21 @@ export function generateFormJavaScript(schema) {
         return { isValid: true };
       }
       
+      function getAllFieldsFromStep(stepSchema) {
+        if (!stepSchema.rows || !Array.isArray(stepSchema.rows)) {
+          return [];
+        }
+        return stepSchema.rows.reduce(function(acc, row) {
+          return acc.concat(row.fields || []);
+        }, []);
+      }
+      
       function validateStep(stepElement, stepSchema) {
         const errors = [];
         const invalidFields = [];
+        const fields = getAllFieldsFromStep(stepSchema);
         
-        stepSchema.fields.forEach(function(fieldSchema) {
+        fields.forEach(function(fieldSchema) {
           const input = stepElement.querySelector('#field-' + fieldSchema.id);
           
           if (fieldSchema.type === 'radio') {
@@ -780,7 +816,10 @@ export function generateFormJavaScript(schema) {
         const formData = {};
         
         schema.steps.forEach(function(step) {
-          step.fields.forEach(function(field) {
+          const fields = step.rows ? step.rows.reduce(function(acc, row) {
+            return acc.concat(row.fields || []);
+          }, []) : [];
+          fields.forEach(function(field) {
             const fieldId = 'field-' + field.id;
             let value = '';
             

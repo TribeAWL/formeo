@@ -136,24 +136,62 @@ function mapField(fieldData) {
 }
 
 /**
- * Extracts all fields from a section, traversing any nested structure
+ * Extracts all fields from a section, preserving row structure
  * @param {Object} section - Section component
- * @return {Array} array of field data
+ * @return {Object} { rows: Array }
+ *   rows: Array of { columns: Number, fields: Array } objects
  */
 function extractFieldsFromSection(section) {
-  const fields = []
+  const rows = []
   const children = section.get('children') || []
 
   for (const childId of children) {
-    const child = Components.getAddress(`fields.${childId}`)
-    if (child) {
-      // Direct field in section
-      const fieldData = child.getData()
-      fields.push(mapField(fieldData))
+    // Check if it's a direct field (treat as single-field row)
+    const field = Components.getAddress(`fields.${childId}`)
+    if (field) {
+      // Direct field in section - create a single-field row
+      const fieldData = field.getData()
+      rows.push({
+        columns: 1,
+        fields: [mapField(fieldData)],
+      })
+      continue
+    }
+
+    // Check if it's a row
+    const row = Components.getAddress(`rows.${childId}`)
+    if (row) {
+      const rowChildren = row.get('children') || []
+      const columnCount = rowChildren.length || 1
+
+      const rowFields = []
+
+      // Traverse columns in this row
+      for (const columnId of rowChildren) {
+        const column = Components.getAddress(`columns.${columnId}`)
+        if (column) {
+          const columnChildren = column.get('children') || []
+
+          // Extract fields from this column
+          for (const fieldId of columnChildren) {
+            const columnField = Components.getAddress(`fields.${fieldId}`)
+            if (columnField) {
+              const fieldData = columnField.getData()
+              rowFields.push(mapField(fieldData))
+            }
+          }
+        }
+      }
+
+      // Add row with its fields (even if empty, to preserve structure)
+      rows.push({
+        columns: columnCount,
+        fields: rowFields,
+      })
     }
   }
 
-  return fields
+  return { rows }
 }
 
 /**
@@ -250,22 +288,19 @@ export function buildRuntimeSchema(formeoState = Components) {
       throw new Error(`Cannot export: Section "${section.id}" is missing a required title.`)
     }
 
-    // Extract fields from section
-    const fields = extractFieldsFromSection(section)
+    // Extract rows from section
+    const { rows } = extractFieldsFromSection(section)
 
     // Get section order from DOM position (most reliable)
     const order = sectionIdToOrder.get(section.id) || getSectionOrder(section, stage)
 
-    // Build step object
+    // Build step object with rows structure
     const step = {
       id: section.id,
       order,
       title: title.trim(),
       description: (section.get('config.description') || section.get('config.instruction') || '').trim(),
-      layout: {
-        columns: 1, // Default to 1 column, can be extended later
-      },
-      fields,
+      rows: rows, // Preserve row structure
     }
 
     // Remove description if empty
@@ -293,7 +328,7 @@ export function buildRuntimeSchema(formeoState = Components) {
         throw new Error(`Cannot export: Section "${section.id}" is missing a required title.`)
       }
 
-      const fields = extractFieldsFromSection(section)
+      const { rows } = extractFieldsFromSection(section)
       const storedOrder = section.get('order')
       const order = storedOrder > 0 ? storedOrder : processedSections.size
 
@@ -302,10 +337,7 @@ export function buildRuntimeSchema(formeoState = Components) {
         order,
         title: title.trim(),
         description: (section.get('config.description') || section.get('config.instruction') || '').trim(),
-        layout: {
-          columns: 1,
-        },
-        fields,
+        rows: rows, // Preserve row structure
       }
 
       if (!step.description) {

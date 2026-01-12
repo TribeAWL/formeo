@@ -128,10 +128,17 @@
 
 /* Fields Container */
 .runtime-schema-fields-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
   margin-bottom: 32px;
+}
+
+/* Row Container - each row can have its own column layout */
+.runtime-schema-row {
+  display: grid;
+  gap: 20px 24px;
+  width: 100%;
 }
 
 /* Field Wrapper */

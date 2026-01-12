@@ -316,10 +316,16 @@ function getRuntimeSchemaStyles() {
     }
     
     .runtime-schema-fields-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
       margin-bottom: 32px;
+    }
+    
+    .runtime-schema-row {
+      display: grid;
+      gap: 20px 24px;
+      width: 100%;
     }
     
     .runtime-schema-field-wrapper {
@@ -534,7 +540,11 @@ function getRuntimeSchemaStyles() {
       }
       
       .runtime-schema-fields-container {
-        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      
+      .runtime-schema-row {
+        grid-template-columns: 1fr !important;
         gap: 20px;
       }
       

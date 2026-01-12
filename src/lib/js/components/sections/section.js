@@ -90,7 +90,7 @@ export default class Section extends Component {
       },
     })
 
-    // Make children sortable (can only contain fields, not rows or columns)
+    // Make children sortable (can contain fields, rows, and columns)
     Sortable.create(children, {
       animation: 150,
       fallbackClass: 'row-moving',
@@ -98,7 +98,7 @@ export default class Section extends Component {
       group: {
         name: 'section',
         pull: true,
-        put: ['controls'], // Only allow controls (form fields), not rows/columns
+        put: ['controls', 'row', 'column'], // Allow controls (form fields), rows, and columns
       },
       sort: true,
       disabled: false,
@@ -106,9 +106,9 @@ export default class Section extends Component {
       onEnd: this.onEnd.bind(this),
       onAdd: this.onAdd.bind(this),
       onSort: this.onSort.bind(this),
-      draggable: `.${FIELD_CLASSNAME}`,
+      draggable: `.${FIELD_CLASSNAME}, .${ROW_CLASSNAME}`,
       handle: '.item-move',
-      filter: `.${ROW_CLASSNAME}, .${COLUMN_CLASSNAME}, .${SECTION_CLASSNAME}`, // Prevent rows, columns, and nested sections
+      filter: `.${SECTION_CLASSNAME}`, // Only prevent nested sections
     })
   }
 
@@ -211,43 +211,12 @@ export default class Section extends Component {
   }
 
   /**
-   * Override onAdd to validate that only form fields can be added to sections
+   * Override onAdd to validate that sections cannot be nested
    * @param {Object} evt - Sortable event
    * @return {Object|undefined} component if added, undefined if prevented
    */
   async onAdd(evt) {
     const { from, to, item } = evt
-
-    // Check if item is from controls panel
-    let fromElement = from
-    if (from && !from.classList.contains(CONTROL_GROUP_CLASSNAME)) {
-      fromElement = from.parentElement
-    }
-
-    const fromType = componentType(fromElement)
-
-    // Only validate if dropping from controls panel
-    if (fromType === 'controls' || fromType === CONTROL_GROUP_CLASSNAME) {
-      // Check if it's a form field (not a layout control)
-      const isField = await this.isFormField(item)
-
-      if (!isField) {
-        // It's a layout control (row, column, or section) - prevent it
-        alert(
-          'Sections can only contain form fields. Please drag form fields (text, email, number, etc.) into sections, not layout elements.'
-        )
-        // Store info to remove the clone in onEnd
-        this._invalidDrop = { item, to }
-        return undefined
-      }
-    }
-
-    // Check if trying to add a row or column (should not happen, but double-check)
-    if (item.classList && (item.classList.contains(ROW_CLASSNAME) || item.classList.contains(COLUMN_CLASSNAME))) {
-      alert('Sections can only contain form fields, not rows or columns.')
-      this._invalidDrop = { item, to }
-      return undefined
-    }
 
     // Check if trying to nest a section inside a section
     if (item.classList && item.classList.contains(SECTION_CLASSNAME)) {
@@ -256,7 +225,7 @@ export default class Section extends Component {
       return undefined
     }
 
-    // Call parent onAdd if validation passes
+    // Allow rows, columns, and fields - call parent onAdd
     return super.onAdd(evt)
   }
 
