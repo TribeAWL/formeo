@@ -674,6 +674,255 @@ function initializeStepNavigation(wrapper, totalSteps, schema) {
 }
 
 /**
+ * Generates JavaScript code for form functionality
+ * @param {Object} schema - Runtime schema object
+ * @return {String} JavaScript code string
+ */
+export function generateFormJavaScript(schema) {
+  const schemaJson = JSON.stringify(schema)
+
+  return `
+    (function() {
+      const schema = ${schemaJson};
+      let currentStep = 0;
+      const totalSteps = schema.steps.length;
+      
+      const wrapper = document.querySelector('.runtime-schema-form-wrapper');
+      if (!wrapper) return;
+      
+      const steps = wrapper.querySelectorAll('.runtime-schema-step');
+      const stepItems = wrapper.querySelectorAll('.runtime-schema-step-item');
+      const prevButton = wrapper.querySelector('.runtime-schema-nav-prev');
+      const nextButton = wrapper.querySelector('.runtime-schema-nav-next');
+      const form = wrapper.querySelector('.runtime-schema-form');
+      
+      if (!steps.length || !stepItems.length || !prevButton || !nextButton || !form) return;
+      
+      function validateField(input, fieldSchema) {
+        const value = input.value.trim();
+        const label = fieldSchema.label || 'Field';
+        
+        if (fieldSchema.required && !value) {
+          return { isValid: false, error: label + ' is required' };
+        }
+        
+        if (!value && !fieldSchema.required) {
+          return { isValid: true };
+        }
+        
+        switch (fieldSchema.type) {
+          case 'email': {
+            const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+            if (value && !emailRegex.test(value)) {
+              return { isValid: false, error: label + ' must be a valid email address' };
+            }
+            break;
+          }
+          case 'number':
+            if (value && isNaN(value)) {
+              return { isValid: false, error: label + ' must be a valid number' };
+            }
+            break;
+          case 'date':
+            if (value && isNaN(Date.parse(value))) {
+              return { isValid: false, error: label + ' must be a valid date' };
+            }
+            break;
+        }
+        
+        return { isValid: true };
+      }
+      
+      function validateStep(stepElement, stepSchema) {
+        const errors = [];
+        const invalidFields = [];
+        
+        stepSchema.fields.forEach(function(fieldSchema) {
+          const input = stepElement.querySelector('#field-' + fieldSchema.id);
+          
+          if (fieldSchema.type === 'radio') {
+            const radios = stepElement.querySelectorAll('input[name="field-' + fieldSchema.id + '"]');
+            if (radios.length > 0) {
+              const isChecked = Array.from(radios).some(function(radio) { return radio.checked; });
+              if (fieldSchema.required && !isChecked) {
+                errors.push((fieldSchema.label || 'Field') + ' is required');
+                invalidFields.push.apply(invalidFields, Array.from(radios));
+              }
+              return;
+            }
+          }
+          
+          if (fieldSchema.type === 'checkbox') {
+            const checkboxes = stepElement.querySelectorAll('input[name="field-' + fieldSchema.id + '"]');
+            if (checkboxes.length > 0) {
+              const isChecked = Array.from(checkboxes).some(function(checkbox) { return checkbox.checked; });
+              if (fieldSchema.required && !isChecked) {
+                errors.push((fieldSchema.label || 'Field') + ' is required');
+                invalidFields.push.apply(invalidFields, Array.from(checkboxes));
+              }
+              return;
+            }
+          }
+          
+          if (!input) return;
+          
+          const validation = validateField(input, fieldSchema);
+          if (!validation.isValid) {
+            errors.push(validation.error);
+            invalidFields.push(input);
+          }
+        });
+        
+        return { isValid: errors.length === 0, errors: errors, invalidFields: invalidFields };
+      }
+      
+      function collectFormData(form, schema) {
+        const formData = {};
+        
+        schema.steps.forEach(function(step) {
+          step.fields.forEach(function(field) {
+            const fieldId = 'field-' + field.id;
+            let value = '';
+            
+            if (field.type === 'radio') {
+              const checkedRadio = form.querySelector('input[name="' + fieldId + '"]:checked');
+              value = checkedRadio ? checkedRadio.value : '';
+            } else if (field.type === 'checkbox') {
+              const checkedBoxes = form.querySelectorAll('input[name="' + fieldId + '"]:checked');
+              if (checkedBoxes.length > 0) {
+                value = Array.from(checkedBoxes).map(function(cb) { return cb.value; }).join(', ');
+              }
+            } else {
+              const input = form.querySelector('#' + fieldId);
+              if (input) {
+                value = input.value.trim();
+              }
+            }
+            
+            const label = (field.label || 'Field ' + field.id).trim();
+            formData[label] = value || '';
+          });
+        });
+        
+        return formData;
+      }
+      
+      function showStep(stepIndex) {
+        steps.forEach(function(step, index) {
+          step.style.display = index === stepIndex ? 'block' : 'none';
+        });
+        
+        stepItems.forEach(function(item, index) {
+          item.classList.toggle('active', index === stepIndex);
+        });
+        
+        prevButton.style.display = stepIndex === 0 ? 'none' : 'block';
+        if (stepIndex === 0) {
+          nextButton.textContent = 'Start';
+        } else if (stepIndex === totalSteps - 1) {
+          nextButton.textContent = 'Submit';
+        } else {
+          nextButton.textContent = 'Next';
+        }
+        
+        currentStep = stepIndex;
+        
+        const currentStepElement = steps[currentStep];
+        if (currentStepElement) {
+          const allInputs = currentStepElement.querySelectorAll('.runtime-schema-field-input, input, select, textarea');
+          allInputs.forEach(function(input) {
+            input.classList.remove('error');
+          });
+        }
+      }
+      
+      nextButton.addEventListener('click', function() {
+        const currentStepElement = steps[currentStep];
+        const currentStepSchema = schema.steps[currentStep];
+        
+        const validation = validateStep(currentStepElement, currentStepSchema);
+        
+        if (!validation.isValid) {
+          validation.invalidFields.forEach(function(field) {
+            field.classList.add('error');
+          });
+          
+          if (validation.invalidFields.length > 0) {
+            validation.invalidFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          
+          const errorMessage = validation.errors.join('\\n');
+          alert('Please fix the following errors:\\n\\n' + errorMessage);
+          return;
+        }
+        
+        const allInputs = currentStepElement.querySelectorAll('.runtime-schema-field-input, input, select, textarea');
+        allInputs.forEach(function(input) {
+          input.classList.remove('error');
+        });
+        
+        if (currentStep < totalSteps - 1) {
+          showStep(currentStep + 1);
+        } else {
+          const finalValidation = validateStep(currentStepElement, currentStepSchema);
+          if (finalValidation.isValid) {
+            const formData = collectFormData(form, schema);
+            
+            let alertMessage = '';
+            Object.keys(formData).forEach(function(label) {
+              alertMessage += label + ': ' + formData[label] + '\\n';
+            });
+            
+            alert(alertMessage.trim());
+            
+            form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+          } else {
+            finalValidation.invalidFields.forEach(function(field) {
+              field.classList.add('error');
+            });
+            const errorMessage = finalValidation.errors.join('\\n');
+            alert('Please fix the following errors:\\n\\n' + errorMessage);
+          }
+        }
+      });
+      
+      prevButton.addEventListener('click', function() {
+        if (currentStep > 0) {
+          showStep(currentStep - 1);
+        }
+      });
+      
+      stepItems.forEach(function(item, index) {
+        item.addEventListener('click', function() {
+          if (index <= currentStep) {
+            showStep(index);
+          }
+        });
+      });
+      
+      form.addEventListener('input', function(e) {
+        if (e.target.classList.contains('error')) {
+          e.target.classList.remove('error');
+        }
+      });
+      
+      form.addEventListener('change', function(e) {
+        if (e.target.type === 'radio' || e.target.type === 'checkbox') {
+          const name = e.target.name;
+          const groupInputs = form.querySelectorAll('input[name="' + name + '"]');
+          groupInputs.forEach(function(input) {
+            input.classList.remove('error');
+          });
+        }
+      });
+      
+      // Initialize first step
+      showStep(0);
+    })();
+  `
+}
+
+/**
  * Gets HTML string from rendered form
  * @param {Object} schema - Runtime schema object
  * @return {String} HTML string

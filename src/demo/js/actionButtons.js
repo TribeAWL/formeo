@@ -2,7 +2,11 @@ import aceEditor, { config } from 'ace-builds/src-noconflict/ace'
 import Json from 'ace-builds/src-noconflict/mode-json?url'
 import githubTheme from 'ace-builds/src-noconflict/theme-github_light_default?url'
 import startCase from 'lodash/startCase'
-import { getRuntimeSchemaHTML, renderRuntimeSchemaForm } from '../../lib/js/renderer/runtime-schema-renderer.js'
+import {
+  generateFormJavaScript,
+  getRuntimeSchemaHTML,
+  renderRuntimeSchemaForm,
+} from '../../lib/js/renderer/runtime-schema-renderer.js'
 
 config.setModuleUrl('ace/mode/json', Json)
 config.setModuleUrl('ace/theme/github_light_default', githubTheme)
@@ -63,7 +67,10 @@ const editorActions = (editor, renderer) => {
         // Get HTML from runtime schema renderer
         const html = getRuntimeSchemaHTML(runtimeSchema)
 
-        // Create a complete HTML document with styles
+        // Get JavaScript for form functionality
+        const formJavaScript = generateFormJavaScript ? generateFormJavaScript(runtimeSchema) : ''
+
+        // Create a complete HTML document with styles and scripts
         const fullHtml = `
 <!DOCTYPE html>
 <html lang="en">
@@ -77,6 +84,9 @@ const editorActions = (editor, renderer) => {
 </head>
 <body>
   ${html}
+  <script>
+    ${formJavaScript}
+  </script>
 </body>
 </html>
         `
