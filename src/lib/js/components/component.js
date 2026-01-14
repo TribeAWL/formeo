@@ -1031,16 +1031,127 @@ export default class Component extends Data {
   }
 
   clone = (parent = this.parent) => {
-    const newClone = parent.addChild(this.cloneData(), this.index + 1)
-    if (this.name !== 'field') {
-      this.cloneChildren(newClone)
+    // Ensure we have a valid parent to receive the clone. Try to resolve from
+    // the DOM if the provided parent is null. If still not found, abort and
+    // warn instead of throwing when calling addChild on null.
+    let resolvedParent = parent || this.parent
+
+    if (!resolvedParent) {
+      // Try resolving parent by the configured parent type first
+      try {
+        const parentType = PARENT_TYPE_MAP.get(this.name)
+        const parentDom = this.dom?.closest(`.${COMPONENT_TYPE_CLASSNAMES[parentType]}`)
+        resolvedParent = parentDom && dom.asComponent(parentDom)
+      } catch (err) {
+        // ignore and fallthrough to broader ancestor lookup
+      }
+    }
+
+    if (!resolvedParent) {
+      // Broader fallback: find the nearest ancestor that is a known component
+      // (column, row, section, stage) and use that as the parent.
+      try {
+        const ancestorSelector = [
+          COMPONENT_TYPE_CLASSNAMES.column,
+          COMPONENT_TYPE_CLASSNAMES.row,
+          COMPONENT_TYPE_CLASSNAMES.section,
+          COMPONENT_TYPE_CLASSNAMES.stage,
+        ]
+          .filter(Boolean)
+          .map(c => `.${c}`)
+          .join(', ')
+
+        const ancestorDom = this.dom?.closest(ancestorSelector)
+        resolvedParent = ancestorDom && dom.asComponent(ancestorDom)
+      } catch (err) {
+        // ignore and fallthrough
+      }
+    }
+
+    if (!resolvedParent) {
+      console.warn(`Clone aborted: parent not found for ${this.name} ${this.id}`, this)
+      return null
+    }
+
+    // If cloning a field, prefer the nearest column ancestor as the parent
+    if (this.name === 'field' && resolvedParent?.name !== 'column') {
+      try {
+        const columnDom = this.dom?.closest(`.${COLUMN_CLASSNAME}`)
+        const columnComp = columnDom && dom.asComponent(columnDom)
+        if (columnComp) {
+          resolvedParent = columnComp
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+
+    // Compute an insertion index so the clone appears next to the original
+    // when possible. If we cannot determine an insertion point, hand off to
+    // addChild to append to the end.
+    let insertionIndex
+    try {
+      const childWrap = resolvedParent.dom.querySelector('.children')
+      if (childWrap && childWrap.contains(this.dom)) {
+        const childrenArr = Array.from(childWrap.children)
+        const idx = childrenArr.indexOf(this.dom)
+        if (idx > -1) insertionIndex = idx + 1
+      }
+    } catch (err) {
+      // ignore and allow undefined insertionIndex
+    }
+
+    let newClone
+    if (this.name === 'field') {
+      // Create the new field component with full data via the Fields index
+      const cloned = this.cloneData()
+      // Ensure we add the full field data into the Fields index
+      newClone = Components.fields.add(cloned.id, cloned)
+
+      // Insert the new field DOM into the resolved parent's children container
+      try {
+        const childWrap = resolvedParent.dom.querySelector('.children')
+        if (childWrap) {
+          if (insertionIndex >= 0 && insertionIndex < childWrap.children.length) {
+            childWrap.children[insertionIndex].before(newClone.dom)
+          } else {
+            childWrap.appendChild(newClone.dom)
+          }
+        }
+      } catch (err) {
+        // ignore DOM insertion errors
+      }
+
+      // Dispatch onAddChild on parent and onAdd on child to match addChild behavior
+      resolvedParent.dispatchComponentEvent('onAddChild', {
+        parent: resolvedParent,
+        target: newClone,
+        child: newClone,
+        index: insertionIndex,
+      })
+
+      newClone.dispatchComponentEvent('onAdd', {
+        parent: resolvedParent,
+        target: newClone,
+        index: insertionIndex,
+        addedVia: 'clone',
+      })
+
+      resolvedParent.removeClasses('empty')
+      resolvedParent.saveChildOrder()
+    } else {
+      const created = resolvedParent.addChild(this.cloneData(), insertionIndex)
+      newClone = created
+      if (this.name !== 'field') {
+        this.cloneChildren(newClone)
+      }
     }
 
     // Dispatch clone event
     this.dispatchComponentEvent('onClone', {
       original: this,
       clone: newClone,
-      parent,
+      parent: resolvedParent,
     })
 
     return newClone
