@@ -19,7 +19,9 @@ import {
   EVENT_FORMEO_REMOVED_ROW,
   PARENT_TYPE_MAP,
   PROPERTY_OPTIONS,
+  ROW_CLASSNAME,
   SECTION_CLASSNAME,
+  STAGE_CLASSNAME,
 } from '../constants.js'
 import Data from './data.js'
 import EditPanel from './edit-panel/edit-panel.js'
@@ -1030,25 +1032,81 @@ export default class Component extends Data {
     return clonedData
   }
 
+  /**
+   * Clone this component. Fallback to a sensible parent when `this.parent` is
+   * not available (fields inside sections) and special-case cloning a field
+   * into a section so a Field (not a Row) is created.
+   */
   clone = (parent = this.parent) => {
-    const newClone = parent.addChild(this.cloneData(), this.index + 1)
+    // Resolve a valid parent: prefer explicit param, then this.parent,
+    // then try to find a nearest valid container in the DOM.
+    let targetParent = parent || this.parent
+    if (!targetParent && this.dom) {
+      const nearest = this.dom.closest(
+        `.${COLUMN_CLASSNAME}, .${ROW_CLASSNAME}, .${SECTION_CLASSNAME}, .${STAGE_CLASSNAME}`
+      )
+      if (nearest) {
+        targetParent = dom.asComponent(nearest)
+      }
+    }
+
+    if (!targetParent) {
+      console.error('Clone failed: no valid parent found for', this)
+      return null
+    }
+
+    // If cloning a field directly into a section, create a Field (sections
+    // accept fields directly) instead of letting section.addChild try to
+    // create a Row.
+    if (this.name === 'field' && targetParent.name === 'section') {
+      const Fields = Components.fields
+      const newField = Fields.add(uuid(), this.cloneData())
+      const childWrap = targetParent.dom.querySelector('.children')
+      const insertIndex = this.index + 1
+      if (!childWrap) {
+        return newField
+      }
+      if (insertIndex >= childWrap.children.length) {
+        childWrap.appendChild(newField.dom)
+      } else {
+        childWrap.children[insertIndex].before(newField.dom)
+      }
+      targetParent.removeClasses('empty')
+      targetParent.saveChildOrder()
+
+      this.dispatchComponentEvent('onClone', {
+        original: this,
+        clone: newField,
+        parent: targetParent,
+      })
+
+      return newField
+    }
+
+    const newClone = targetParent.addChild(this.cloneData(), this.index + 1)
+
+    // For non-field types, clone children into the new clone.
     if (this.name !== 'field') {
       this.cloneChildren(newClone)
     }
 
-    // Dispatch clone event
     this.dispatchComponentEvent('onClone', {
       original: this,
       clone: newClone,
-      parent,
+      parent: targetParent,
     })
 
     return newClone
   }
 
+  /**
+   * Clone children into target parent/component
+   */
   cloneChildren(toParent) {
     for (const child of this.children) {
-      child?.clone(toParent)
+      if (child) {
+        child.clone(toParent)
+      }
     }
   }
 
