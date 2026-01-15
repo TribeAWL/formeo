@@ -3,7 +3,7 @@ import Section from './section.js'
 
 const DEFAULT_CONFIG = {
   actionButtons: {
-    buttons: ['move', 'edit', 'clone', 'remove'],
+    buttons: ['move', 'edit', 'remove'],
     disabled: [],
   },
 }

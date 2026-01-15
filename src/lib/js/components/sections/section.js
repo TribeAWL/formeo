@@ -329,75 +329,23 @@ export default class Section extends Component {
   }
 
   /**
-   * Override buttons getter for sections
+   * Override buttons getter for sections to use shared actions from component.js
+   * Only customize the edit button to call selectSection instead of toggleEdit
    */
   get buttons() {
-    if (this.actionButtons) {
-      return this.actionButtons
+    // Get buttons from parent Component class
+    const buttons = super.buttons
+
+    // Customize edit button to call selectSection instead of toggleEdit
+    const editButton = buttons.find(btn => btn.meta?.id === 'edit')
+    if (editButton) {
+      editButton.action = {
+        click: () => {
+          this.selectSection()
+        },
+      }
     }
 
-    const buttonConfig = {
-      move: (icon = 'move') => {
-        return {
-          ...dom.btnTemplate({ content: dom.icon(icon) }),
-          className: ['item-move'],
-          meta: {
-            id: 'move',
-          },
-        }
-      },
-      edit: (icon = 'edit') => {
-        return {
-          ...dom.btnTemplate({ content: dom.icon(icon) }),
-          className: ['edit-toggle'],
-          meta: {
-            id: 'edit',
-          },
-          action: {
-            click: () => {
-              this.selectSection()
-            },
-          },
-        }
-      },
-      remove: (icon = 'bin') => {
-        return {
-          ...dom.btnTemplate({ content: dom.icon(icon) }),
-          className: ['item-remove'],
-          meta: {
-            id: 'remove',
-          },
-          action: {
-            click: () => {
-              animate.slideUp(this.dom, ANIMATION_SPEED_BASE, () => {
-                this.remove()
-              })
-            },
-          },
-        }
-      },
-      clone: (icon = 'copy') => {
-        return {
-          ...dom.btnTemplate({ content: dom.icon(icon) }),
-          className: ['item-clone'],
-          meta: {
-            id: 'clone',
-          },
-          action: {
-            click: () => {
-              this.clone(this.parent)
-            },
-          },
-        }
-      },
-    }
-
-    const { buttons, disabled } = this.config.actionButtons
-    const activeButtons = buttons.filter(btn => !disabled.includes(btn))
-    const actionButtonsConfigs = activeButtons.map(btn => buttonConfig[btn]?.() || btn)
-
-    this.actionButtons = actionButtonsConfigs
-
-    return this.actionButtons
+    return buttons
   }
 }
