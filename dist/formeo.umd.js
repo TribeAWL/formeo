@@ -12425,8 +12425,8 @@ Author: Draggable https://draggable.io
     };
     get json() {
       return window.JSON.stringify({
-        $schema: `./formData_schema.json`,
-        // Relative path instead of CDN
+        $schema: `./dist/formData_schema.json`,
+        // Local path to schema file
         ...this.formData
       });
     }
@@ -12801,7 +12801,8 @@ Author: Draggable https://draggable.io
         svgSprite: null,
         // null = use bundled sprite, or provide custom URL
         style: null,
-        // No CDN - use bundled styles instead
+        // null = CSS should be imported directly in your project (e.g., import 'formeo/dist/formeo.min.css')
+        // Alternatively, you can provide a local path: style: './dist/formeo.min.css'
         iconFont: null,
         // 'glyphicons' || 'font-awesome' || 'fontello'
         config: {},
@@ -12811,7 +12812,7 @@ Author: Draggable https://draggable.io
         controls: {},
         i18n: {
           location: null
-          // No CDN - use bundled language files from @draggable/formeo-languages
+          // null = use bundled language files from @draggable/formeo-languages
         },
         onLoad: () => {
         }

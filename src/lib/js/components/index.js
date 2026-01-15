@@ -84,7 +84,7 @@ export class Components extends Data {
 
   get json() {
     return window.JSON.stringify({
-      $schema: `./formData_schema.json`, // Relative path instead of CDN
+      $schema: `./dist/formData_schema.json`, // Local path to schema file
       ...this.formData,
     })
   }
