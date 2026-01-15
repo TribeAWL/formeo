@@ -440,6 +440,8 @@ function createCheckboxGroup(field) {
  * @param {Number} totalSteps - Total number of steps
  * @return {HTMLElement} Navigation element
  */
+
+// Button show in preview view
 function createNavigation(totalSteps) {
   const navigation = document.createElement('div')
   navigation.className = 'runtime-schema-navigation'

@@ -143,13 +143,20 @@ function mapField(fieldData) {
  */
 function extractFieldsFromSection(section) {
   const rows = []
-  const children = section.get('children') || []
 
-  for (const childId of children) {
-    // Check if it's a direct field (treat as single-field row)
+  // Prefer reading the live DOM children to reflect current UI state
+  // This ensures removed fields (DOM nodes removed) are not included in the schema
+  const sectionDom = section.dom
+  const sectionChildrenContainer = sectionDom?.querySelector('.children')
+  const domChildren = sectionChildrenContainer ? Array.from(sectionChildrenContainer.children) : []
+
+  for (const domChild of domChildren) {
+    const childId = domChild.id
+    if (!childId) continue
+
+    // If this DOM element corresponds to a field, treat as single-field row
     const field = Components.getAddress(`fields.${childId}`)
     if (field) {
-      // Direct field in section - create a single-field row
       const fieldData = field.getData()
       rows.push({
         columns: 1,
@@ -158,32 +165,37 @@ function extractFieldsFromSection(section) {
       continue
     }
 
-    // Check if it's a row
+    // If this DOM element corresponds to a row, traverse its column children
     const row = Components.getAddress(`rows.${childId}`)
     if (row) {
-      const rowChildren = row.get('children') || []
-      const columnCount = rowChildren.length || 1
+      const rowDom = row.dom
+      const rowChildrenContainer = rowDom?.querySelector('.children')
+      const rowDomChildren = rowChildrenContainer ? Array.from(rowChildrenContainer.children) : []
+      const columnCount = rowDomChildren.length || 1
 
       const rowFields = []
 
-      // Traverse columns in this row
-      for (const columnId of rowChildren) {
-        const column = Components.getAddress(`columns.${columnId}`)
-        if (column) {
-          const columnChildren = column.get('children') || []
+      for (const colDom of rowDomChildren) {
+        const columnId = colDom.id
+        if (!columnId) continue
 
-          // Extract fields from this column
-          for (const fieldId of columnChildren) {
-            const columnField = Components.getAddress(`fields.${fieldId}`)
-            if (columnField) {
-              const fieldData = columnField.getData()
-              rowFields.push(mapField(fieldData))
-            }
+        const column = Components.getAddress(`columns.${columnId}`)
+        if (!column) continue
+
+        const columnChildrenContainer = column.dom?.querySelector('.children')
+        const columnDomChildren = columnChildrenContainer ? Array.from(columnChildrenContainer.children) : []
+
+        for (const fieldDom of columnDomChildren) {
+          const fieldId = fieldDom.id
+          if (!fieldId) continue
+          const columnField = Components.getAddress(`fields.${fieldId}`)
+          if (columnField) {
+            const fieldData = columnField.getData()
+            rowFields.push(mapField(fieldData))
           }
         }
       }
 
-      // Add row with its fields (even if empty, to preserve structure)
       rows.push({
         columns: columnCount,
         fields: rowFields,
