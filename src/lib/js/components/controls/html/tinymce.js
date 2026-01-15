@@ -17,7 +17,7 @@ class TinyMCEControl extends Control {
       attrs: {
         required: false,
       },
-      dependencies: { js: 'https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.9.11/tinymce.min.js' },
+      dependencies: { js: null }, // No CDN - provide TinyMCE dependency yourself
       // this action is passed to the rendered control/element
       // useful for actions and events on the control preview
       action: {

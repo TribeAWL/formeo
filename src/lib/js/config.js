@@ -16,14 +16,14 @@ export const defaults = {
       sessionStorage: false,
       editorContainer: null, // element or selector to attach editor to
       svgSprite: null, // null = use bundled sprite, or provide custom URL
-      style: CSS_URL, // change to null
+      style: null, // No CDN - use bundled styles instead
       iconFont: null, // 'glyphicons' || 'font-awesome' || 'fontello'
       config: {}, // stages, rows, columns, fields
       events: {},
       actions: {},
       controls: {},
       i18n: {
-        location: 'https://draggable.github.io/formeo/assets/lang/',
+        location: null, // No CDN - use bundled language files from @draggable/formeo-languages
       },
       onLoad: () => {},
     }

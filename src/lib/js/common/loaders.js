@@ -149,7 +149,13 @@ export const fetchIcons = async (iconSpriteUrl = SVG_SPRITE_URL) => {
 
   const parseResp = async resp => insertIcons(await resp.text())
 
-  return ajax(iconSpriteUrl, parseResp, () => ajax(FALLBACK_SVG_SPRITE_URL, parseResp))
+  return ajax(iconSpriteUrl, parseResp, () => {
+    // If fallback is not available, use bundled sprite
+    if (FALLBACK_SVG_SPRITE_URL) {
+      return ajax(FALLBACK_SVG_SPRITE_URL, parseResp)
+    }
+    return insertIcons(BUNDLED_SVG_SPRITE)
+  })
 }
 
 export const LOADER_MAP = {

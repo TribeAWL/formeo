@@ -84,7 +84,7 @@ export class Components extends Data {
 
   get json() {
     return window.JSON.stringify({
-      $schema: `https://cdn.jsdelivr.net/npm/formeo@${version}/dist/formData_schema.json`,
+      $schema: `./formData_schema.json`, // Relative path instead of CDN
       ...this.formData,
     })
   }

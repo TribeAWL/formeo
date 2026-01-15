@@ -8,14 +8,10 @@ export const version = pkg.version
 export const PACKAGE_NAME = name
 export const formeoSpriteId = 'formeo-sprite'
 
-export const POLYFILLS = [
-  { name: 'cssPreload', src: '//cdnjs.cloudflare.com/ajax/libs/loadCSS/2.0.1/cssrelpreload.min.js' },
-  { name: 'mutationObserver', src: '//cdn.jsdelivr.net/npm/mutationobserver-shim/dist/mutationobserver.min.js' },
-  { name: 'fetch', src: 'https://unpkg.com/unfetch/polyfill' },
-]
+export const POLYFILLS = []
 export const SVG_SPRITE_URL = null // No longer fetching by default - using bundled sprite
-export const FALLBACK_SVG_SPRITE_URL = `https://cdn.jsdelivr.net/npm/formeo@${version}/dist/${formeoSpriteId}.svg`
-export const CSS_URL = `https://cdn.jsdelivr.net/npm/formeo@${version}/dist/formeo.min.css`
+export const FALLBACK_SVG_SPRITE_URL = null // No CDN fallback - using bundled sprite only
+export const CSS_URL = null // No CDN CSS - use bundled styles instead
 // export const FALLBACK_CSS_URL = 'https://draggable.github.io/formeo/assets/css/formeo.min.css'
 
 export const PANEL_CLASSNAME = 'f-panel'

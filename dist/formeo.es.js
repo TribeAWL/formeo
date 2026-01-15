@@ -29,7 +29,8 @@ const DEFAULT_CONFIG$5 = {
   // init with user's preferred language
   override: {}
 };
-class I18N {
+let instance = null;
+class I18NBase {
   /**
    * Process options and start the module
    * @param {Object} options
@@ -45,14 +46,16 @@ class I18N {
    */
   processConfig(options) {
     const { location, ...restOptions } = { ...DEFAULT_CONFIG$5, ...options };
-    const parsedLocation = location.replace(/\/?$/, "/");
+    const parsedLocation = location.endsWith("/") ? location : `${location}/`;
     this.config = { location: parsedLocation, ...restOptions };
-    const { override, preloaded = {} } = this.config;
-    const allLangs = Object.entries(this.langs).concat(Object.entries(override || preloaded));
-    this.langs = allLangs.reduce((acc, [locale2, lang]) => {
-      acc[locale2] = this.applyLanguage(locale2, lang);
-      return acc;
-    }, {});
+    const { preloaded = {}, override = {} } = this.config;
+    const allLocales = /* @__PURE__ */ new Set([...Object.keys(preloaded), ...Object.keys(override)]);
+    for (const locale2 of allLocales) {
+      const preloadedLang = preloaded[locale2] || {};
+      const overrideLang = override[locale2] || {};
+      const mergedLang = { ...preloadedLang, ...overrideLang };
+      this.applyLanguage(locale2, mergedLang);
+    }
     this.locale = this.config.locale || this.config.langs[0];
   }
   /**
@@ -70,9 +73,10 @@ class I18N {
    * @param {String|Object} lang
    */
   addLanguage(locale2, lang = {}) {
-    lang = typeof lang === "string" ? I18N.processFile(lang) : lang;
+    lang = typeof lang === "string" ? I18NBase.processFile(lang) : lang;
     this.applyLanguage(locale2, lang);
-    this.config.langs.push("locale");
+    this.loaded.push(locale2);
+    this.config.langs.push(locale2);
   }
   /**
    * get a string from a loaded language file
@@ -101,12 +105,12 @@ class I18N {
    */
   makeSafe(str) {
     const mapObj = {
-      "{": "\\{",
-      "}": "\\}",
-      "|": "\\|"
+      "{": String.raw`\{`,
+      "}": String.raw`\}`,
+      "|": String.raw`\|`
     };
-    str = str.replace(/[{}|]/g, (matched) => mapObj[matched]);
-    return new RegExp(str, "g");
+    const escapedStr = str.replaceAll(/[{}|]/g, (matched) => mapObj[matched]);
+    return new RegExp(escapedStr, "g");
   }
   /**
    * Temporarily put a string into the currently loaded language
@@ -125,21 +129,24 @@ class I18N {
    * @return {String}      updated string translation
    */
   get(key, args) {
-    const _this = this;
     let value = this.getValue(key);
     if (!value) {
       return;
     }
+    if (!args) {
+      return value;
+    }
     const tokens = value.match(/\{[^}]+?\}/g);
-    if (args && tokens) {
-      if ("object" === typeof args) {
-        for (const token of tokens) {
-          const key2 = token.substring(1, token.length - 1);
-          value = value.replace(_this.makeSafe(token), args[key2] || "");
-        }
-      } else {
-        value = value.replace(/\{[^}]+?\}/g, args);
+    if (!tokens) {
+      return value;
+    }
+    if (typeof args === "object") {
+      for (const token of tokens) {
+        const tokenKey = token.slice(1, -1);
+        value = value.replace(this.makeSafe(token), args[tokenKey] ?? "");
       }
+    } else {
+      value = value.replaceAll(/\{[^}]+?\}/g, args);
     }
     return value;
   }
@@ -149,7 +156,7 @@ class I18N {
    * @return {Object} processed language
    */
   static processFile(response) {
-    return I18N.fromFile(response.replace(/\n\n/g, "\n"));
+    return I18N.fromFile(response.replaceAll("\n\n", "\n"));
   }
   /**
    * Static method: Turn raw text from the language files into fancy JSON
@@ -163,10 +170,27 @@ class I18N {
       const regex = /^(.+?) *?= *?([^\n]+)/;
       matches2 = regex.exec(lines[i2]);
       if (matches2) {
-        lang[matches2[1]] = matches2[2].replace(/(^\s+|\s+$)/g, "");
+        lang[matches2[1]] = matches2[2].trim();
       }
     }
     return lang;
+  }
+  /**
+   * Get the singleton instance
+   * @param {Object} options
+   * @return {I18NBase} singleton instance
+   */
+  static getInstance(options) {
+    if (!instance) {
+      instance = new I18NBase(options);
+    }
+    return instance;
+  }
+  /**
+   * Reset the singleton instance (useful for testing)
+   */
+  static resetInstance() {
+    instance = null;
   }
   /**
    * Load a remotely stored language file
@@ -174,26 +198,20 @@ class I18N {
    * @param  {Boolean} useCache
    * @return {Promise}       resolves response
    */
-  loadLang(locale2, useCache = true) {
-    const _this = this;
-    return new Promise(function(resolve, reject) {
-      if (_this.loaded.indexOf(locale2) !== -1 && useCache) {
-        _this.applyLanguage(_this.langs[locale2]);
-        return resolve(_this.langs[locale2]);
-      } else {
-        const langFile = [_this.config.location, locale2, _this.config.extension].join("");
-        return fetchData(langFile).then((lang) => {
-          const processedFile = I18N.processFile(lang);
-          _this.applyLanguage(locale2, processedFile);
-          _this.loaded.push(locale2);
-          return resolve(_this.langs[locale2]);
-        }).catch((err) => {
-          console.error(err);
-          const lang = _this.applyLanguage(locale2);
-          resolve(lang);
-        });
-      }
-    });
+  async loadLang(locale2, useCache = true) {
+    if (this.loaded.includes(locale2) && useCache) {
+      return this.langs[locale2];
+    }
+    const langFile = `${this.config.location}${locale2}${this.config.extension}`;
+    try {
+      const lang = await fetchData(langFile);
+      const processedFile = I18NBase.processFile(lang);
+      this.applyLanguage(locale2, processedFile);
+      return this.langs[locale2];
+    } catch (err) {
+      console.error(err);
+      return this.applyLanguage(locale2);
+    }
   }
   /**
    * applies overrides from config
@@ -205,6 +223,7 @@ class I18N {
     const override = this.config.override[locale2] || {};
     const existingLang = this.langs[locale2] || {};
     this.langs[locale2] = { ...existingLang, ...lang, ...override };
+    this.loaded.push(locale2);
     return this.langs[locale2];
   }
   /**
@@ -220,13 +239,37 @@ class I18N {
    * @return {Promise} language
    */
   async setCurrent(locale2 = "en-US") {
-    await this.loadLang(locale2);
+    if (!this.loaded.includes(locale2)) {
+      await this.loadLang(locale2);
+    }
     this.locale = locale2;
     this.current = this.langs[locale2];
     return this.current;
   }
 }
-const mi18n = new I18N();
+const I18N = new Proxy(I18NBase, {
+  /**
+   * Called when I18N() is invoked as a function (without new)
+   * Returns the singleton instance
+   */
+  apply(target, thisArg, args) {
+    return target.getInstance(...args);
+  },
+  /**
+   * Called when new I18N() is invoked
+   * Creates a new instance
+   */
+  construct(target, args) {
+    return new target(...args);
+  },
+  /**
+   * Proxy property access to the base class
+   */
+  get(target, prop) {
+    return target[prop];
+  }
+});
+const mi18n = I18N.getInstance();
 !(function() {
   try {
     if ("undefined" != typeof document) {
@@ -431,10 +474,8 @@ if (window !== void 0) {
   window.SmartTooltip = SmartTooltip;
 }
 const name$1 = "formeo";
-const version$2 = "4.2.4";
 const pkg = {
-  name: name$1,
-  version: version$2
+  name: name$1
 };
 var commonjsGlobal = typeof globalThis !== "undefined" ? globalThis : typeof window !== "undefined" ? window : typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : {};
 function getDefaultExportFromCjs(x) {
@@ -1203,9 +1244,9 @@ var hasRequired_cloneBuffer;
 function require_cloneBuffer() {
   if (hasRequired_cloneBuffer) return _cloneBuffer.exports;
   hasRequired_cloneBuffer = 1;
-  (function(module, exports) {
+  (function(module, exports$1) {
     var root = require_root();
-    var freeExports = exports && !exports.nodeType && exports;
+    var freeExports = exports$1 && !exports$1.nodeType && exports$1;
     var freeModule = freeExports && true && module && !module.nodeType && module;
     var moduleExports = freeModule && freeModule.exports === freeExports;
     var Buffer = moduleExports ? root.Buffer : void 0, allocUnsafe = Buffer ? Buffer.allocUnsafe : void 0;
@@ -1451,9 +1492,9 @@ var hasRequiredIsBuffer;
 function requireIsBuffer() {
   if (hasRequiredIsBuffer) return isBuffer.exports;
   hasRequiredIsBuffer = 1;
-  (function(module, exports) {
+  (function(module, exports$1) {
     var root = require_root(), stubFalse = requireStubFalse();
-    var freeExports = exports && !exports.nodeType && exports;
+    var freeExports = exports$1 && !exports$1.nodeType && exports$1;
     var freeModule = freeExports && true && module && !module.nodeType && module;
     var moduleExports = freeModule && freeModule.exports === freeExports;
     var Buffer = moduleExports ? root.Buffer : void 0;
@@ -1524,9 +1565,9 @@ var hasRequired_nodeUtil;
 function require_nodeUtil() {
   if (hasRequired_nodeUtil) return _nodeUtil.exports;
   hasRequired_nodeUtil = 1;
-  (function(module, exports) {
+  (function(module, exports$1) {
     var freeGlobal = require_freeGlobal();
-    var freeExports = exports && !exports.nodeType && exports;
+    var freeExports = exports$1 && !exports$1.nodeType && exports$1;
     var freeModule = freeExports && true && module && !module.nodeType && module;
     var moduleExports = freeModule && freeModule.exports === freeExports;
     var freeProcess = moduleExports && freeGlobal.process;
@@ -2168,18 +2209,15 @@ function buildFlatDataStructure(data, componentId, componentType2, result = {}) 
 }
 const BUNDLED_SVG_SPRITE = '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><symbol id="f-i-autocomplete" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M6,5h1v1H6V5z M4,4H3v1h1V4z M6,4H5v1h1V4z M2,5v1h1V5H2z M3,7h1V6H3V7z M5,7h1V6H5V7z M4,5v1h1V5H4z M2,14h1v-1H2V14z M4,14h1v-1H4V14z M6,14h1v-1H6V14z M9,13H8v1h1V13z M16,3.5v4C16,8.3,15.3,9,14.5,9H14v3v3c0,0.6-0.4,1-1,1H1c-0.6,0-1-0.4-1-1V3.5 C0,2.7,0.7,2,1.5,2h3H8V1.5V1H7H6V0.5V0h2.5H11v0.5V1h-1H9v0.5V2h3h2.5C15.3,2,16,2.7,16,3.5z M13,12H7H1v3h12V12z M3,11v-1H2v1H3z M5,11v-1H4v1H5z M15,3.5C15,3.2,14.8,3,14.5,3H9v2.5V8H8.5H8V7.5V7H7V6h1V5.5V5H7V4h1V3.5V3H1.5C1.2,3,1,3.2,1,3.5v4 C1,7.8,1.2,8,1.5,8H8v1H6v0.5V10h2.5H11V9.5V9H9V8h5.5C14.8,8,15,7.8,15,7.5V3.5z"/></symbol><symbol viewBox="0 0 32 32" id="f-i-bin" xmlns="http://www.w3.org/2000/svg"><path d="M4 10v20c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2v-20h-22zM10 28h-2v-14h2v14zM14 28h-2v-14h2v14zM18 28h-2v-14h2v14zM22 28h-2v-14h2v14zM26.5 4h-6.5v-2.5c0-.825-.675-1.5-1.5-1.5h-7c-.825 0-1.5.675-1.5 1.5v2.5h-6.5c-.825 0-1.5.675-1.5 1.5v2.5h26v-2.5c0-.825-.675-1.5-1.5-1.5zM18 4h-6v-1.975h6v1.975z"/></symbol><symbol id="f-i-button" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><metadata id="adprefix__metadata8"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><path id="adprefix__rect4140" d="M 0.4765625,4 A 0.47706934,0.47706934 0 0 0 0,4.4765625 L 0,11.523438 A 0.47706934,0.47706934 0 0 0 0.4765625,12 L 15.523438,12 A 0.47706934,0.47706934 0 0 0 16,11.523438 L 16,4.4765625 A 0.47706934,0.47706934 0 0 0 15.523438,4 L 0.4765625,4 Z m 0.4765625,0.953125 14.09375,0 0,6.09375 -14.09375,0 0,-6.09375 z"/><g id="adprefix__layer1"><g id="adprefix__text4203"><g id="adprefix__g4212" transform="translate(0.10112835,0.1001358)"><path id="adprefix__path4208" d="m 6.0690374,6.4093857 q -0.5371093,0 -0.8544922,0.4003906 -0.3149414,0.4003906 -0.3149414,1.0913086 0,0.6884766 0.3149414,1.0888672 0.3173829,0.4003906 0.8544922,0.4003906 0.5371094,0 0.8496094,-0.4003906 0.3149414,-0.4003906 0.3149414,-1.0888672 0,-0.690918 -0.3149414,-1.0913086 -0.3125,-0.4003906 -0.8496094,-0.4003906 z m 0,-0.4003906 q 0.7666016,0 1.225586,0.5151367 0.4589843,0.5126953 0.4589843,1.3769531 0,0.8618164 -0.4589843,1.3769531 -0.4589844,0.5126953 -1.225586,0.5126953 -0.7690429,0 -1.2304687,-0.5126953 -0.4589844,-0.5126953 -0.4589844,-1.3769531 0,-0.8642578 0.4589844,-1.3769531 0.4614258,-0.5151367 1.2304687,-0.5151367 z"/><path id="adprefix__path4210" d="m 8.5250921,6.074913 0.4931641,0 0,1.5405274 1.6357418,-1.5405274 0.634766,0 -1.809082,1.6992188 1.938477,1.9458008 -0.649415,0 -1.7504878,-1.7553711 0,1.7553711 -0.4931641,0 0,-3.6450196 z"/></g></g></g></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-button-line" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 17h-17A2.502 2.502 0 0 1 1 14.5v-4A2.502 2.502 0 0 1 3.5 8h17a2.502 2.502 0 0 1 2.5 2.5v4a2.502 2.502 0 0 1-2.5 2.5zm-17-8A1.502 1.502 0 0 0 2 10.5v4A1.502 1.502 0 0 0 3.5 16h17a1.502 1.502 0 0 0 1.5-1.5v-4A1.502 1.502 0 0 0 20.5 9zM17 12H7v1h10z" fill="currentColor"/></symbol><symbol viewBox="0 0 32 32" id="f-i-calendar" xmlns="http://www.w3.org/2000/svg"><path d="M12.048 16.961c-0.178 0.257-0.395 0.901-0.652 1.059-0.257 0.157-0.547 0.267-0.869 0.328-0.323 0.062-0.657 0.089-1.002 0.079v1.527h2.467v6.046h1.991v-9.996h-1.584c-0.056 0.381-0.173 0.7-0.351 0.957zM23 8h2c0.553 0 1-0.448 1-1v-6c0-0.552-0.447-1-1-1h-2c-0.553 0-1 0.448-1 1v6c0 0.552 0.447 1 1 1zM7 8h2c0.552 0 1-0.448 1-1v-6c0-0.552-0.448-1-1-1h-2c-0.552 0-1 0.448-1 1v6c0 0.552 0.448 1 1 1zM30 4h-2v5c0 0.552-0.447 1-1 1h-6c-0.553 0-1-0.448-1-1v-5h-8v5c0 0.552-0.448 1-1 1h-6c-0.552 0-1-0.448-1-1v-5h-2c-1.104 0-2 0.896-2 2v24c0 1.104 0.896 2 2 2h28c1.104 0 2-0.896 2-2v-24c0-1.104-0.896-2-2-2zM30 29c0 0.553-0.447 1-1 1h-26c-0.552 0-1-0.447-1-1v-16c0-0.552 0.448-1 1-1h26c0.553 0 1 0.448 1 1v16zM15.985 17.982h4.968c-0.936 1.152-1.689 2.325-2.265 3.705-0.575 1.381-0.638 2.818-0.749 4.312h2.131c0.009-0.666-0.195-1.385-0.051-2.156 0.146-0.771 0.352-1.532 0.617-2.285 0.267-0.752 0.598-1.461 0.996-2.127 0.396-0.667 0.853-1.229 1.367-1.686v-1.742h-7.015v1.979z"/></symbol><symbol viewBox="0 0 14 14" fill="none" id="f-i-checkbox" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m 4.2666667,5.73333 -0.9333334,0.93334 3,3 L 13,3 12.066667,2.06667 6.3333333,7.8 4.2666667,5.73333 Z m 7.4000003,5.93334 -9.3333337,0 0,-9.33334 L 9,2.33333 9,1 2.3333333,1 C 1.6,1 1,1.6 1,2.33333 l 0,9.33334 C 1,12.4 1.6,13 2.3333333,13 l 9.3333337,0 C 12.4,13 13,12.4 13,11.66667 l 0,-5.33334 -1.333333,0 0,5.33334 z"/></symbol><symbol viewBox="0 0 14 14" fill="none" id="f-i-checkbox-check" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m 4.2666667,5.73333 -0.9333334,0.93334 3,3 L 13,3 12.066667,2.06667 6.3333333,7.8 4.2666667,5.73333 Z m 7.4000003,5.93334 -9.3333337,0 0,-9.33334 L 9,2.33333 9,1 2.3333333,1 C 1.6,1 1,1.6 1,2.33333 l 0,9.33334 C 1,12.4 1.6,13 2.3333333,13 l 9.3333337,0 C 12.4,13 13,12.4 13,11.66667 l 0,-5.33334 -1.333333,0 0,5.33334 z"/></symbol><symbol id="f-i-checkbox-group" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M0,1h16V0H0V1z M0,3h16V2H0V3z M6,5v1h9V5H6z M15,14v-1H6v1H15z M6,10h9V9H6V10z M4,12l-2.5,1.5L0,13l1.5,2L4,12z M4,8 L1.5,9.5L0,9l1.5,2L4,8z M4,4L1.5,5.5L0,5l1.5,2L4,4z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-columns" xmlns="http://www.w3.org/2000/svg"><metadata id="aiprefix__metadata4318"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><path id="aiprefix__rect4860-3-5" d="M 16,0.5 A 0.50004997,0.50004997 0 0 0 15.5,0 l -5,0 -5,0 -5,0 A 0.50004997,0.50004997 0 0 0 0,0.5 l 0,15 A 0.50004997,0.50004997 0 0 0 0.5,16 l 5,0 5,0 5,0 A 0.50004997,0.50004997 0 0 0 16,15.5 l 0,-15 z M 15,1 15,15 11,15 11,1 15,1 Z M 10,1 10,15 6,15 6,1 10,1 Z M 5,1 5,15 1,15 1,1 5,1 Z"/></symbol><symbol viewBox="0 0 32 32" id="f-i-copy" xmlns="http://www.w3.org/2000/svg"><path d="M20 8v-8h-14l-6 6v18h12v8h20v-24h-12zM6 2.828v3.172h-3.172l3.172-3.172zM2 22v-14h6v-6h10v6l-6 6v8h-10zM18 10.828v3.172h-3.172l3.172-3.172zM30 30h-16v-14h6v-6h10v20z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-date-calendar" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M3.5,21.3V4.3h3.8V2.7h1v1.6h7.4V2.7h1v1.6h3.9V21.3H3.5z M19.6,20.3V8.8H4.5v11.6H19.6z M19.6,7.8V5.2h-2.9v1h-1V5.2H8.2v1h-1V5.2H4.5v2.6H19.6z"/></symbol><symbol id="f-i-divider" viewBox="0 0 15 15" xmlns="http://www.w3.org/2000/svg"><metadata id="amprefix__metadata10"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><rect y="7" x="0" height="1" width="15" id="amprefix__rect4182"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-divider-dots" xmlns="http://www.w3.org/2000/svg"><path d="M3 12H3.01M7.5 12H7.51M16.5 12H16.51M12 12H12.01M21 12H21.01M21 21V20.2C21 19.0799 21 18.5198 20.782 18.092C20.5903 17.7157 20.2843 17.4097 19.908 17.218C19.4802 17 18.9201 17 17.8 17H6.2C5.0799 17 4.51984 17 4.09202 17.218C3.7157 17.4097 3.40973 17.7157 3.21799 18.092C3 18.5198 3 19.0799 3 20.2V21M21 3V3.8C21 4.9201 21 5.48016 20.782 5.90798C20.5903 6.28431 20.2843 6.59027 19.908 6.78201C19.4802 7 18.9201 7 17.8 7H6.2C5.0799 7 4.51984 7 4.09202 6.78201C3.71569 6.59027 3.40973 6.28431 3.21799 5.90798C3 5.48016 3 4.92011 3 3.8V3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-dropdown-chevron" xmlns="http://www.w3.org/2000/svg"><path d="M6 9L12 15L18 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 28 32" id="f-i-edit" xmlns="http://www.w3.org/2000/svg"><path d="M22 2l-4 4 6 6 4-4-6-6zM0 24l0.021 6.018 5.979-0.018 16-16-6-6-16 16zM6 28h-4v-4h2v2h2v2z"/></symbol><symbol fill="#000000" viewBox="0 0 24 24" id="f-i-email" xmlns="http://www.w3.org/2000/svg"><path d="M12,2 C17.4292399,2 21.8479317,6.32667079 21.9961582,11.7200952 L22,12 L22,13 C22,15.1729208 20.477434,17 18.5,17 C17.3269391,17 16.3139529,16.3570244 15.6839382,15.3803024 C14.770593,16.3757823 13.4581934,17 12,17 C9.23857625,17 7,14.7614237 7,12 C7,9.23857625 9.23857625,7 12,7 C14.6887547,7 16.8818181,9.12230671 16.9953805,11.7831104 L17,12 L17,13 C17,14.1407877 17.7160103,15 18.5,15 C19.2447902,15 19.928229,14.2245609 19.9947109,13.1689341 L20,13 L20,12 C20,7.581722 16.418278,4 12,4 C7.581722,4 4,7.581722 4,12 C4,16.418278 7.581722,20 12,20 C13.1630948,20 14.2892822,19.7522618 15.3225159,19.2798331 C15.8247876,19.0501777 16.4181317,19.271177 16.647787,19.7734487 C16.8774423,20.2757205 16.656443,20.8690646 16.1541713,21.0987199 C14.861218,21.689901 13.4515463,22 12,22 C6.4771525,22 2,17.5228475 2,12 C2,6.4771525 6.4771525,2 12,2 Z M12,9 C10.3431458,9 9,10.3431458 9,12 C9,13.6568542 10.3431458,15 12,15 C13.6568542,15 15,13.6568542 15,12 C15,10.3431458 13.6568542,9 12,9 Z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-email-envelope" xmlns="http://www.w3.org/2000/svg"><path d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6zm3.519 0L12 11.671 18.481 6H5.52zM20 7.329l-7.341 6.424a1 1 0 0 1-1.318 0L4 7.329V18h16V7.329z" fill="currentColor"/></symbol><symbol viewBox="0 0 24 24" id="f-i-eye" xmlns="http://www.w3.org/2000/svg"><path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol><symbol viewBox="0 0 15 15" fill="none" id="f-i-eye-open" xmlns="http://www.w3.org/2000/svg"><path d="M0.5 7.5L0.0357612 7.31431C-0.0119204 7.43351 -0.0119204 7.56649 0.0357612 7.68569L0.5 7.5ZM14.5 7.5L14.9642 7.6857C15.0119 7.56649 15.0119 7.43351 14.9642 7.3143L14.5 7.5ZM7.49998 12C5.18597 12 3.56111 10.8483 2.49664 9.66552C1.96405 9.07375 1.57811 8.48029 1.32563 8.03474C1.19968 7.81247 1.10772 7.62838 1.04797 7.50164C1.01811 7.4383 0.996349 7.3894 0.98246 7.35735C0.975517 7.34133 0.970545 7.32953 0.967517 7.32225C0.966003 7.31861 0.964975 7.3161 0.96443 7.31477C0.964157 7.3141 0.964005 7.31372 0.963973 7.31364C0.963958 7.3136 0.963972 7.31364 0.964016 7.31375C0.964038 7.31381 0.964094 7.31394 0.964105 7.31397C0.964168 7.31413 0.964239 7.31431 0.5 7.5C0.0357612 7.68569 0.0358471 7.68591 0.0359408 7.68614C0.0359823 7.68625 0.036084 7.6865 0.0361671 7.68671C0.0363335 7.68712 0.0365311 7.68761 0.0367599 7.68818C0.0372175 7.68931 0.0377999 7.69075 0.0385076 7.69248C0.0399231 7.69595 0.0418401 7.70062 0.0442628 7.70644C0.0491078 7.71808 0.0559773 7.73436 0.0649031 7.75495C0.0827516 7.79614 0.108844 7.85467 0.143439 7.92805C0.212592 8.07474 0.315944 8.28128 0.455611 8.52776C0.734381 9.01971 1.16093 9.67625 1.75334 10.3345C2.93886 11.6517 4.814 13 7.49998 13V12ZM0.5 7.5C0.964239 7.68569 0.964168 7.68587 0.964105 7.68603C0.964094 7.68606 0.964038 7.68619 0.964016 7.68625C0.963972 7.68636 0.963958 7.6864 0.963973 7.68636C0.964005 7.68628 0.964157 7.6859 0.96443 7.68523C0.964975 7.6839 0.966003 7.68139 0.967517 7.67775C0.970545 7.67047 0.975517 7.65867 0.98246 7.64265C0.996349 7.6106 1.01811 7.5617 1.04797 7.49836C1.10772 7.37162 1.19968 7.18753 1.32563 6.96526C1.57811 6.51971 1.96405 5.92625 2.49664 5.33448C3.56111 4.15173 5.18597 3 7.49998 3V2C4.814 2 2.93886 3.34827 1.75334 4.66552C1.16093 5.32375 0.734381 5.98029 0.455611 6.47224C0.315944 6.71872 0.212592 6.92526 0.143439 7.07195C0.108844 7.14533 0.0827516 7.20386 0.0649031 7.24505C0.0559773 7.26564 0.0491078 7.28192 0.0442628 7.29356C0.0418401 7.29938 0.0399231 7.30405 0.0385076 7.30752C0.0377999 7.30925 0.0372175 7.31069 0.0367599 7.31182C0.0365311 7.31239 0.0363335 7.31288 0.0361671 7.31329C0.036084 7.3135 0.0359823 7.31375 0.0359408 7.31386C0.0358471 7.31409 0.0357612 7.31431 0.5 7.5ZM7.49998 3C9.814 3 11.4389 4.15173 12.5033 5.33448C13.0359 5.92625 13.4219 6.51971 13.6744 6.96526C13.8003 7.18754 13.8923 7.37162 13.952 7.49837C13.9819 7.5617 14.0037 7.6106 14.0175 7.64265C14.0245 7.65868 14.0295 7.67048 14.0325 7.67775C14.034 7.68139 14.035 7.6839 14.0356 7.68524C14.0358 7.6859 14.036 7.68628 14.036 7.68636C14.036 7.6864 14.036 7.68636 14.036 7.68625C14.036 7.6862 14.0359 7.68606 14.0359 7.68603C14.0358 7.68587 14.0358 7.6857 14.5 7.5C14.9642 7.3143 14.9642 7.31409 14.9641 7.31385C14.964 7.31375 14.9639 7.3135 14.9638 7.31329C14.9637 7.31288 14.9635 7.31239 14.9632 7.31182C14.9628 7.31069 14.9622 7.30925 14.9615 7.30752C14.9601 7.30405 14.9582 7.29938 14.9557 7.29356C14.9509 7.28192 14.944 7.26564 14.9351 7.24504C14.9172 7.20385 14.8912 7.14533 14.8566 7.07195C14.7874 6.92526 14.6841 6.71871 14.5444 6.47224C14.2656 5.98029 13.8391 5.32375 13.2466 4.66552C12.0611 3.34827 10.186 2 7.49998 2V3ZM14.5 7.5C14.0358 7.3143 14.0358 7.31413 14.0359 7.31397C14.0359 7.31394 14.036 7.3138 14.036 7.31375C14.036 7.31364 14.036 7.3136 14.036 7.31364C14.036 7.31372 14.0358 7.3141 14.0356 7.31476C14.035 7.3161 14.034 7.31861 14.0325 7.32225C14.0295 7.32952 14.0245 7.34132 14.0175 7.35735C14.0037 7.3894 13.9819 7.4383 13.952 7.50163C13.8923 7.62838 13.8003 7.81246 13.6744 8.03474C13.4219 8.48029 13.0359 9.07375 12.5033 9.66552C11.4389 10.8483 9.814 12 7.49998 12V13C10.186 13 12.0611 11.6517 13.2466 10.3345C13.8391 9.67625 14.2656 9.01971 14.5444 8.52776C14.6841 8.28129 14.7874 8.07474 14.8566 7.92805C14.8912 7.85467 14.9172 7.79615 14.9351 7.75496C14.944 7.73436 14.9509 7.71808 14.9557 7.70644C14.9582 7.70062 14.9601 7.69595 14.9615 7.69248C14.9622 7.69075 14.9628 7.68931 14.9632 7.68818C14.9635 7.68761 14.9637 7.68712 14.9638 7.68671C14.9639 7.6865 14.964 7.68625 14.9641 7.68615C14.9642 7.68591 14.9642 7.6857 14.5 7.5ZM7.5 9C6.67157 9 6 8.32843 6 7.5H5C5 8.88071 6.11929 10 7.5 10V9ZM9 7.5C9 8.32843 8.32843 9 7.5 9V10C8.88071 10 10 8.88071 10 7.5H9ZM7.5 6C8.32843 6 9 6.67157 9 7.5H10C10 6.11929 8.88071 5 7.5 5V6ZM7.5 5C6.11929 5 5 6.11929 5 7.5H6C6 6.67157 6.67157 6 7.5 6V5Z" fill="#975DAA"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-file-upload-image" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M2.4 1.6H21.6V0H2.4V1.6ZM22.4 2.4V21.6H24V2.4H22.4ZM21.6 22.4H2.4V24H21.6V22.4ZM1.6 21.6V2.4H0V21.6H1.6ZM2.4 22.4C1.96 22.4 1.6 22.04 1.6 21.6H0C0 22.93 1.07 24 2.4 24V22.4ZM22.4 21.6C22.4 22.04 22.04 22.4 21.6 22.4V24C22.93 24 24 22.93 24 21.6H22.4ZM21.6 1.6C22.04 1.6 22.4 1.96 22.4 2.4H24C24 1.07 22.93 0 21.6 0V1.6ZM2.4 0C1.07 0 0 1.07 0 2.4H1.6C1.6 1.96 1.96 1.6 2.4 1.6V0ZM0.8 17.6H23.2V16H0.8V17.6ZM1.37 12.57L7.77 6.17L6.63 5.03L0.23 11.43L1.37 12.57ZM6.63 6.17L17.83 17.37L18.97 16.23L7.77 5.03L6.63 6.17ZM16.8 8C16.36 8 16 7.64 16 7.2H14.4C14.4 8.53 15.47 9.6 16.8 9.6V8ZM17.6 7.2C17.6 7.64 17.24 8 16.8 8V9.6C18.13 9.6 19.2 8.53 19.2 7.2H17.6ZM16.8 6.4C17.24 6.4 17.6 6.76 17.6 7.2H19.2C19.2 5.87 18.13 4.8 16.8 4.8V6.4ZM16.8 4.8C15.47 4.8 14.4 5.87 14.4 7.2H16C16 6.76 16.36 6.4 16.8 6.4V4.8Z"/></symbol><symbol viewBox="0 0 32 32" id="f-i-floppy-disk" xmlns="http://www.w3.org/2000/svg"><path d="M28 0h-28v32h32v-28l-4-4zM16 4h4v8h-4v-8zM28 28h-24v-24h2v10h18v-10h2.343l1.657 1.657v22.343z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle" xmlns="http://www.w3.org/2000/svg"><metadata id="azprefix__metadata8"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><g transform="translate(0,-2)" id="azprefix__g4220"><rect id="azprefix__rect4191" width="2" height="2" x="2" y="7"/><rect id="azprefix__rect4191-2" width="2" height="2" x="7" y="7"/><rect id="azprefix__rect4191-4" width="2" height="2" x="12" y="7"/></g><g transform="translate(0,2)" id="azprefix__g4220-6"><rect id="azprefix__rect4191-40" width="2" height="2" x="2" y="7"/><rect id="azprefix__rect4191-2-3" width="2" height="2" x="7" y="7"/><rect id="azprefix__rect4191-4-9" width="2" height="2" x="12" y="7"/></g></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-column" xmlns="http://www.w3.org/2000/svg"><path d="M2 7h2v2H2zM7 7h2v2H7zM12 7h2v2h-2zM2 12h2v2H2zM7 12h2v2H7zM12 12h2v2h-2z" transform="rotate(90 9.25 9.25)"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-field" xmlns="http://www.w3.org/2000/svg"><path d="M9.5-6.5h2v2h-2zm-5 0h2v2h-2zm5-5h2v2h-2zm-5 0h2v2h-2z" transform="rotate(90)"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-row" xmlns="http://www.w3.org/2000/svg"><path d="M12 9.5h2v2h-2zm-5 0h2v2H7Zm-5 0h2v2H2Zm10-5h2v2h-2zm-5 0h2v2H7Zm-5 0h2v2H2Z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-handle-stage" xmlns="http://www.w3.org/2000/svg"><path d="M2 4.5h2v2H2zM7 4.5h2v2H7zM12 4.5h2v2h-2zM2 9.5h2v2H2zM7 9.5h2v2H7zM12 9.5h2v2h-2zM2-.5h2v2H2zM7-.5h2v2H7zM12-.5h2v2h-2z" transform="translate(0 2.5)"/></symbol><symbol viewBox="0 0 448 512" id="f-i-hash" xmlns="http://www.w3.org/2000/svg"><g id="baprefix__icomoon-ignore"/><path fill="#000" d="M448 192v-64h-80.064l16-128h-64l-16 128h-127.968l16-128h-64l-16 128h-111.968v64h103.968l-15.968 128h-88v64h80l-16 128h64l16-128h127.968l-16 128h64.032l16-128h112v-64h-104l15.936-128h88.064zM279.968 320h-127.968l15.968-128h127.968l-15.968 128z"/></symbol><symbol viewBox="0 0 28 28" id="f-i-header" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M26.281 26q-0.688 0-2.070-0.055t-2.086-0.055q-0.688 0-2.063 0.055t-2.063 0.055q-0.375 0-0.578-0.32t-0.203-0.711q0-0.484 0.266-0.719t0.609-0.266 0.797-0.109 0.703-0.234q0.516-0.328 0.516-2.188l-0.016-6.109q0-0.328-0.016-0.484-0.203-0.063-0.781-0.063h-10.547q-0.594 0-0.797 0.063-0.016 0.156-0.016 0.484l-0.016 5.797q0 2.219 0.578 2.562 0.25 0.156 0.75 0.203t0.891 0.055 0.703 0.234 0.313 0.711q0 0.406-0.195 0.75t-0.57 0.344q-0.734 0-2.18-0.055t-2.164-0.055q-0.672 0-2 0.055t-1.984 0.055q-0.359 0-0.555-0.328t-0.195-0.703q0-0.469 0.242-0.703t0.562-0.273 0.742-0.117 0.656-0.234q0.516-0.359 0.516-2.234l-0.016-0.891v-12.703q0-0.047 0.008-0.406t0-0.57-0.023-0.602-0.055-0.656-0.102-0.57-0.172-0.492-0.25-0.281q-0.234-0.156-0.703-0.187t-0.828-0.031-0.641-0.219-0.281-0.703q0-0.406 0.187-0.75t0.562-0.344q0.719 0 2.164 0.055t2.164 0.055q0.656 0 1.977-0.055t1.977-0.055q0.391 0 0.586 0.344t0.195 0.75q0 0.469-0.266 0.68t-0.602 0.227-0.773 0.063-0.672 0.203q-0.547 0.328-0.547 2.5l0.016 5q0 0.328 0.016 0.5 0.203 0.047 0.609 0.047h10.922q0.391 0 0.594-0.047 0.016-0.172 0.016-0.5l0.016-5q0-2.172-0.547-2.5-0.281-0.172-0.914-0.195t-1.031-0.203-0.398-0.773q0-0.406 0.195-0.75t0.586-0.344q0.688 0 2.063 0.055t2.063 0.055q0.672 0 2.016-0.055t2.016-0.055q0.391 0 0.586 0.344t0.195 0.75q0 0.469-0.273 0.688t-0.625 0.227-0.805 0.047-0.688 0.195q-0.547 0.359-0.547 2.516l0.016 14.734q0 1.859 0.531 2.188 0.25 0.156 0.719 0.211t0.836 0.070 0.648 0.242 0.281 0.695q0 0.406-0.187 0.75t-0.562 0.344z"/></symbol><symbol viewBox="0 0 16 16" fill="none" id="f-i-header-t" xmlns="http://www.w3.org/2000/svg"><path d="M5.68412,13v-.72885l.221-.0181c.7641-.05812.947-.1896.98514-.22866.02573-.02668.1572-.202.1572-.99276V4.07755H6.47918A2.45938,2.45938,0,0,0,5.002,4.36909a2.26179,2.26179,0,0,0-.56259,1.35957l-.03811.19626H3.6038L3.70384,3h8.59994l.09242,2.92492h-.78411l-.02144-.09527a2.81746,2.81746,0,0,0-.58832-1.46532c-.14719-.13148-.52305-.28678-1.481-.28678H8.9606v7.12272c0,.67835.13815.8184.16578.83936a2.09154,2.09154,0,0,0,1.00943.21342l.223.0181V13Z" fill="currentColor"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-hidden" xmlns="http://www.w3.org/2000/svg"><path d="M0 12h1v-1H0Zm15-7h1V4h-1zm-1 7h1v-1h-1zm-2 0h1v-1h-1zm-2 0h1v-1h-1Zm-2 0h1v-1H8Zm-2 0h1v-1H6Zm-2 0h1v-1H4Zm-2 0h1v-1H2Zm13-1h1v-1h-1ZM0 10h1V9H0Zm15-1h1V8h-1ZM0 8h1V7H0Zm15-1h1V6h-1ZM0 6h1V5H0Zm13-1h1V4h-1zm-2 0h1V4h-1ZM9 5h1V4H9ZM7 5h1V4H7ZM5 5h1V4H5ZM3 5h1V4H3ZM1 5h1V4H1Z"/></symbol><symbol viewBox="0 0 384 512" id="f-i-menu" xmlns="http://www.w3.org/2000/svg"><g id="beprefix__icomoon-ignore"/><path d="M0 96v64h384v-64h-384zM0 288h384v-64h-384v64zM0 416h384v-64h-384v64z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-minus" xmlns="http://www.w3.org/2000/svg"><path d="M6 12L18 12" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 512 512" id="f-i-move" xmlns="http://www.w3.org/2000/svg"><path d="M287.744 94.736v129.008h128v-64l96.256 96.256-96.256 96.24v-65.488h-128v129.008h64.496l-96.24 96.24-96.256-96.24h64v-129.008h-128v64.992l-95.744-95.744 95.744-95.744v63.488h128v-129.008h-62.496l94.752-94.736 94.752 94.736h-63.008z"/></symbol><symbol viewBox="0 0 512 512" id="f-i-move-vertical" xmlns="http://www.w3.org/2000/svg"><metadata id="bgprefix__metadata10"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><sodipodi:namedview pagecolor="#ffffff" bordercolor="#666666" borderopacity="1" objecttolerance="10" gridtolerance="10" guidetolerance="10" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:pageopacity="0" inkscape:pageshadow="2" inkscape:window-width="3440" inkscape:window-height="1416" id="bgprefix__namedview6" showgrid="false" inkscape:zoom="1.84375" inkscape:cx="421.4312" inkscape:cy="218.56484" inkscape:window-x="0" inkscape:window-y="24" inkscape:window-maximized="1" inkscape:current-layer="svg2" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"/><path d="m 287.744,94.736 0,321.024 64.496,0 L 256,512 l -96.256,-96.24 64,0 0,-321.024 -62.496,0 L 256,0 350.752,94.736 Z" id="bgprefix__path4" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" inkscape:connector-curvature="0" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" sodipodi:nodetypes="ccccccccccc"/></symbol><symbol viewBox="0 0 15 15" fill="none" id="f-i-new-eye" xmlns="http://www.w3.org/2000/svg"><path d="M0.5 7.5L0.0357612 7.31431C-0.0119204 7.43351 -0.0119204 7.56649 0.0357612 7.68569L0.5 7.5ZM14.5 7.5L14.9642 7.6857C15.0119 7.56649 15.0119 7.43351 14.9642 7.3143L14.5 7.5ZM7.49998 12C5.18597 12 3.56111 10.8483 2.49664 9.66552C1.96405 9.07375 1.57811 8.48029 1.32563 8.03474C1.19968 7.81247 1.10772 7.62838 1.04797 7.50164C1.01811 7.4383 0.996349 7.3894 0.98246 7.35735C0.975517 7.34133 0.970545 7.32953 0.967517 7.32225C0.966003 7.31861 0.964975 7.3161 0.96443 7.31477C0.964157 7.3141 0.964005 7.31372 0.963973 7.31364C0.963958 7.3136 0.963972 7.31364 0.964016 7.31375C0.964038 7.31381 0.964094 7.31394 0.964105 7.31397C0.964168 7.31413 0.964239 7.31431 0.5 7.5C0.0357612 7.68569 0.0358471 7.68591 0.0359408 7.68614C0.0359823 7.68625 0.036084 7.6865 0.0361671 7.68671C0.0363335 7.68712 0.0365311 7.68761 0.0367599 7.68818C0.0372175 7.68931 0.0377999 7.69075 0.0385076 7.69248C0.0399231 7.69595 0.0418401 7.70062 0.0442628 7.70644C0.0491078 7.71808 0.0559773 7.73436 0.0649031 7.75495C0.0827516 7.79614 0.108844 7.85467 0.143439 7.92805C0.212592 8.07474 0.315944 8.28128 0.455611 8.52776C0.734381 9.01971 1.16093 9.67625 1.75334 10.3345C2.93886 11.6517 4.814 13 7.49998 13V12ZM0.5 7.5C0.964239 7.68569 0.964168 7.68587 0.964105 7.68603C0.964094 7.68606 0.964038 7.68619 0.964016 7.68625C0.963972 7.68636 0.963958 7.6864 0.963973 7.68636C0.964005 7.68628 0.964157 7.6859 0.96443 7.68523C0.964975 7.6839 0.966003 7.68139 0.967517 7.67775C0.970545 7.67047 0.975517 7.65867 0.98246 7.64265C0.996349 7.6106 1.01811 7.5617 1.04797 7.49836C1.10772 7.37162 1.19968 7.18753 1.32563 6.96526C1.57811 6.51971 1.96405 5.92625 2.49664 5.33448C3.56111 4.15173 5.18597 3 7.49998 3V2C4.814 2 2.93886 3.34827 1.75334 4.66552C1.16093 5.32375 0.734381 5.98029 0.455611 6.47224C0.315944 6.71872 0.212592 6.92526 0.143439 7.07195C0.108844 7.14533 0.0827516 7.20386 0.0649031 7.24505C0.0559773 7.26564 0.0491078 7.28192 0.0442628 7.29356C0.0418401 7.29938 0.0399231 7.30405 0.0385076 7.30752C0.0377999 7.30925 0.0372175 7.31069 0.0367599 7.31182C0.0365311 7.31239 0.0363335 7.31288 0.0361671 7.31329C0.036084 7.3135 0.0359823 7.31375 0.0359408 7.31386C0.0358471 7.31409 0.0357612 7.31431 0.5 7.5ZM7.49998 3C9.814 3 11.4389 4.15173 12.5033 5.33448C13.0359 5.92625 13.4219 6.51971 13.6744 6.96526C13.8003 7.18754 13.8923 7.37162 13.952 7.49837C13.9819 7.5617 14.0037 7.6106 14.0175 7.64265C14.0245 7.65868 14.0295 7.67048 14.0325 7.67775C14.034 7.68139 14.035 7.6839 14.0356 7.68524C14.0358 7.6859 14.036 7.68628 14.036 7.68636C14.036 7.6864 14.036 7.68636 14.036 7.68625C14.036 7.6862 14.0359 7.68606 14.0359 7.68603C14.0358 7.68587 14.0358 7.6857 14.5 7.5C14.9642 7.3143 14.9642 7.31409 14.9641 7.31385C14.964 7.31375 14.9639 7.3135 14.9638 7.31329C14.9637 7.31288 14.9635 7.31239 14.9632 7.31182C14.9628 7.31069 14.9622 7.30925 14.9615 7.30752C14.9601 7.30405 14.9582 7.29938 14.9557 7.29356C14.9509 7.28192 14.944 7.26564 14.9351 7.24504C14.9172 7.20385 14.8912 7.14533 14.8566 7.07195C14.7874 6.92526 14.6841 6.71871 14.5444 6.47224C14.2656 5.98029 13.8391 5.32375 13.2466 4.66552C12.0611 3.34827 10.186 2 7.49998 2V3ZM14.5 7.5C14.0358 7.3143 14.0358 7.31413 14.0359 7.31397C14.0359 7.31394 14.036 7.3138 14.036 7.31375C14.036 7.31364 14.036 7.3136 14.036 7.31364C14.036 7.31372 14.0358 7.3141 14.0356 7.31476C14.035 7.3161 14.034 7.31861 14.0325 7.32225C14.0295 7.32952 14.0245 7.34132 14.0175 7.35735C14.0037 7.3894 13.9819 7.4383 13.952 7.50163C13.8923 7.62838 13.8003 7.81246 13.6744 8.03474C13.4219 8.48029 13.0359 9.07375 12.5033 9.66552C11.4389 10.8483 9.814 12 7.49998 12V13C10.186 13 12.0611 11.6517 13.2466 10.3345C13.8391 9.67625 14.2656 9.01971 14.5444 8.52776C14.6841 8.28129 14.7874 8.07474 14.8566 7.92805C14.8912 7.85467 14.9172 7.79615 14.9351 7.75496C14.944 7.73436 14.9509 7.71808 14.9557 7.70644C14.9582 7.70062 14.9601 7.69595 14.9615 7.69248C14.9622 7.69075 14.9628 7.68931 14.9632 7.68818C14.9635 7.68761 14.9637 7.68712 14.9638 7.68671C14.9639 7.6865 14.964 7.68625 14.9641 7.68615C14.9642 7.68591 14.9642 7.6857 14.5 7.5ZM7.5 9C6.67157 9 6 8.32843 6 7.5H5C5 8.88071 6.11929 10 7.5 10V9ZM9 7.5C9 8.32843 8.32843 9 7.5 9V10C8.88071 10 10 8.88071 10 7.5H9ZM7.5 6C8.32843 6 9 6.67157 9 7.5H10C10 6.11929 8.88071 5 7.5 5V6ZM7.5 5C6.11929 5 5 6.11929 5 7.5H6C6 6.67157 6.67157 6 7.5 6V5Z" fill="#000000"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-number-hash" xmlns="http://www.w3.org/2000/svg"><path d="M10 4L8 20M16 4L14 20M5 8H21M3 16H19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol viewBox="0 0 32 32" fill="none" id="f-i-paragraph" xmlns="http://www.w3.org/2000/svg"><path d="M24 6H12c-2.761 0-5 2.239-5 5v0c0 2.761 2.239 5 5 5h5M17 27V6M21 27V6" fill="none" stroke="currentColor" stroke-width="2" stroke-miterlimit="10"/></symbol><symbol viewBox="0 0 32 32" fill="none" id="f-i-paragraph-lines" xmlns="http://www.w3.org/2000/svg"><path d="M24 6H12c-2.761 0-5 2.239-5 5v0c0 2.761 2.239 5 5 5h5M17 27V6M21 27V6" fill="none" stroke="currentColor" stroke-width="2" stroke-miterlimit="10"/></symbol><symbol id="f-i-phone-receiver" viewBox="0 0 578.106 578.106" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><g><g><path d="M577.83,456.128c1.225,9.385-1.635,17.545-8.568,24.48l-81.396,80.781 c-3.672,4.08-8.465,7.551-14.381,10.404c-5.916,2.857-11.729,4.693-17.439,5.508c-0.408,0-1.635,0.105-3.676,0.309 c-2.037,0.203-4.689,0.307-7.953,0.307c-7.754,0-20.301-1.326-37.641-3.979s-38.555-9.182-63.645-19.584 c-25.096-10.404-53.553-26.012-85.376-46.818c-31.823-20.805-65.688-49.367-101.592-85.68 c-28.56-28.152-52.224-55.08-70.992-80.783c-18.768-25.705-33.864-49.471-45.288-71.299 c-11.425-21.828-19.993-41.616-25.705-59.364S4.59,177.362,2.55,164.51s-2.856-22.95-2.448-30.294 c0.408-7.344,0.612-11.424,0.612-12.24c0.816-5.712,2.652-11.526,5.508-17.442s6.324-10.71,10.404-14.382L98.022,8.756 c5.712-5.712,12.24-8.568,19.584-8.568c5.304,0,9.996,1.53,14.076,4.59s7.548,6.834,10.404,11.322l65.484,124.236 c3.672,6.528,4.692,13.668,3.06,21.42c-1.632,7.752-5.1,14.28-10.404,19.584l-29.988,29.988c-0.816,0.816-1.53,2.142-2.142,3.978 s-0.918,3.366-0.918,4.59c1.632,8.568,5.304,18.36,11.016,29.376c4.896,9.792,12.444,21.726,22.644,35.802 s24.684,30.293,43.452,48.653c18.36,18.77,34.68,33.354,48.96,43.76c14.277,10.4,26.215,18.053,35.803,22.949 c9.588,4.896,16.932,7.854,22.031,8.871l7.648,1.531c0.816,0,2.145-0.307,3.979-0.918c1.836-0.613,3.162-1.326,3.979-2.143 l34.883-35.496c7.348-6.527,15.912-9.791,25.705-9.791c6.938,0,12.443,1.223,16.523,3.672h0.611l118.115,69.768 C571.098,441.238,576.197,447.968,577.83,456.128z"/></g></g><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/><g/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-plus" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol fill="currentColor" viewBox="0 0 32 32" id="f-i-plus-square" xmlns="http://www.w3.org/2000/svg"><polygon points="15,20 17,20 17,17 20,17 20,15 17,15 17,12 15,12 15,15 12,15 12,17 15,17"/><path d="M7 7v18h18V7H7zM23 23H9V9h14V23z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-radio-circle" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/></symbol><symbol id="f-i-radio-group" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M0,1h16V0H0V1z M0,3h16V2H0V3z M5,6h10V5H5V6z M15,9H5v1h10V9z M15,14v-1H5v1H15z M1.5,7C0.7,7,0,6.3,0,5.5S0.7,4,1.5,4 S3,4.7,3,5.5S2.3,7,1.5,7z M1.5,5C1.2,5,1,5.2,1,5.5S1.2,6,1.5,6S2,5.8,2,5.5S1.8,5,1.5,5z M1.5,11.1C0.7,11.1,0,10.4,0,9.6 s0.7-1.5,1.5-1.5S3,8.7,3,9.6S2.3,11.1,1.5,11.1z M1.5,9.1C1.2,9.1,1,9.3,1,9.6s0.2,0.5,0.5,0.5S2,9.8,2,9.6S1.8,9.1,1.5,9.1z M1.5,15C0.7,15,0,14.3,0,13.5S0.7,12,1.5,12S3,12.7,3,13.5S2.3,15,1.5,15z M1.5,13C1.2,13,1,13.2,1,13.5S1.2,14,1.5,14 S2,13.8,2,13.5S1.8,13,1.5,13z"/></symbol><symbol viewBox="0 0 512 512" id="f-i-remove" xmlns="http://www.w3.org/2000/svg"><path d="M193.694-139.2h87.322v510.916h-87.322zM-18.103 159.92V72.597h510.915v87.322z" transform="rotate(45 77.994 208.636)"/></symbol><symbol id="f-i-rich-text" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path d="M15,1H1C0.4,1,0,1.4,0,2v12c0,0.6,0.4,1,1,1h14c0.6,0,1-0.4,1-1V2C16,1.4,15.6,1,15,1z M1,3.1h0.8v0.3H1V3.1z M1,3.6h0.8 v0.3H1V3.6z M15,14H1V5.1h14V14z M15,4.9H1V4.6h14V4.9z M15,4.4H1V4.1h0.8v0.2h1.5V4.1h1.3v0.2H6V4.1h1.3v0.2h1.5V4.1H10v0.2h1.5 V4.1h1.3v0.2h1.5V4.1H15V4.4z M4.5,3.6v0.3H3.3V3.6H4.5z M3.3,3.4V3.1h1.3v0.3H3.3z M7.3,3.6v0.3H6V3.6H7.3z M6,3.4V3.1h1.3v0.3H6z M10,3.6v0.3H8.8V3.6H10z M8.8,3.4V3.1H10v0.3H8.8z M12.8,3.6v0.3h-1.3V3.6H12.8z M11.5,3.4V3.1h1.3v0.3H11.5z M15,3.9h-0.8V3.6H15 V3.9z M15,3.4h-0.8V3.1H15V3.4z M15,2.9h-0.8V2.8h-1.5v0.2h-1.3V2.8H10v0.2H8.8V2.8H7.3v0.2H6V2.8H4.5v0.2H3.3V2.8H1.8v0.2H1V2.6h14 V2.9z M15,2.4H1V2.1h14V2.4z M3,12v-1h10v1H3z M13,10H3V9h10V10z M11,8H3V7h8V8z"/></symbol><symbol xml:space="preserve" viewBox="0 0 16 16" id="f-i-rows" xmlns="http://www.w3.org/2000/svg"><metadata id="btprefix__metadata4318"><rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><cc:Work rdf:about="" xmlns:cc="http://creativecommons.org/ns#"><dc:format xmlns:dc="http://purl.org/dc/elements/1.1/">image/svg+xml</dc:format><dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage" xmlns:dc="http://purl.org/dc/elements/1.1/"/><dc:title xmlns:dc="http://purl.org/dc/elements/1.1/"/></cc:Work></rdf:RDF></metadata><g transform="matrix(0,1,-1,0,3.0984025,11.835155)" id="btprefix__g7209"><path id="btprefix__rect4860-3-5" d="m 4.1640625,-12.402344 a 0.50004997,0.50004997 0 0 0 -0.5,-0.5 l -5,0 -5,0 -5.0000005,0 a 0.50004997,0.50004997 0 0 0 -0.5,0.5 l 0,15.0000002 a 0.50004997,0.50004997 0 0 0 0.5,0.5 l 4.9648442,0 a 0.50004997,0.50004997 0 0 0 0.035156,0 l 4.9648437,0 a 0.50004997,0.50004997 0 0 0 0.035156,0 l 5,0 a 0.50004997,0.50004997 0 0 0 0.5,-0.5 l 0,-15.0000002 z m -1,0.5 0,14.0000002 -4,0 0,-14.0000002 4,0 z m -5,0 0,14.0000002 -4,0 0,-14.0000002 4,0 z m -5,0 0,14.0000002 -4.0000005,0 0,-14.0000002 4.0000005,0 z"/></g></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-section" xmlns="http://www.w3.org/2000/svg"><path d="M0.8 5.6L12 0.8L23.2 5.6M0.8 5.6L12 10.4M0.8 5.6V18.4L12 23.2M23.2 5.6L12 10.4M23.2 5.6V18.4L12 23.2M12 10.4V23.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol><symbol id="f-i-select" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path id="bvprefix__XMLID_1_" d="M0,0v14h0c0,0.6,0.4,1,1,1h10c0.6,0,1-0.4,1-1h0V5h4V0H0z M1,1h10v3H1V1z M1,7h10v3H1V7z M1,14v-3h10v3H1z M15,4h-3V1h3V4z M2,2h1v1H2V2z M2,12h1v1H2V12z M4,12h1v1H4V12z M6,12h1v1H6V12z M9,12v1H8v-1H9z M2,8h1v1H2V8z M4,8h1v1H4V8z M6,8 h1v1H6V8z M13.5,3.1l-1-1.1h1.9L13.5,3.1z M2,6V5h1v1H2L2,6z M4,6V5h1v1H4L4,6z"/></symbol><symbol viewBox="0 0 448 512" id="f-i-settings" xmlns="http://www.w3.org/2000/svg"><g id="bwprefix__icomoon-ignore"/><path d="M223.969 175c-44.703 0-80.969 36.266-80.969 81 0 44.688 36.266 81.031 80.969 81.031 44.719 0 80.719-36.344 80.719-81.031-0-44.734-36-81-80.719-81zM386.313 302.531l-14.594 35.156 29.469 57.875-36.094 36.094-59.218-27.969-35.156 14.438-17.844 54.625-2.281 7.25h-51.016l-22.078-61.656-35.156-14.5-57.952 29.344-36.078-36.063 27.938-59.25-14.484-35.125-61.767-20.156v-50.984l61.703-22.109 14.485-35.094-25.953-51.234-3.422-6.719 36.031-36.031 59.297 27.922 35.109-14.516 17.828-54.594 2.297-7.234h51l22.094 61.734 35.063 14.516 58.031-29.406 36.063 36.031-27.938 59.203 14.438 35.172 61.875 20.125v50.969l-61.688 22.187z"/></symbol><symbol id="f-i-text-input" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path id="byprefix__XMLID_10_" d="M15,4H4.5V3H6V2H4.5h-1H2v1h1.5v1H1C0.4,4,0,4.5,0,5v6c0,0.6,0.4,1,1,1h2.5v1H2v1h4v-1H4.5v-1H15 c0.6,0,1-0.4,1-1V5C16,4.5,15.6,4,15,4z M1,11V5h2.5v6H1z M15,11H4.5V5H15V11z"/></symbol><symbol viewBox="0 0 24 24" fill="none" id="f-i-text-input-pilcrow" xmlns="http://www.w3.org/2000/svg"><path d="M4 7a1 1 0 0 1 1-1h1a1 1 0 0 1 0 2H5a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1zm-5 5a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1zm-5 5a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1zm5 0a1 1 0 0 1 1-1h9a1 1 0 1 1 0 2h-9a1 1 0 0 1-1-1z" fill="currentColor"/></symbol><symbol id="f-i-textarea" viewBox="0 0 16 16" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"><path id="bzprefix__XMLID_1_" d="M3,11v-1h8v1H3L3,11z M3,7h10V6H3V7L3,7z M3,8v1h10V8H3L3,8z M13,4H3v1h10V4L13,4z M16,14V2c0-0.6-0.4-1-1-1 H1C0.4,1,0,1.4,0,2v12c0,0.6,0.4,1,1,1h14C15.6,15,16,14.6,16,14z M15,2v12H1V2H15z"/></symbol><symbol viewBox="0 0 24 32" id="f-i-triangle-down" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M0 12l11.992 11.992 11.992-11.992h-23.984z"/></symbol><symbol viewBox="0 0 12 32" id="f-i-triangle-left" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M0 15.996l11.992 11.992v-23.984l-11.992 11.992z"/></symbol><symbol viewBox="0 0 12 32" id="f-i-triangle-right" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M0.002 4.008l11.992 11.992-11.992 11.992v-23.984z"/></symbol><symbol viewBox="0 0 24 32" id="f-i-triangle-up" xmlns="http://www.w3.org/2000/svg"><path fill="#444" d="M11.992 8l-11.992 11.992h23.984l-11.992-11.992z"/></symbol><symbol viewBox="0 0 512 512" id="f-i-upload" xmlns="http://www.w3.org/2000/svg"><g id="ceprefix__icomoon-ignore"/><path d="M240 352h-240v128h480v-128h-240zM448 416h-64v-32h64v32zM112 160l128-128 128 128h-80v160h-96v-160z"/></symbol></svg>';
 const name = pkg.name;
-const version$1 = pkg.version;
 const PACKAGE_NAME = name;
-const formeoSpriteId = "formeo-sprite";
 const SVG_SPRITE_URL = null;
-const FALLBACK_SVG_SPRITE_URL = `https://cdn.jsdelivr.net/npm/formeo@${version$1}/dist/${formeoSpriteId}.svg`;
-const CSS_URL = `https://cdn.jsdelivr.net/npm/formeo@${version$1}/dist/formeo.min.css`;
 const PANEL_CLASSNAME = "f-panel";
 const CONTROL_GROUP_CLASSNAME = "control-group";
 const STAGE_CLASSNAME = `${PACKAGE_NAME}-stage`;
 const ROW_CLASSNAME = `${PACKAGE_NAME}-row`;
 const COLUMN_CLASSNAME = `${PACKAGE_NAME}-column`;
 const FIELD_CLASSNAME = `${PACKAGE_NAME}-field`;
+const SECTION_CLASSNAME = `${PACKAGE_NAME}-section`;
 const CUSTOM_COLUMN_OPTION_CLASSNAME = "custom-column-widths";
 const COLUMN_PRESET_CLASSNAME = "column-preset";
 const COLUMN_RESIZE_CLASSNAME = "resizing-columns";
@@ -2188,7 +2226,7 @@ const CHILD_CLASSNAME_MAP = /* @__PURE__ */ new Map([
   [ROW_CLASSNAME, COLUMN_CLASSNAME],
   [COLUMN_CLASSNAME, FIELD_CLASSNAME]
 ]);
-const INTERNAL_COMPONENT_TYPES = ["stage", "row", "column", "field"];
+const INTERNAL_COMPONENT_TYPES = ["stage", "section", "row", "column", "field"];
 const INTERNAL_COMPONENT_INDEX_TYPES = INTERNAL_COMPONENT_TYPES.map((type) => `${type}s`);
 new Map(
   INTERNAL_COMPONENT_INDEX_TYPES.map((type, index2) => [type, INTERNAL_COMPONENT_TYPES[index2]])
@@ -2206,6 +2244,7 @@ const COMPONENT_TYPE_MAP = COMPONENT_TYPES.reduce((acc, type) => {
 const COMPONENT_TYPE_CONFIGS = [
   { name: "controls", className: CONTROL_GROUP_CLASSNAME },
   { name: "stage", className: STAGE_CLASSNAME },
+  { name: "section", className: SECTION_CLASSNAME },
   { name: "row", className: ROW_CLASSNAME },
   { name: "column", className: COLUMN_CLASSNAME },
   { name: "field", className: FIELD_CLASSNAME }
@@ -2213,6 +2252,7 @@ const COMPONENT_TYPE_CONFIGS = [
 const COMPONENT_TYPE_CLASSNAMES = {
   controls: CONTROL_GROUP_CLASSNAME,
   stage: STAGE_CLASSNAME,
+  section: SECTION_CLASSNAME,
   row: ROW_CLASSNAME,
   column: COLUMN_CLASSNAME,
   field: FIELD_CLASSNAME
@@ -2238,8 +2278,14 @@ const { childTypeMapVals, childTypeIndexMapVals } = COMPONENT_TYPE_CONFIGS.reduc
   { childTypeMapVals: [], childTypeIndexMapVals: [] }
 );
 const parentTypeMap = childTypeMapVals.slice().map((typeMap) => typeMap.slice().reverse()).reverse();
-const CHILD_TYPE_MAP = new Map(childTypeMapVals);
-const CHILD_TYPE_INDEX_MAP = new Map(childTypeIndexMapVals);
+const baseChildTypeMap = new Map(childTypeMapVals);
+const baseChildTypeIndexMap = new Map(childTypeIndexMapVals);
+baseChildTypeMap.set("stage", "row");
+baseChildTypeIndexMap.set("stages", "rows");
+baseChildTypeMap.set("section", "row");
+baseChildTypeIndexMap.set("sections", "rows");
+const CHILD_TYPE_MAP = baseChildTypeMap;
+const CHILD_TYPE_INDEX_MAP = baseChildTypeIndexMap;
 const PARENT_TYPE_MAP = new Map(parentTypeMap.slice());
 const columnTemplates = [
   [{ value: "100.0", label: "100%" }],
@@ -2345,7 +2391,8 @@ const DEFAULT_FORMDATA = () => ({
   stages: { [uuid()]: {} },
   rows: {},
   columns: {},
-  fields: {}
+  fields: {},
+  sections: {}
 });
 const CHECKED_TYPES = ["selected", "checked"];
 const REVERSED_CHECKED_TYPES = CHECKED_TYPES.toReversed();
@@ -3537,7 +3584,7 @@ function _objectWithoutProperties(source, excluded) {
   }
   return target;
 }
-var version = "1.15.3";
+var version = "1.15.6";
 function userAgent(pattern) {
   if (typeof window !== "undefined" && window.navigator) {
     return !!/* @__PURE__ */ navigator.userAgent.match(pattern);
@@ -3743,7 +3790,7 @@ function lastChild(el, selector) {
   }
   return last || null;
 }
-function index$9(el, selector) {
+function index$a(el, selector) {
   var index2 = 0;
   if (!el || !el.parentNode) {
     return -1;
@@ -4289,7 +4336,8 @@ function Sortable(el, options) {
       x: 0,
       y: 0
     },
-    supportPointer: Sortable.supportPointer !== false && "PointerEvent" in window && !Safari,
+    // Disabled on Safari: #1571; Enabled on Safari IOS: #2244
+    supportPointer: Sortable.supportPointer !== false && "PointerEvent" in window && (!Safari || IOS),
     emptyInsertThreshold: 5
   };
   PluginManager.initializePlugins(this, el, defaults2);
@@ -4354,8 +4402,8 @@ Sortable.prototype = /** @lends Sortable.prototype */
     if (lastDownEl === target) {
       return;
     }
-    oldIndex = index$9(target);
-    oldDraggableIndex = index$9(target, options.draggable);
+    oldIndex = index$a(target);
+    oldDraggableIndex = index$a(target, options.draggable);
     if (typeof filter === "function") {
       if (filter.call(this, evt, target, this)) {
         _dispatchEvent({
@@ -4369,7 +4417,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
         pluginEvent2("filter", _this, {
           evt
         });
-        preventOnFilter && evt.cancelable && evt.preventDefault();
+        preventOnFilter && evt.preventDefault();
         return;
       }
     } else if (filter) {
@@ -4391,7 +4439,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
         }
       });
       if (filter) {
-        preventOnFilter && evt.cancelable && evt.preventDefault();
+        preventOnFilter && evt.preventDefault();
         return;
       }
     }
@@ -4447,9 +4495,14 @@ Sortable.prototype = /** @lends Sortable.prototype */
       on(ownerDocument, "dragover", nearestEmptyInsertDetectEvent);
       on(ownerDocument, "mousemove", nearestEmptyInsertDetectEvent);
       on(ownerDocument, "touchmove", nearestEmptyInsertDetectEvent);
-      on(ownerDocument, "mouseup", _this._onDrop);
-      on(ownerDocument, "touchend", _this._onDrop);
-      on(ownerDocument, "touchcancel", _this._onDrop);
+      if (options.supportPointer) {
+        on(ownerDocument, "pointerup", _this._onDrop);
+        !this.nativeDraggable && on(ownerDocument, "pointercancel", _this._onDrop);
+      } else {
+        on(ownerDocument, "mouseup", _this._onDrop);
+        on(ownerDocument, "touchend", _this._onDrop);
+        on(ownerDocument, "touchcancel", _this._onDrop);
+      }
       if (FireFox && this.nativeDraggable) {
         this.options.touchStartThreshold = 4;
         dragEl.draggable = true;
@@ -4462,9 +4515,14 @@ Sortable.prototype = /** @lends Sortable.prototype */
           this._onDrop();
           return;
         }
-        on(ownerDocument, "mouseup", _this._disableDelayedDrag);
-        on(ownerDocument, "touchend", _this._disableDelayedDrag);
-        on(ownerDocument, "touchcancel", _this._disableDelayedDrag);
+        if (options.supportPointer) {
+          on(ownerDocument, "pointerup", _this._disableDelayedDrag);
+          on(ownerDocument, "pointercancel", _this._disableDelayedDrag);
+        } else {
+          on(ownerDocument, "mouseup", _this._disableDelayedDrag);
+          on(ownerDocument, "touchend", _this._disableDelayedDrag);
+          on(ownerDocument, "touchcancel", _this._disableDelayedDrag);
+        }
         on(ownerDocument, "mousemove", _this._delayedDragTouchMoveHandler);
         on(ownerDocument, "touchmove", _this._delayedDragTouchMoveHandler);
         options.supportPointer && on(ownerDocument, "pointermove", _this._delayedDragTouchMoveHandler);
@@ -4490,6 +4548,8 @@ Sortable.prototype = /** @lends Sortable.prototype */
     off(ownerDocument, "mouseup", this._disableDelayedDrag);
     off(ownerDocument, "touchend", this._disableDelayedDrag);
     off(ownerDocument, "touchcancel", this._disableDelayedDrag);
+    off(ownerDocument, "pointerup", this._disableDelayedDrag);
+    off(ownerDocument, "pointercancel", this._disableDelayedDrag);
     off(ownerDocument, "mousemove", this._delayedDragTouchMoveHandler);
     off(ownerDocument, "touchmove", this._delayedDragTouchMoveHandler);
     off(ownerDocument, "pointermove", this._delayedDragTouchMoveHandler);
@@ -4700,6 +4760,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
     _this._dragStartId = _nextTick(_this._dragStarted.bind(_this, fallback, evt));
     on(document, "selectstart", _this);
     moved = true;
+    window.getSelection().removeAllRanges();
     if (Safari) {
       css(document.body, "user-select", "none");
     }
@@ -4775,8 +4836,8 @@ Sortable.prototype = /** @lends Sortable.prototype */
       return completedFired = true;
     }
     function changed() {
-      newIndex = index$9(dragEl);
-      newDraggableIndex = index$9(dragEl, options.draggable);
+      newIndex = index$a(dragEl);
+      newDraggableIndex = index$a(dragEl, options.draggable);
       _dispatchEvent({
         sortable: _this,
         name: "change",
@@ -4862,7 +4923,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
         direction = _getSwapDirection(evt, target, targetRect, vertical, differentRowCol ? 1 : options.swapThreshold, options.invertedSwapThreshold == null ? options.swapThreshold : options.invertedSwapThreshold, isCircumstantialInvert, lastTarget === target);
         var sibling;
         if (direction !== 0) {
-          var dragIndex = index$9(dragEl);
+          var dragIndex = index$a(dragEl);
           do {
             dragIndex -= direction;
             sibling = parentEl.children[dragIndex];
@@ -4919,19 +4980,20 @@ Sortable.prototype = /** @lends Sortable.prototype */
     off(ownerDocument, "mouseup", this._onDrop);
     off(ownerDocument, "touchend", this._onDrop);
     off(ownerDocument, "pointerup", this._onDrop);
+    off(ownerDocument, "pointercancel", this._onDrop);
     off(ownerDocument, "touchcancel", this._onDrop);
     off(document, "selectstart", this);
   },
   _onDrop: function _onDrop(evt) {
     var el = this.el, options = this.options;
-    newIndex = index$9(dragEl);
-    newDraggableIndex = index$9(dragEl, options.draggable);
+    newIndex = index$a(dragEl);
+    newDraggableIndex = index$a(dragEl, options.draggable);
     pluginEvent2("drop", this, {
       evt
     });
     parentEl = dragEl && dragEl.parentNode;
-    newIndex = index$9(dragEl);
-    newDraggableIndex = index$9(dragEl, options.draggable);
+    newIndex = index$a(dragEl);
+    newDraggableIndex = index$a(dragEl, options.draggable);
     if (Sortable.eventCanceled) {
       this._nulling();
       return;
@@ -5278,7 +5340,7 @@ function _getSwapDirection(evt, target, targetRect, vertical, swapThreshold, inv
   return 0;
 }
 function _getInsertDirection(target) {
-  if (index$9(dragEl) < index$9(target)) {
+  if (index$a(dragEl) < index$a(target)) {
     return 1;
   } else {
     return -1;
@@ -5326,7 +5388,7 @@ Sortable.utils = {
   closest,
   toggleClass,
   clone,
-  index: index$9,
+  index: index$a,
   nextTick: _nextTick,
   cancelNextTick: _cancelNextTick,
   detectDirection: _detectDirection,
@@ -5811,7 +5873,9 @@ const fetchIcons = async (iconSpriteUrl = SVG_SPRITE_URL) => {
     return insertIcons(BUNDLED_SVG_SPRITE);
   }
   const parseResp = async (resp) => insertIcons(await resp.text());
-  return ajax(iconSpriteUrl, parseResp, () => ajax(FALLBACK_SVG_SPRITE_URL, parseResp));
+  return ajax(iconSpriteUrl, parseResp, () => {
+    return insertIcons(BUNDLED_SVG_SPRITE);
+  });
 };
 const LOADER_MAP = {
   js: insertScripts,
@@ -6871,7 +6935,7 @@ class Autocomplete {
     });
     this.clearButton = dom.create({
       tag: "span",
-      content: dom.icon("remove"),
+      content: dom.icon("bin"),
       className: "clear-button hidden",
       action: { click: () => this.clearValue() }
     });
@@ -7585,7 +7649,7 @@ class EditPanelItem {
           this.dom.classList.remove("to-remove");
         }
       },
-      content: dom.icon("remove")
+      content: dom.icon("bin")
     };
     const controls = {
       className: `${this.panelName}-prop-controls prop-controls`,
@@ -8339,10 +8403,13 @@ class Component extends Data {
         }
       },
       children: [
-        {
-          ...dom.btnTemplate({ content: dom.icon(`handle-${this.name}`) }),
-          className: ["component-handle", `${this.name}-handle`]
-        },
+        // Only show component-handle for stage, hide for sections, rows, columns, and fields
+        ...this.name === "stage" ? [
+          {
+            ...dom.btnTemplate({ content: dom.icon(`handle-${this.name}`) }),
+            className: ["component-handle", `${this.name}-handle`]
+          }
+        ] : [],
         {
           className: ["action-btn-wrap", `${this.name}-action-btn-wrap`],
           children: this.buttons
@@ -8407,7 +8474,7 @@ class Component extends Data {
           }
         };
       },
-      remove: (icon = "remove") => {
+      remove: (icon = "bin") => {
         return {
           ...dom.btnTemplate({ content: dom.icon(icon) }),
           className: ["item-remove"],
@@ -8488,6 +8555,15 @@ class Component extends Data {
     }
     const domChildren = this.domChildren;
     const childGroup = CHILD_TYPE_MAP.get(this.name);
+    if (this.name === "section") {
+      return map(domChildren, (child) => {
+        const row = components.getAddress(`rows.${child.id}`);
+        if (row) return row;
+        const field2 = components.getAddress(`fields.${child.id}`);
+        if (field2) return field2;
+        return null;
+      }).filter(Boolean);
+    }
     return map(domChildren, (child) => components.getAddress(`${childGroup}s.${child.id}`)).filter(Boolean);
   }
   loadChildren = (children = this.data.children) => children.map((rowId) => this.addChild({ id: rowId }));
@@ -8513,7 +8589,16 @@ class Component extends Data {
       return null;
     }
     const childComponentType = `${childGroup}s`;
-    const child = components.getAddress(`${childComponentType}.${childId}`) || components[childComponentType].add(childId, data);
+    let child = null;
+    if (this.name === "stage") {
+      const section = components.getAddress(`sections.${childId}`);
+      if (section) {
+        child = section;
+      }
+    }
+    if (!child) {
+      child = components.getAddress(`${childComponentType}.${childId}`) || components[childComponentType].add(childId, data);
+    }
     if (index2 >= childWrap.children.length) {
       childWrap.appendChild(child.dom);
     } else {
@@ -8583,7 +8668,46 @@ class Component extends Data {
           return newChild.addChild.bind(newChild);
         }
       ],
-      [0, () => this.addChild.bind(this)],
+      [
+        0,
+        (controlData) => {
+          if (this.name === "section") {
+            return (childData, childIndex) => {
+              const controlId = childData?.config?.controlId || "";
+              const controlType = controlId.startsWith("layout-") ? controlId.replace(/^layout-/, "") : controlId || "field";
+              if (controlType === "row") {
+                const Rows3 = components.rows;
+                const row = Rows3.add(uuid(), childData);
+                const childWrap = this.dom.querySelector(".children");
+                if (childIndex >= childWrap.children.length) {
+                  childWrap.appendChild(row.dom);
+                } else {
+                  childWrap.children[childIndex].before(row.dom);
+                }
+                this.removeClasses("empty");
+                this.saveChildOrder();
+                return row;
+              } else {
+                if (controlType === "field" || !controlId.startsWith("layout-")) {
+                  const Fields3 = components.fields;
+                  const field2 = Fields3.add(uuid(), childData);
+                  const childWrap = this.dom.querySelector(".children");
+                  if (childIndex >= childWrap.children.length) {
+                    childWrap.appendChild(field2.dom);
+                  } else {
+                    childWrap.children[childIndex].before(field2.dom);
+                  }
+                  this.removeClasses("empty");
+                  this.saveChildOrder();
+                  return field2;
+                }
+                return this.addChild(childData, childIndex);
+              }
+            };
+          }
+          return (childData, childIndex) => this.addChild(childData, childIndex);
+        }
+      ],
       [
         1,
         (controlData) => {
@@ -8591,7 +8715,13 @@ class Component extends Data {
           return () => this.parent.addChild(controlData, currentIndex + 1);
         }
       ],
-      [2, (controlData) => () => this.parent.parent.addChild(controlData)]
+      [2, (controlData) => () => this.parent.parent.addChild(controlData)],
+      [
+        -999,
+        () => {
+          return () => void 0;
+        }
+      ]
     ]);
     const onAddConditions = {
       controls: async () => {
@@ -8607,13 +8737,94 @@ class Component extends Data {
         } = Controls$3.get(item.id);
         set(elementData, "config.controlId", metaId);
         const controlType = metaId.startsWith("layout-") ? metaId.replace(/^layout-/, "") : "field";
+        if (controlType === "section") {
+          if (this.name !== "stage") {
+            alert("Sections can only be added at the root level (stage), not inside other sections.");
+            const isInControlsPanel3 = from && from.contains && from.contains(item);
+            if (!isInControlsPanel3) {
+              dom.remove(item);
+            }
+            return void 0;
+          }
+          const { default: Sections3 } = await Promise.resolve().then(() => index$9);
+          const stageChildrenContainer = this.dom?.querySelector(".children");
+          const domChildren = stageChildrenContainer ? Array.from(stageChildrenContainer.children) : [];
+          const existingSections = [];
+          for (const domChild of domChildren) {
+            const childId = domChild.id;
+            if (!childId) continue;
+            if (domChild.classList && domChild.classList.contains(SECTION_CLASSNAME)) {
+              const section2 = components.getAddress(`sections.${childId}`);
+              if (section2) {
+                existingSections.push({ section: section2, domIndex: domChildren.indexOf(domChild) });
+              }
+            }
+          }
+          if (existingSections.length > 0) {
+            let previousSection = null;
+            if (newIndex2 === void 0 || newIndex2 >= domChildren.length) {
+              previousSection = existingSections[existingSections.length - 1].section;
+            } else {
+              const sortedSections = [...existingSections].sort((a, b) => b.domIndex - a.domIndex);
+              for (const sectionData of sortedSections) {
+                if (sectionData.domIndex < newIndex2) {
+                  previousSection = sectionData.section;
+                  break;
+                }
+              }
+              if (!previousSection && newIndex2 > 0) {
+                previousSection = existingSections[0].section;
+              }
+            }
+            if (previousSection) {
+              const previousSectionTitle = previousSection.get("config.title") || previousSection.get("config.name") || "";
+              if (!previousSectionTitle.trim()) {
+                alert("Please add a title to the previous section before adding a new section.");
+                const isInControlsPanel3 = from && from.contains && from.contains(item);
+                if (!isInControlsPanel3) {
+                  dom.remove(item);
+                }
+                return void 0;
+              }
+            }
+          }
+          const section = Sections3.add();
+          const childWrap = this.dom.querySelector(".children");
+          if (childWrap) {
+            if (newIndex2 >= childWrap.children.length) {
+              childWrap.appendChild(section.dom);
+            } else {
+              childWrap.children[newIndex2].before(section.dom);
+            }
+          }
+          const currentChildren = this.get("children") || [];
+          const updatedChildren = [...currentChildren];
+          updatedChildren.splice(newIndex2 !== void 0 ? newIndex2 : updatedChildren.length, 0, section.id);
+          this.set("children", updatedChildren);
+          this.removeClasses("empty");
+          const isInControlsPanel2 = from && from.contains && from.contains(item);
+          if (!isInControlsPanel2) {
+            dom.remove(item);
+          }
+          return section;
+        }
         const targets = {
           stage: {
             row: 0,
             column: -1,
             field: -2,
             section: 0
-            // section is a specialized row
+            // sections can be added to stage
+          },
+          section: {
+            row: 0,
+            // sections can contain rows
+            column: -1,
+            // columns must be inside rows
+            field: 0,
+            // sections can contain fields directly
+            section: -999
+            // sections cannot contain other sections
           },
           row: {
             row: 1,
@@ -8633,7 +8844,10 @@ class Component extends Data {
         };
         const depth = get(targets, `${this.name}.${controlType}`);
         const action = depthMap.get(depth)();
-        dom.remove(item);
+        const isInControlsPanel = from && from.contains && from.contains(item);
+        if (!isInControlsPanel) {
+          dom.remove(item);
+        }
         const component2 = action(elementData, newIndex2);
         return component2;
       },
@@ -8815,21 +9029,66 @@ class Component extends Data {
     }
     return clonedData;
   };
+  /**
+   * Clone this component. Fallback to a sensible parent when `this.parent` is
+   * not available (fields inside sections) and special-case cloning a field
+   * into a section so a Field (not a Row) is created.
+   */
   clone = (parent = this.parent) => {
-    const newClone = parent.addChild(this.cloneData(), this.index + 1);
+    let targetParent = parent || this.parent;
+    if (!targetParent && this.dom) {
+      const nearest = this.dom.closest(
+        `.${COLUMN_CLASSNAME}, .${ROW_CLASSNAME}, .${SECTION_CLASSNAME}, .${STAGE_CLASSNAME}`
+      );
+      if (nearest) {
+        targetParent = dom.asComponent(nearest);
+      }
+    }
+    if (!targetParent) {
+      console.error("Clone failed: no valid parent found for", this);
+      return null;
+    }
+    if (this.name === "field" && targetParent.name === "section") {
+      const Fields3 = components.fields;
+      const newField = Fields3.add(uuid(), this.cloneData());
+      const childWrap = targetParent.dom.querySelector(".children");
+      const insertIndex = this.index + 1;
+      if (!childWrap) {
+        return newField;
+      }
+      if (insertIndex >= childWrap.children.length) {
+        childWrap.appendChild(newField.dom);
+      } else {
+        childWrap.children[insertIndex].before(newField.dom);
+      }
+      targetParent.removeClasses("empty");
+      targetParent.saveChildOrder();
+      this.dispatchComponentEvent("onClone", {
+        original: this,
+        clone: newField,
+        parent: targetParent
+      });
+      return newField;
+    }
+    const newClone = targetParent.addChild(this.cloneData(), this.index + 1);
     if (this.name !== "field") {
       this.cloneChildren(newClone);
     }
     this.dispatchComponentEvent("onClone", {
       original: this,
       clone: newClone,
-      parent
+      parent: targetParent
     });
     return newClone;
   };
+  /**
+   * Clone children into target parent/component
+   */
   cloneChildren(toParent) {
     for (const child of this.children) {
-      child?.clone(toParent);
+      if (child) {
+        child.clone(toParent);
+      }
     }
   }
   createChildWrap = (children) => dom.create({
@@ -9504,15 +9763,17 @@ let Rows$1 = class Rows extends ComponentData {
   }
 };
 const rows = new Rows$1();
-const SECTION_CLASSNAME = "formeo-section";
 const DEFAULT_DATA$2 = () => Object.freeze({
   config: {
     name: "",
     instruction: "",
-    collapsed: false
+    collapsed: false,
+    title: "",
+    description: ""
   },
   children: [],
-  className: [SECTION_CLASSNAME, STAGE_CLASSNAME]
+  className: [SECTION_CLASSNAME, STAGE_CLASSNAME],
+  order: 0
 });
 class Section extends Component {
   /**
@@ -9522,6 +9783,16 @@ class Section extends Component {
    */
   constructor(sectionData) {
     super("section", { ...DEFAULT_DATA$2(), ...sectionData });
+    this.getComponentTag = () => {
+      return dom.create({
+        tag: "span",
+        className: ["component-tag", `${this.name}-tag`],
+        children: ["Section"]
+      });
+    };
+    if (this.get("order") === void 0 || this.get("order") === 0) {
+      this.updateOrder();
+    }
     const children = this.createChildWrap();
     const sectionHeader = this.createSectionHeader();
     this.dom = dom.create({
@@ -9532,7 +9803,17 @@ class Section extends Component {
         editingHoverTag: mi18n.get("editing.section") || "Editing Section"
       },
       id: this.id,
-      content: [sectionHeader, this.getActionButtons(), this.editWindow, children]
+      content: [this.getComponentTag(), sectionHeader, this.getActionButtons(), children],
+      action: {
+        click: (evt) => {
+          const target = evt.target;
+          if (target.closest(".section-actions") || target.closest("button") || target.closest("input") || target.closest("textarea")) {
+            return;
+          }
+          evt.stopPropagation();
+          this.selectSection();
+        }
+      }
     });
     Sortable.create(children, {
       animation: 150,
@@ -9541,7 +9822,8 @@ class Section extends Component {
       group: {
         name: "section",
         pull: true,
-        put: ["row", "column", "controls"]
+        put: ["controls", "row", "column"]
+        // Allow controls (form fields), rows, and columns
       },
       sort: true,
       disabled: false,
@@ -9549,8 +9831,10 @@ class Section extends Component {
       onEnd: this.onEnd.bind(this),
       onAdd: this.onAdd.bind(this),
       onSort: this.onSort.bind(this),
-      draggable: `.${ROW_CLASSNAME}`,
-      handle: ".item-move"
+      draggable: `.${FIELD_CLASSNAME}, .${ROW_CLASSNAME}`,
+      handle: ".item-move",
+      filter: `.${SECTION_CLASSNAME}`
+      // Only prevent nested sections
     });
   }
   /**
@@ -9575,17 +9859,18 @@ class Section extends Component {
       className: "section-drag-handle",
       content: dom.icon("handle")
     };
-    const nameInput = {
+    const titleInput = {
       tag: "input",
-      className: "section-name-input",
+      className: "section-title-input",
       attrs: {
         type: "text",
-        placeholder: mi18n.get("section.name.placeholder") || "Section name (required)",
-        value: this.get("config.name") || "",
+        placeholder: mi18n.get("section.title.placeholder") || "Section title (required)",
+        value: this.get("config.title") || this.get("config.name") || "",
         required: true
       },
       action: {
         input: ({ target }) => {
+          this.set("config.title", target.value);
           this.set("config.name", target.value);
         },
         blur: ({ target }) => {
@@ -9597,23 +9882,24 @@ class Section extends Component {
         }
       }
     };
-    const instructionInput = {
+    const descriptionInput = {
       tag: "input",
-      className: "section-instruction-input",
+      className: "section-description-input",
       attrs: {
         type: "text",
-        placeholder: mi18n.get("section.instruction.placeholder") || "Add instruction or context (optional)",
-        value: this.get("config.instruction") || ""
+        placeholder: mi18n.get("section.description.placeholder") || "Section description (optional)",
+        value: this.get("config.description") || this.get("config.instruction") || ""
       },
       action: {
         input: ({ target }) => {
+          this.set("config.description", target.value);
           this.set("config.instruction", target.value);
         }
       }
     };
     const headerContent = {
       className: "section-header-content",
-      content: [nameInput, instructionInput]
+      content: [titleInput, descriptionInput]
     };
     return {
       className: "section-header",
@@ -9629,62 +9915,126 @@ class Section extends Component {
     this.dom.classList.toggle("collapsed", !isCollapsed);
   }
   /**
-   * Edit window for Section
-   * @return {Object} edit window dom config for Section
+   * Select this section and show its settings in the Settings tab
    */
-  get editWindow() {
-    const nameInput = {
-      tag: "input",
-      id: `${this.id}-name`,
-      attrs: {
-        type: "text",
-        value: this.get("config.name") || "",
-        placeholder: "Section name"
-      },
-      config: {
-        label: mi18n.get("section.name") || "Section Name"
-      },
-      action: {
-        input: ({ target }) => {
-          this.set("config.name", target.value);
-          const inlineInput = this.dom.querySelector(".section-name-input");
-          if (inlineInput) {
-            inlineInput.value = target.value;
-          }
-        }
-      }
-    };
-    const instructionInput = {
-      tag: "textarea",
-      id: `${this.id}-instruction`,
-      attrs: {
-        value: this.get("config.instruction") || "",
-        placeholder: "Add instruction or context for this section",
-        rows: 3
-      },
-      config: {
-        label: mi18n.get("section.instruction") || "Section Instruction (optional)"
-      },
-      action: {
-        input: ({ target }) => {
-          this.set("config.instruction", target.value);
-          const inlineInput = this.dom.querySelector(".section-instruction-input");
-          if (inlineInput) {
-            inlineInput.value = target.value;
-          }
-        }
-      }
-    };
-    const editWindow = dom.create({
-      className: `${this.name}-edit group-config`,
-      content: [dom.create(dom.formGroup(nameInput)), dom.create(dom.formGroup(instructionInput))]
+  selectSection = () => {
+    const event = new CustomEvent("formeo:section:selected", {
+      detail: { section: this },
+      bubbles: true
     });
-    return editWindow;
+    document.dispatchEvent(event);
+  };
+  /**
+   * Override onAdd to validate that sections cannot be nested
+   * @param {Object} evt - Sortable event
+   * @return {Object|undefined} component if added, undefined if prevented
+   */
+  async onAdd(evt) {
+    const { from, to, item } = evt;
+    if (item.classList && item.classList.contains(SECTION_CLASSNAME)) {
+      alert("Sections cannot be nested inside other sections.");
+      this._invalidDrop = { item, to };
+      return void 0;
+    }
+    return super.onAdd(evt);
+  }
+  /**
+   * Check if the dragged item is a form field (not a layout control)
+   * @param {HTMLElement} item - The element being dragged
+   * @return {Promise<Boolean>} true if it's a form field
+   */
+  async isFormField(item) {
+    if (!item || !item.id) {
+      return false;
+    }
+    const { default: Controls3 } = await Promise.resolve().then(() => index$8);
+    const controlData = Controls3.get(item.id);
+    if (!controlData) {
+      return false;
+    }
+    const { meta } = controlData.controlData || {};
+    if (!meta) {
+      return false;
+    }
+    if (meta.group === "layout") {
+      return false;
+    }
+    if (meta.id && meta.id.startsWith("layout-")) {
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Store invalid drop info to clean up in onEnd
+   */
+  _invalidDrop = null;
+  /**
+   * Override onEnd to clean up invalid drops after Sortable finishes
+   * @param {Object} evt - Sortable event
+   */
+  onEnd(evt) {
+    if (this._invalidDrop) {
+      const { item, to } = this._invalidDrop;
+      this._invalidDrop = null;
+      if (item && item.parentNode === to && to.contains(item)) {
+        requestAnimationFrame(() => {
+          if (item.parentNode === to) {
+            item.parentNode.removeChild(item);
+          }
+        });
+      }
+    }
+    this.updateOrder();
+    super.onEnd(evt);
+  }
+  /**
+   * Update the order of this section based on its position in the stage
+   */
+  updateOrder() {
+    const parent = this.parent;
+    if (parent && parent.name === "stage") {
+      const stageChildren = parent.get("children") || [];
+      const order = stageChildren.indexOf(this.id) + 1;
+      this.set("order", order);
+    }
+  }
+  /**
+   * Override onSort to update order when section is reordered
+   */
+  onSort() {
+    this.updateOrder();
+    return super.onSort();
+  }
+  /**
+   * Override getComponentTag to show just "Section" text
+   */
+  getComponentTag() {
+    return dom.create({
+      tag: "span",
+      className: ["component-tag", `${this.name}-tag`],
+      children: ["Section"]
+    });
+  }
+  /**
+   * Override buttons getter for sections to use shared actions from component.js
+   * Only customize the edit button to call selectSection instead of toggleEdit
+   */
+  get buttons() {
+    const buttons = super.buttons;
+    const editButton = buttons.find((btn) => btn.meta?.id === "edit");
+    if (editButton) {
+      editButton.action = {
+        click: () => {
+          this.selectSection();
+        }
+      };
+    }
+    return buttons;
   }
 }
 const DEFAULT_CONFIG$2 = {
   actionButtons: {
-    buttons: ["move", "edit", "clone", "remove"],
+    buttons: ["move", "edit", "remove"],
     disabled: []
   }
 };
@@ -9698,6 +10048,11 @@ let Sections$1 = class Sections extends ComponentData {
   }
 };
 const sections = new Sections$1();
+const index$9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  Sections: Sections$1,
+  default: sections
+}, Symbol.toStringTag, { value: "Module" }));
 const DEFAULT_DATA$1 = () => ({ conditions: [CONDITION_TEMPLATE()], children: [] });
 class Stage extends Component {
   /**
@@ -9764,7 +10119,7 @@ class Stage extends Component {
       group: {
         name: "stage",
         pull: true,
-        put: ["row", "column", "controls"]
+        put: ["row", "column", "controls", "section"]
       },
       sort: true,
       disabled: false,
@@ -9774,8 +10129,12 @@ class Stage extends Component {
         stages.active = this;
       },
       onSort: this.onSort.bind(this),
-      draggable: `.${ROW_CLASSNAME}`,
-      handle: ".item-move"
+      onEnd: this.onEndValidation.bind(this),
+      draggable: `.${ROW_CLASSNAME}, .${SECTION_CLASSNAME}`,
+      handle: ".item-move",
+      onUpdate: () => {
+        this.updateSectionOrders();
+      }
     });
   }
   empty(isAnimated = true) {
@@ -9792,11 +10151,134 @@ class Stage extends Component {
       }
     });
   }
-  onAdd(...args) {
-    const component = super.onAdd(...args);
+  /**
+   * Check if a section exists in the stage
+   * @return {Boolean} true if at least one section exists
+   */
+  hasSection() {
+    const sections$1 = Object.keys(sections.data || {});
+    return sections$1.length > 0;
+  }
+  /**
+   * Check if the dragged item is a form field (not a layout control)
+   * @param {HTMLElement} item - The element being dragged
+   * @return {Promise<Boolean>} true if it's a form field
+   */
+  async isFormField(item) {
+    if (!item || !item.id) {
+      return false;
+    }
+    const { default: Controls3 } = await Promise.resolve().then(() => index$8);
+    const controlData = Controls3.get(item.id);
+    if (!controlData) {
+      return false;
+    }
+    const { meta } = controlData.controlData || {};
+    if (!meta) {
+      return false;
+    }
+    if (meta.group === "layout") {
+      return false;
+    }
+    if (meta.id && meta.id.startsWith("layout-")) {
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Check if the drop target is a section or inside a section
+   * @param {HTMLElement} target - The drop target element
+   * @return {Boolean} true if target is a section or inside a section
+   */
+  isDroppingIntoSection(target) {
+    if (!target) {
+      return false;
+    }
+    if (target.classList && target.classList.contains(SECTION_CLASSNAME)) {
+      return true;
+    }
+    if (target.classList && target.classList.contains("children")) {
+      const section2 = target.closest(`.${SECTION_CLASSNAME}`);
+      if (section2) {
+        return true;
+      }
+    }
+    const section = target.closest(`.${SECTION_CLASSNAME}`);
+    return !!section;
+  }
+  /**
+   * Store invalid drop info to clean up in onEnd
+   */
+  _invalidDrop = null;
+  /**
+   * Override onEnd to clean up invalid drops after Sortable finishes
+   * This ensures the clone is removed without affecting the original in controls panel
+   * @param {Object} evt - Sortable event
+   */
+  onEndValidation(evt) {
+    if (!this._invalidDrop) {
+      return;
+    }
+    const { item, to } = this._invalidDrop;
+    this._invalidDrop = null;
+    if (item && item.parentNode === to && to.contains(item)) {
+      requestAnimationFrame(() => {
+        if (item.parentNode === to) {
+          item.parentNode.removeChild(item);
+        }
+      });
+    }
+  }
+  /**
+   * Override onAdd to validate form fields before adding
+   * @param {Object} evt - Sortable event
+   * @return {Object|undefined} component if added, undefined if prevented
+   */
+  async onAdd(evt) {
+    const { from, to, item } = evt;
+    let fromElement = from;
+    if (from && !from.classList.contains(CONTROL_GROUP_CLASSNAME)) {
+      fromElement = from.parentElement;
+    }
+    const fromType = componentType(fromElement);
+    const stageChildren = this.dom.querySelector(".children");
+    const isDroppingOnStage = to === stageChildren;
+    if ((fromType === "controls" || fromType === CONTROL_GROUP_CLASSNAME) && isDroppingOnStage) {
+      const isField = await this.isFormField(item);
+      if (isField) {
+        if (!this.hasSection()) {
+          alert(
+            'Please add a section first before dragging form fields. Select "Section" from the layout fields, then you can drag and drop form fields into it.'
+          );
+          this._invalidDrop = { item, to };
+          return void 0;
+        } else {
+          alert("Please drag form fields into a section. Form fields can only be added inside sections.");
+          this._invalidDrop = { item, to };
+          return void 0;
+        }
+      }
+    }
+    const component = super.onAdd(evt);
     if (component?.name === "column") {
       component.parent.autoColumnWidths();
     }
+    if (component?.name === "section") {
+      this.updateSectionOrders();
+    }
+    return component;
+  }
+  /**
+   * Update the order property of all sections based on their position in the stage
+   */
+  updateSectionOrders() {
+    const children = this.get("children") || [];
+    children.forEach((childId, index2) => {
+      const section = components.getAddress(`sections.${childId}`);
+      if (section) {
+        section.set("order", index2 + 1);
+      }
+    });
   }
 }
 const DEFAULT_CONFIG$1 = () => ({
@@ -9944,6 +10426,7 @@ let Controls$1 = class Controls {
     this.data = /* @__PURE__ */ new Map();
     this.isDragging = false;
     this.selectedField = null;
+    this.selectedSection = null;
     this.settingsGroupIndex = -1;
     this.buttonActions = {
       // this is used for keyboard navigation. when tabbing through controls it
@@ -10195,8 +10678,17 @@ let Controls$1 = class Controls {
           document.documentElement.style.overflow = "hidden";
         },
         onEnd: ({ from, item, clone: clone2 }) => {
-          if (from.contains(clone2)) {
+          if (from && item && !from.contains(item)) {
+            if (from.contains(clone2)) {
+              from.replaceChild(item, clone2);
+            } else if (clone2 && clone2.parentNode === from) {
+              from.replaceChild(item, clone2);
+            }
+          } else if (from && clone2 && from.contains(clone2)) {
             from.replaceChild(item, clone2);
+          }
+          if (item && item.parentNode && item.style.display === "none") {
+            item.style.display = "";
           }
           document.documentElement.style.overflow = this.originalDocumentOverflow;
           this.originalDocumentOverflow = null;
@@ -10250,14 +10742,21 @@ let Controls$1 = class Controls {
       const { field: field2 } = evt.detail;
       this.showFieldSettings(field2);
     });
+    document.addEventListener("formeo:section:selected", (evt) => {
+      const { section } = evt.detail;
+      this.showSectionSettings(section);
+    });
     document.addEventListener("click", (evt) => {
       if (evt.target.closest(".formeo-field")) {
+        return;
+      }
+      if (evt.target.closest(".formeo-section")) {
         return;
       }
       if (evt.target.closest(".formeo-controls")) {
         return;
       }
-      if (evt.target.closest(".field-actions") || evt.target.closest("button")) {
+      if (evt.target.closest(".field-actions") || evt.target.closest(".section-actions") || evt.target.closest("button")) {
         return;
       }
       if (evt.target.closest(".formeo-stage")) {
@@ -10288,6 +10787,19 @@ let Controls$1 = class Controls {
     if (group === "layout") {
       return this.layoutTypes[metaId.replace("layout-", "")]();
     }
+    const isFormField = group !== "layout" && !metaId.startsWith("layout-");
+    if (isFormField) {
+      const activeStage = stages.active;
+      if (!activeStage || !activeStage.hasSection()) {
+        alert(
+          'Please add a section first before adding form fields. Select "Section" from the layout fields, then you can add form fields into it.'
+        );
+        return null;
+      } else {
+        alert("Please add form fields into a section. Form fields can only be added inside sections.");
+        return null;
+      }
+    }
     return this.layoutTypes.field(elementData);
   };
   /**
@@ -10302,7 +10814,11 @@ let Controls$1 = class Controls {
     if (this.selectedField?.dom) {
       this.selectedField.dom.classList.remove("field-selected");
     }
+    if (this.selectedSection?.dom) {
+      this.selectedSection.dom.classList.remove("section-selected");
+    }
     this.selectedField = field2;
+    this.selectedSection = null;
     dom.empty(settingsPanel);
     if (field2) {
       field2.dom.classList.add("field-selected");
@@ -10321,6 +10837,140 @@ let Controls$1 = class Controls {
       settingsPanel.appendChild(placeholder);
     }
     this.switchToSettingsTab();
+  };
+  /**
+   * Show section settings in the Settings tab
+   * @param {Object} section - The section component to show settings for
+   */
+  showSectionSettings = (section) => {
+    const settingsPanel = this.dom?.querySelector("#settings-control-group");
+    if (!settingsPanel) {
+      return;
+    }
+    if (this.selectedField?.dom) {
+      this.selectedField.dom.classList.remove("field-selected");
+    }
+    if (this.selectedSection?.dom) {
+      this.selectedSection.dom.classList.remove("section-selected");
+    }
+    this.selectedSection = section;
+    this.selectedField = null;
+    dom.empty(settingsPanel);
+    if (section) {
+      section.dom.classList.add("section-selected");
+      const sectionSettingsContent = this.createSectionSettingsUI(section);
+      settingsPanel.appendChild(sectionSettingsContent);
+    } else {
+      const placeholder = dom.create({
+        className: "settings-placeholder",
+        children: [
+          {
+            tag: "p",
+            content: mi18n.get("settings.selectSection") || "Select a section to edit its settings"
+          }
+        ]
+      });
+      settingsPanel.appendChild(placeholder);
+    }
+    this.switchToSettingsTab();
+  };
+  /**
+   * Create the settings UI for a section
+   * @param {Object} section - The section component
+   * @return {HTMLElement} The settings UI element
+   */
+  createSectionSettingsUI = (section) => {
+    const settingsRows = [];
+    const title = section.get("config.title") || section.get("config.name") || "";
+    settingsRows.push(this.createSectionTitleRow(section, title));
+    const description = section.get("config.description") || section.get("config.instruction") || "";
+    settingsRows.push(this.createSectionDescriptionRow(section, description));
+    return dom.create({
+      className: "section-settings-content",
+      children: settingsRows.filter(Boolean)
+    });
+  };
+  /**
+   * Create a settings row for section title
+   * @param {Object} section - The section component
+   * @param {String} title - Current title value
+   * @return {Object} Settings row config
+   */
+  createSectionTitleRow = (section, title) => {
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: (mi18n.get("section.title") || "Section Title") + " *",
+          attrs: { for: `${section.id}-title` }
+        },
+        {
+          tag: "input",
+          attrs: {
+            type: "text",
+            id: `${section.id}-title`,
+            value: title,
+            placeholder: mi18n.get("section.title.placeholder") || "Section title (required)",
+            required: true
+          },
+          action: {
+            input: ({ target }) => {
+              section.set("config.title", target.value);
+              section.set("config.name", target.value);
+              const inlineInput = section.dom.querySelector(".section-title-input");
+              if (inlineInput) {
+                inlineInput.value = target.value;
+              }
+            },
+            blur: ({ target }) => {
+              if (!target.value.trim()) {
+                target.classList.add("invalid");
+              } else {
+                target.classList.remove("invalid");
+              }
+            }
+          }
+        }
+      ]
+    };
+  };
+  /**
+   * Create a settings row for section description
+   * @param {Object} section - The section component
+   * @param {String} description - Current description value
+   * @return {Object} Settings row config
+   */
+  createSectionDescriptionRow = (section, description) => {
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("section.description") || "Section Description",
+          attrs: { for: `${section.id}-description` }
+        },
+        {
+          tag: "textarea",
+          attrs: {
+            id: `${section.id}-description`,
+            placeholder: mi18n.get("section.description.placeholder") || "Add description for this section",
+            rows: 3
+          },
+          content: description,
+          action: {
+            input: ({ target }) => {
+              section.set("config.description", target.value);
+              section.set("config.instruction", target.value);
+              const inlineInput = section.dom.querySelector(".section-description-input");
+              if (inlineInput) {
+                inlineInput.value = target.value;
+              }
+            }
+          }
+        }
+      ]
+    };
   };
   /**
    * Get field type from field data
@@ -10856,7 +11506,10 @@ let Controls$1 = class Controls {
           {
             tag: "button",
             attrs: { type: "button" },
-            children: [{ tag: "span", className: "add-conditions-plus", content: "+" }, { tag: "span", content: mi18n.get("addConditions") || "Add conditions" }],
+            children: [
+              { tag: "span", className: "add-conditions-plus", content: "+" },
+              { tag: "span", content: mi18n.get("addConditions") || "Add conditions" }
+            ],
             action: {
               click: () => {
                 fieldConditionState.showConditions = true;
@@ -11164,6 +11817,10 @@ let Controls$1 = class Controls {
       this.selectedField.dom.classList.remove("field-selected");
     }
     this.selectedField = null;
+    if (this.selectedSection?.dom) {
+      this.selectedSection.dom.classList.remove("section-selected");
+    }
+    this.selectedSection = null;
     const settingsPanel = this.dom?.querySelector("#settings-control-group");
     if (settingsPanel) {
       dom.empty(settingsPanel);
@@ -11226,12 +11883,7 @@ class Field extends Component {
         className: FIELD_CLASSNAME
       },
       id: this.id,
-      children: [
-        this.label,
-        this.getComponentTag(),
-        actionButtons,
-        this.preview
-      ].filter(Boolean),
+      children: [this.label, this.getComponentTag(), actionButtons, this.preview].filter(Boolean),
       panelNav: this.panelNav,
       dataset: {
         hoverTag: mi18n.get("field")
@@ -11478,6 +12130,237 @@ const index$7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePrope
   Fields: Fields$1,
   default: fields
 }, Symbol.toStringTag, { value: "Module" }));
+function mapFieldType(fieldData) {
+  const controlId = fieldData.config?.controlId || fieldData.meta?.id || "";
+  const tag = fieldData.tag || "";
+  const attrsType = fieldData.attrs?.type || "";
+  const controlIdMap = {
+    "text-input": "text",
+    email: "email",
+    number: "number",
+    date: "date",
+    file: "file",
+    hidden: "hidden",
+    textarea: "textarea",
+    select: "select",
+    "checkbox-group": "checkbox",
+    "radio-group": "radio"
+  };
+  if (controlId && controlIdMap[controlId]) {
+    return controlIdMap[controlId];
+  }
+  const typeMap = {
+    input: {
+      text: "text",
+      email: "email",
+      number: "number",
+      date: "date",
+      file: "file",
+      hidden: "hidden"
+    },
+    textarea: {
+      "": "textarea"
+    },
+    select: {
+      "": "select"
+    },
+    checkbox: {
+      "": "checkbox"
+    },
+    radio: {
+      "": "radio"
+    }
+  };
+  if (typeMap[tag] && typeMap[tag][attrsType] !== void 0) {
+    return typeMap[tag][attrsType];
+  }
+  return attrsType || tag || "text";
+}
+function mapField(fieldData) {
+  const field2 = {
+    id: fieldData.id,
+    type: mapFieldType(fieldData),
+    label: fieldData.config?.label || "",
+    required: fieldData.attrs?.required || false,
+    placeholder: fieldData.attrs?.placeholder || ""
+  };
+  if (fieldData.attrs?.value !== void 0) {
+    field2.value = fieldData.attrs.value;
+  }
+  if (fieldData.options && Array.isArray(fieldData.options)) {
+    field2.options = fieldData.options.map((opt) => ({
+      label: opt.label || opt.value || "",
+      value: opt.value || "",
+      selected: opt.selected || false,
+      checked: opt.checked || false
+    }));
+  }
+  Object.keys(field2).forEach((key) => {
+    if (field2[key] === void 0) {
+      delete field2[key];
+    }
+  });
+  return field2;
+}
+function extractFieldsFromSection(section) {
+  const rows2 = [];
+  const sectionDom = section.dom;
+  const sectionChildrenContainer = sectionDom?.querySelector(".children");
+  const domChildren = sectionChildrenContainer ? Array.from(sectionChildrenContainer.children) : [];
+  for (const domChild of domChildren) {
+    const childId = domChild.id;
+    if (!childId) continue;
+    const field2 = components.getAddress(`fields.${childId}`);
+    if (field2) {
+      const fieldData = field2.getData();
+      rows2.push({
+        columns: 1,
+        fields: [mapField(fieldData)]
+      });
+      continue;
+    }
+    const row = components.getAddress(`rows.${childId}`);
+    if (row) {
+      const rowDom = row.dom;
+      const rowChildrenContainer = rowDom?.querySelector(".children");
+      const rowDomChildren = rowChildrenContainer ? Array.from(rowChildrenContainer.children) : [];
+      const columnCount = rowDomChildren.length || 1;
+      const rowFields = [];
+      for (const colDom of rowDomChildren) {
+        const columnId = colDom.id;
+        if (!columnId) continue;
+        const column = components.getAddress(`columns.${columnId}`);
+        if (!column) continue;
+        const columnChildrenContainer = column.dom?.querySelector(".children");
+        const columnDomChildren = columnChildrenContainer ? Array.from(columnChildrenContainer.children) : [];
+        for (const fieldDom of columnDomChildren) {
+          const fieldId = fieldDom.id;
+          if (!fieldId) continue;
+          const columnField = components.getAddress(`fields.${fieldId}`);
+          if (columnField) {
+            const fieldData = columnField.getData();
+            rowFields.push(mapField(fieldData));
+          }
+        }
+      }
+      rows2.push({
+        columns: columnCount,
+        fields: rowFields
+      });
+    }
+  }
+  return { rows: rows2 };
+}
+function getSectionOrder(section, stage) {
+  const stageChildren = stage.get("children") || [];
+  const sectionIndex = stageChildren.indexOf(section.id);
+  return sectionIndex >= 0 ? sectionIndex + 1 : 0;
+}
+function buildRuntimeSchema(formeoState = components) {
+  const formId = formeoState.get("id");
+  const stages2 = formeoState.get("stages") || {};
+  const sections2 = formeoState.get("sections") || {};
+  const sectionIds = Object.keys(sections2);
+  if (sectionIds.length === 0) {
+    throw new Error("Cannot export: No sections found. Please add at least one section to the form.");
+  }
+  const stageId = Object.keys(stages2)[0];
+  if (!stageId) {
+    throw new Error("Cannot export: No stage found.");
+  }
+  const stage = stages2[stageId];
+  const stageDom = stage.dom;
+  const stageChildrenContainer = stageDom?.querySelector(".children");
+  const domChildren = stageChildrenContainer ? Array.from(stageChildrenContainer.children) : [];
+  const steps = [];
+  const processedSections = /* @__PURE__ */ new Set();
+  const sectionIdToOrder = /* @__PURE__ */ new Map();
+  let sectionOrder = 1;
+  for (const domChild of domChildren) {
+    const childId = domChild.id;
+    if (!childId) continue;
+    if (!domChild.classList || !domChild.classList.contains(SECTION_CLASSNAME)) {
+      continue;
+    }
+    const section = sections2[childId];
+    if (section) {
+      sectionIdToOrder.set(section.id, sectionOrder++);
+    }
+  }
+  for (const domChild of domChildren) {
+    const childId = domChild.id;
+    if (!childId) continue;
+    if (!domChild.classList || !domChild.classList.contains(SECTION_CLASSNAME)) {
+      continue;
+    }
+    const section = sections2[childId];
+    if (!section) {
+      continue;
+    }
+    if (processedSections.has(section.id)) {
+      continue;
+    }
+    processedSections.add(section.id);
+    const title = section.get("config.title") || section.get("config.name") || "";
+    if (!title.trim()) {
+      throw new Error(`Cannot export: Section "${section.id}" is missing a required title.`);
+    }
+    const { rows: rows2 } = extractFieldsFromSection(section);
+    const order = sectionIdToOrder.get(section.id) || getSectionOrder(section, stage);
+    const step = {
+      id: section.id,
+      order,
+      title: title.trim(),
+      description: (section.get("config.description") || section.get("config.instruction") || "").trim(),
+      rows: rows2
+      // Preserve row structure
+    };
+    if (!step.description) {
+      delete step.description;
+    }
+    steps.push(step);
+  }
+  if (steps.length === 0 && sectionIds.length > 0) {
+    console.warn("No sections found in DOM, falling back to processing all sections");
+    for (const sectionId of sectionIds) {
+      const section = sections2[sectionId];
+      if (!section || processedSections.has(section.id)) {
+        continue;
+      }
+      processedSections.add(section.id);
+      const title = section.get("config.title") || section.get("config.name") || "";
+      if (!title.trim()) {
+        throw new Error(`Cannot export: Section "${section.id}" is missing a required title.`);
+      }
+      const { rows: rows2 } = extractFieldsFromSection(section);
+      const storedOrder = section.get("order");
+      const order = storedOrder > 0 ? storedOrder : processedSections.size;
+      const step = {
+        id: section.id,
+        order,
+        title: title.trim(),
+        description: (section.get("config.description") || section.get("config.instruction") || "").trim(),
+        rows: rows2
+        // Preserve row structure
+      };
+      if (!step.description) {
+        delete step.description;
+      }
+      steps.push(step);
+    }
+  }
+  steps.sort((a, b) => a.order - b.order);
+  const unprocessedSections = sectionIds.filter((id) => !processedSections.has(id));
+  if (unprocessedSections.length > 0) {
+    console.warn("Warning: Some sections are not in the stage DOM:", unprocessedSections);
+  }
+  const schema = {
+    formId,
+    version: "1.0",
+    steps
+  };
+  return schema;
+}
 const Stages2 = stages;
 const Rows2 = rows;
 const Columns2 = columns;
@@ -11538,19 +12421,54 @@ class Components extends Data {
   };
   get json() {
     return window.JSON.stringify({
-      $schema: `https://cdn.jsdelivr.net/npm/formeo@${version$1}/dist/formData_schema.json`,
+      $schema: `./formData_schema.json`,
+      // Relative path instead of CDN
       ...this.formData
     });
   }
-  get formData() {
-    return {
+  /**
+   * Returns the legacy Formeo format (stages, rows, columns, fields, sections)
+   * Used for preview rendering which expects the old structure
+   * @return {Object} legacy Formeo formData structure
+   */
+  getLegacyFormData() {
+    const stages2 = this.get("stages") || {};
+    const rows2 = this.get("rows") || {};
+    const columns2 = this.get("columns") || {};
+    const fields2 = this.get("fields") || {};
+    const sections2 = this.get("sections") || {};
+    const legacyData = {
       id: this.get("id"),
-      stages: stages.getData(),
-      rows: rows.getData(),
-      columns: columns.getData(),
-      fields: fields.getData(),
-      sections: sections.getData()
+      stages: {},
+      rows: {},
+      columns: {},
+      fields: {},
+      sections: {}
     };
+    for (const [stageId, stage] of Object.entries(stages2)) {
+      legacyData.stages[stageId] = stage.getData();
+    }
+    for (const [rowId, row] of Object.entries(rows2)) {
+      legacyData.rows[rowId] = row.getData();
+    }
+    for (const [columnId, column] of Object.entries(columns2)) {
+      legacyData.columns[columnId] = column.getData();
+    }
+    for (const [fieldId, field2] of Object.entries(fields2)) {
+      legacyData.fields[fieldId] = field2.getData();
+    }
+    for (const [sectionId, section] of Object.entries(sections2)) {
+      legacyData.sections[sectionId] = section.getData();
+    }
+    return legacyData;
+  }
+  get formData() {
+    try {
+      return buildRuntimeSchema(this);
+    } catch (error) {
+      console.error("Error building runtime schema:", error);
+      throw error;
+    }
   }
   set config(config) {
     const { stages: stages2, rows: rows2, columns: columns2, fields: fields2 } = config;
@@ -11862,7 +12780,7 @@ const actions = {
     }
   }
 };
-const e = { "en-US": { "en-US": "English", dir: "ltr", "af-ZA": "Afrikaans (South Africa)", "ar-TN": "Arabic (Tunisia)", "cs-CZ": "Czech (Czechia)", "de-DE": "German (Germany)", "es-ES": "European Spanish", "fa-IR": "Persian (Iran)", "fi-FI": "Finnish (Finland)", "fr-FR": "French (France)", "hu-HU": "Hungarian (Hungary)", "it-IT": "Italian (Italy)", "ja-JP": "Japanese (Japan)", "nb-NO": "Norwegian Bokmål (Norway)", "pl-PL": "Polish (Poland)", "pt-BR": "Brazilian Portuguese", "pt-PT": "European Portuguese", "ro-RO": "Romanian (Romania)", "ru-RU": "Russian (Russia)", "th-TH": "Thai (Thailand)", "tr-TR": "Turkish (Türkiye)", "zh-CN": "Chinese (China)", "zh-HK": "Chinese (Hong Kong SAR China)", "action.add.attrs.attr": "What attribute would you like to add?", "action.add.attrs.value": "Default Value", addOption: "Add Option", allFieldsRemoved: "All fields were removed.", allowSelect: "Allow Select", and: "and", attribute: "Attribute", attributeNotPermitted: 'Attribute "{attribute}" is not permitted, please choose another.', attributes: "Attributes", "attrs.class": "Class", "attrs.className": "Class", "attrs.dir": "Direction", "attrs.id": "Id", "attrs.required": "Required", "attrs.style": "Style", "attrs.title": "Title", "attrs.type": "Type", "attrs.value": "Value", autocomplete: "Autocomplete", button: "Button", cannotBeEmpty: "This field cannot be empty", cannotClearFields: "There are no fields to clear", checkbox: "Checkbox", checkboxes: "Checkboxes", class: "Class", clear: "Clear", clearAllMessage: "Are you sure you want to clear all fields?", close: "Close", column: "Column", "condition.target.placeholder": "target", "condition.type.and": "And", "condition.type.if": "If", "condition.type.or": "Or", "condition.type.then": "Then", "condition.value.placeholder": "value", confirmClearAll: "Are you sure you want to remove all fields?", content: "Content", control: "Control", "controlGroups.nextGroup": "Next Group", "controlGroups.prevGroup": "Previous Group", "controls.filteringTerm": 'Filtering "{term}"', "controls.form.button": "Button", "controls.form.checkbox-group": "Checkbox Group", "controls.form.input.date": "Date", "controls.form.input.email": "Email", "controls.form.input.file": "File Upload", "controls.form.input.hidden": "Hidden Input", "controls.form.input.number": "Number", "controls.form.input.text": "Text Input", "controls.form.radio-group": "Radio Group", "controls.form.select": "Select", "controls.form.textarea": "TextArea", "controls.groups.form": "Form Fields", "controls.groups.html": "HTML Elements", "controls.groups.layout": "Layout", "controls.html.divider": "Divider", "controls.html.header": "Header", "controls.html.paragraph": "Paragraph", "controls.layout.column": "Column", "controls.layout.row": "Row", copy: "Copy To Clipboard", danger: "Danger", defineColumnLayout: "Define a column layout", defineColumnWidths: "Define column widths", description: "Help Text", descriptionField: "Description", "editing.row": "Editing Row", editorTitle: "Form Elements", field: "Field", "field.property.invalid": "not valid", "field.property.isChecked": "is checked", "field.property.isNotVisible": "is not visible", "field.property.isVisible": "is visible", "field.property.label": "label", "field.property.valid": "valid", "field.property.value": "value", fieldNonEditable: "This field cannot be edited.", fieldRemoveWarning: "Are you sure you want to remove this field?", fileUpload: "File Upload", formUpdated: "Form Updated", getStarted: "Drag a field from the right to get started.", group: "Group", grouped: "Grouped", hidden: "Hidden Input", hide: "Edit", htmlElements: "HTML Elements", if: "If", "if.condition.source.placeholder": "source", "if.condition.target.placeholder": "target / value", info: "Info", "input.date": "Date", "input.text": "Text", label: "Label", labelCount: "{label} {count}", labelEmpty: "Field Label cannot be empty", "lang.af": "Afrikaans", "lang.ar": "Arabic", "lang.cs": "Czech", "lang.de": "German", "lang.en": "English", "lang.es": "Spanish", "lang.fa": "Persian", "lang.fi": "Finnish", "lang.fr": "French", "lang.hu": "Hungarian", "lang.it": "Italian", "lang.ja": "Japanese", "lang.nb": "Norwegian Bokmål", "lang.pl": "Polish", "lang.pt": "Portuguese", "lang.ro": "Romanian", "lang.ru": "Russian", "lang.th": "Thai", "lang.tr": "Turkish", "lang.zh": "Chinese", layout: "Layout", limitRole: "Limit access to one or more of the following roles:", mandatory: "Mandatory", maxlength: "Max Length", "meta.group": "Group", "meta.icon": "Ico", "meta.label": "Label", minOptionMessage: "This field requires a minimum of 2 options", name: "Name", newOptionLabel: "New {type}", no: "No", number: "Number", off: "Off", on: "On", "operator.contains": "contains", "operator.equals": "equals", "operator.notContains": "not contains", "operator.notEquals": "not equal", "operator.notVisible": "not visible", "operator.visible": "visible", option: "Option", optional: "optional", optionEmpty: "Option value required", optionLabel: "Option {count}", options: "Options", or: "or", order: "Order", "panel.label.attrs": "Attributes", "panel.label.conditions": "Conditions", "panel.label.config": "Configuration", "panel.label.meta": "Meta", "panel.label.options": "Options", "panelEditButtons.attrs": "+ Attribute", "panelEditButtons.conditions": "+ Condition", "panelEditButtons.options": "+ Option", placeholder: "Placeholder", "placeholder.className": "space separated classes", "placeholder.email": "Enter you email", "placeholder.label": "Label", "placeholder.password": "Enter your password", "placeholder.placeholder": "Placeholder", "placeholder.text": "Enter some Text", "placeholder.textarea": "Enter a lot of text", "placeholder.value": "Value", preview: "Preview", primary: "Primary", remove: "Remove", removeMessage: "Remove Element", removeType: "Remove {type}", required: "Required", reset: "Reset", richText: "Rich Text Editor", roles: "Access", row: "Row", "row.makeInputGroup": "Make this row an input group.", "row.makeInputGroupDesc": "Input Groups enable users to add sets of inputs at a time.", "row.settings.fieldsetWrap": "Wrap row in a &lt;fieldset&gt; tag", "row.settings.fieldsetWrap.aria": "Wrap Row in Fieldset", save: "Save", secondary: "Secondary", select: "Select", selectColor: "Select Color", selectionsMessage: "Allow Multiple Selections", selectOptions: "Options", separator: "Separator", settings: "Settings", size: "Size", sizes: "Sizes", "sizes.lg": "Large", "sizes.m": "Default", "sizes.sm": "Small", "sizes.xs": "Extra Small", style: "Style", styles: "Styles", "styles.btn": "Button Style", "styles.btn.danger": "Danger", "styles.btn.default": "Default", "styles.btn.info": "Info", "styles.btn.primary": "Primary", "styles.btn.success": "Success", "styles.btn.warning": "Warning", subtype: "Type", success: "Success", text: "Text Field", then: "Then", "then.condition.target.placeholder": "target", toggle: "Toggle", ungrouped: "Un-Grouped", warning: "Warning", yes: "Yes" } }, i = e["en-US"];
+const e = { "en-US": { "en-US": "English", dir: "ltr", "af-ZA": "Afrikaans (South Africa)", "ar-TN": "Arabic (Tunisia)", "cs-CZ": "Czech (Czechia)", "de-DE": "German (Germany)", "es-ES": "European Spanish", "fa-IR": "Persian (Iran)", "fi-FI": "Finnish (Finland)", "fr-FR": "French (France)", "hu-HU": "Hungarian (Hungary)", "it-IT": "Italian (Italy)", "ja-JP": "Japanese (Japan)", "nb-NO": "Norwegian Bokmål (Norway)", "pl-PL": "Polish (Poland)", "pt-BR": "Brazilian Portuguese", "pt-PT": "European Portuguese", "ro-RO": "Romanian (Romania)", "ru-RU": "Russian (Russia)", "th-TH": "Thai (Thailand)", "tr-TR": "Turkish (Türkiye)", "zh-CN": "Chinese (China)", "zh-HK": "Chinese (Hong Kong SAR China)", "action.add.attrs.attr": "What attribute would you like to add?", "action.add.attrs.value": "Default Value", addOption: "Add Option", allFieldsRemoved: "All fields were removed.", allowSelect: "Allow Select", and: "and", attribute: "Attribute", attributeNotPermitted: 'Attribute "{attribute}" is not permitted, please choose another.', attributes: "Attributes", "attrs.class": "Class", "attrs.className": "Class", "attrs.dir": "Direction", "attrs.id": "Id", "attrs.required": "Required", "attrs.style": "Style", "attrs.title": "Title", "attrs.type": "Type", "attrs.value": "Value", autocomplete: "Autocomplete", button: "Button", cannotBeEmpty: "This field cannot be empty", cannotClearFields: "There are no fields to clear", checkbox: "Checkbox", checkboxes: "Checkboxes", class: "Class", clear: "Clear", clearAllMessage: "Are you sure you want to clear all fields?", close: "Close", column: "Column", "condition.target.placeholder": "target", "condition.type.and": "And", "condition.type.if": "If", "condition.type.or": "Or", "condition.type.then": "Then", "condition.value.placeholder": "value", confirmClearAll: "Are you sure you want to remove all fields?", content: "Content", control: "Control", "controlGroups.nextGroup": "Next Group", "controlGroups.prevGroup": "Previous Group", "controls.filteringTerm": 'Filtering "{term}"', "controls.form.button": "Button", "controls.form.checkbox-group": "Checkbox Group", "controls.form.input.date": "Date", "controls.form.input.email": "Email", "controls.form.input.file": "File Upload", "controls.form.input.hidden": "Hidden Input", "controls.form.input.number": "Number", "controls.form.input.text": "Text Input", "controls.form.radio-group": "Radio Group", "controls.form.select": "Select", "controls.form.textarea": "TextArea", "controls.groups.form": "Form Fields", "controls.groups.html": "HTML Elements", "controls.groups.layout": "Layout", "controls.html.divider": "Divider", "controls.html.header": "Header", "controls.html.paragraph": "Paragraph", "controls.layout.column": "Column", "controls.layout.row": "Row", copy: "Copy To Clipboard", danger: "Danger", defineColumnLayout: "Define a column layout", defineColumnWidths: "Define column widths", description: "Help Text", descriptionField: "Description", "editing.row": "Editing Row", editorTitle: "Form Elements", field: "Field", "field.property.invalid": "not valid", "field.property.isChecked": "is checked", "field.property.isNotVisible": "is not visible", "field.property.isVisible": "is visible", "field.property.label": "label", "field.property.valid": "valid", "field.property.value": "value", fieldNonEditable: "This field cannot be edited.", fieldRemoveWarning: "Are you sure you want to remove this field?", fileUpload: "File Upload", formUpdated: "Form Updated", getStarted: "Drag a field from the right to get started.", group: "Group", grouped: "Grouped", hidden: "Hidden Input", hide: "Edit", htmlElements: "HTML Elements", if: "If", "if.condition.source.placeholder": "source", "if.condition.target.placeholder": "target / value", info: "Info", "input.date": "Date", "input.text": "Text", label: "Label", labelCount: "{label} {count}", labelEmpty: "Field Label cannot be empty", "lang.af": "Afrikaans", "lang.ar": "Arabic", "lang.cs": "Czech", "lang.de": "German", "lang.en": "English", "lang.es": "Spanish", "lang.fa": "Persian", "lang.fi": "Finnish", "lang.fr": "French", "lang.hu": "Hungarian", "lang.it": "Italian", "lang.ja": "Japanese", "lang.nb": "Norwegian Bokmål", "lang.pl": "Polish", "lang.pt": "Portuguese", "lang.ro": "Romanian", "lang.ru": "Russian", "lang.th": "Thai", "lang.tr": "Turkish", "lang.zh": "Chinese", layout: "Layout", limitRole: "Limit access to one or more of the following roles:", mandatory: "Mandatory", maxlength: "Max Length", "meta.group": "Group", "meta.icon": "Ico", "meta.label": "Label", minOptionMessage: "This field requires a minimum of 2 options", name: "Name", newOptionLabel: "New {type}", no: "No", number: "Number", off: "Off", on: "On", "operator.contains": "contains", "operator.equals": "equals", "operator.notContains": "not contains", "operator.notEquals": "not equal", "operator.notVisible": "not visible", "operator.visible": "visible", option: "Option", optional: "optional", optionEmpty: "Option value required", optionLabel: "Option {count}", options: "Options", or: "or", order: "Order", "panel.label.attrs": "Attributes", "panel.label.conditions": "Conditions", "panel.label.config": "Configuration", "panel.label.meta": "Meta", "panel.label.options": "Options", "panelEditButtons.attrs": "+ Attribute", "panelEditButtons.conditions": "+ Condition", "panelEditButtons.options": "+ Option", "panelEditButtons.config": "+ Configuration", placeholder: "Placeholder", "placeholder.className": "space separated classes", "placeholder.email": "Enter you email", "placeholder.label": "Label", "placeholder.password": "Enter your password", "placeholder.placeholder": "Placeholder", "placeholder.text": "Enter some Text", "placeholder.textarea": "Enter a lot of text", "placeholder.value": "Value", preview: "Preview", primary: "Primary", remove: "Remove", removeMessage: "Remove Element", removeType: "Remove {type}", required: "Required", reset: "Reset", richText: "Rich Text Editor", roles: "Access", row: "Row", "row.makeInputGroup": "Make this row an input group.", "row.makeInputGroupDesc": "Input Groups enable users to add sets of inputs at a time.", "row.settings.fieldsetWrap": "Wrap row in a &lt;fieldset&gt; tag", "row.settings.fieldsetWrap.aria": "Wrap Row in Fieldset", save: "Save", cancel: "Cancel", secondary: "Secondary", select: "Select", selectColor: "Select Color", selectionsMessage: "Allow Multiple Selections", selectOptions: "Options", separator: "Separator", settings: "Settings", size: "Size", sizes: "Sizes", "sizes.lg": "Large", "sizes.m": "Default", "sizes.sm": "Small", "sizes.xs": "Extra Small", style: "Style", styles: "Styles", "styles.btn": "Button Style", "styles.btn.danger": "Danger", "styles.btn.default": "Default", "styles.btn.info": "Info", "styles.btn.primary": "Primary", "styles.btn.success": "Success", "styles.btn.warning": "Warning", subtype: "Type", success: "Success", text: "Text Field", then: "Then", "then.condition.target.placeholder": "target", toggle: "Toggle", ungrouped: "Un-Grouped", warning: "Warning", yes: "Yes" } }, i = e["en-US"];
 const locale = "en-US";
 mi18n.addLanguage(locale, i);
 mi18n.setCurrent(locale);
@@ -11878,8 +12796,8 @@ const defaults = {
       // element or selector to attach editor to
       svgSprite: null,
       // null = use bundled sprite, or provide custom URL
-      style: CSS_URL,
-      // change to null
+      style: null,
+      // No CDN - use bundled styles instead
       iconFont: null,
       // 'glyphicons' || 'font-awesome' || 'fontello'
       config: {},
@@ -11888,7 +12806,8 @@ const defaults = {
       actions: {},
       controls: {},
       i18n: {
-        location: "https://draggable.github.io/formeo/assets/lang/"
+        location: null
+        // No CDN - use bundled language files from @draggable/formeo-languages
       },
       onLoad: () => {
       }
@@ -11936,7 +12855,7 @@ const propertyMap = {
 };
 const createRemoveButton = () => dom.btnTemplate({
   className: "remove-input-group",
-  children: dom.icon("remove"),
+  children: dom.icon("bin"),
   action: {
     mouseover: ({ target }) => target.parentElement.classList.add("will-remove"),
     mouseleave: ({ target }) => target.parentElement.classList.remove("will-remove"),
@@ -12184,32 +13103,43 @@ let FormeoRenderer$1 = class FormeoRenderer {
    */
   processSection = (section) => {
     const { id, config = {}, children = [] } = section;
-    const processedRows = children.reduce((acc, rowId) => {
-      const row = this.form.rows[rowId];
+    const processedChildren = children.reduce((acc, childId) => {
+      const row = this.form.rows?.[childId];
       if (row) {
         acc.push(this.processRow(row));
+        return acc;
+      }
+      const field2 = this.form.fields?.[childId];
+      if (field2) {
+        const processedField = this.processFields([childId])[0];
+        if (processedField) {
+          acc.push(processedField);
+        }
+        return acc;
       }
       return acc;
     }, []);
     const sectionHeader = [];
-    if (config.name) {
+    const sectionTitle = config.title || config.name;
+    if (sectionTitle) {
       sectionHeader.push({
         tag: "h3",
         className: "formeo-section-name",
-        children: config.name
+        children: sectionTitle
       });
     }
-    if (config.instruction) {
+    const sectionDescription = config.description || config.instruction;
+    if (sectionDescription) {
       sectionHeader.push({
         tag: "p",
         className: "formeo-section-instruction",
-        children: config.instruction
+        children: sectionDescription
       });
     }
     const sectionData = {
       id: this.prefixId(id),
       className: [SECTION_CLASSNAME, STAGE_CLASSNAME, "formeo-rendered-section"],
-      children: [...sectionHeader, ...processedRows]
+      children: [...sectionHeader, ...processedChildren]
     };
     this.components[baseId(id)] = sectionData;
     return sectionData;
@@ -12364,6 +13294,535 @@ const LISTEN_TYPE_MAP = (component) => {
   const [listenerEvent] = typesMap.find((typeMap) => typeMap[1](component)) || [false];
   return listenerEvent;
 };
+function renderRuntimeSchemaForm(schema, container) {
+  container.innerHTML = "";
+  const wrapper = document.createElement("div");
+  wrapper.className = "runtime-schema-form-wrapper";
+  const sidebar = createSidebar(schema.steps);
+  const mainContent = document.createElement("div");
+  mainContent.className = "runtime-schema-form-content";
+  const form = document.createElement("form");
+  form.className = "runtime-schema-form";
+  form.id = `form-${schema.formId || "default"}`;
+  schema.steps.forEach((step, index2) => {
+    const stepElement = renderStep(step, index2 === 0);
+    form.appendChild(stepElement);
+  });
+  const navigation = createNavigation(schema.steps.length);
+  form.appendChild(navigation);
+  mainContent.appendChild(form);
+  wrapper.appendChild(sidebar);
+  wrapper.appendChild(mainContent);
+  container.appendChild(wrapper);
+  initializeStepNavigation(wrapper, schema.steps.length, schema);
+  return wrapper;
+}
+function createSidebar(steps) {
+  const sidebar = document.createElement("div");
+  sidebar.className = "runtime-schema-sidebar";
+  const stepsList = document.createElement("ul");
+  stepsList.className = "runtime-schema-steps-list";
+  steps.forEach((step, index2) => {
+    const stepItem = document.createElement("li");
+    stepItem.className = "runtime-schema-step-item";
+    stepItem.dataset.stepIndex = index2;
+    if (index2 === 0) {
+      stepItem.classList.add("active");
+    }
+    const stepNumber = document.createElement("div");
+    stepNumber.className = "runtime-schema-step-number";
+    stepNumber.textContent = step.order || index2 + 1;
+    const stepLabel = document.createElement("div");
+    stepLabel.className = "runtime-schema-step-label";
+    stepLabel.textContent = step.title;
+    stepItem.appendChild(stepNumber);
+    stepItem.appendChild(stepLabel);
+    if (index2 < steps.length - 1) {
+      const connector = document.createElement("div");
+      connector.className = "runtime-schema-step-connector";
+      stepItem.appendChild(connector);
+    }
+    stepsList.appendChild(stepItem);
+  });
+  sidebar.appendChild(stepsList);
+  return sidebar;
+}
+function renderStep(step, isActive = false) {
+  const stepElement = document.createElement("div");
+  stepElement.className = "runtime-schema-step";
+  stepElement.dataset.stepId = step.id;
+  stepElement.dataset.stepOrder = step.order;
+  if (!isActive) {
+    stepElement.style.display = "none";
+  }
+  const stepHeader = document.createElement("h2");
+  stepHeader.className = "runtime-schema-step-header";
+  stepHeader.textContent = step.title;
+  stepElement.appendChild(stepHeader);
+  if (step.description) {
+    const stepDescription = document.createElement("p");
+    stepDescription.className = "runtime-schema-step-description";
+    stepDescription.textContent = step.description;
+    stepElement.appendChild(stepDescription);
+  }
+  const fieldsContainer = document.createElement("div");
+  fieldsContainer.className = "runtime-schema-fields-container";
+  if (step.rows && Array.isArray(step.rows) && step.rows.length > 0) {
+    step.rows.forEach((row) => {
+      const rowContainer = document.createElement("div");
+      rowContainer.className = "runtime-schema-row";
+      const rowColumns = row.columns || 1;
+      if (rowColumns === 1) {
+        rowContainer.style.gridTemplateColumns = "1fr";
+      } else {
+        rowContainer.style.gridTemplateColumns = `repeat(${Math.min(rowColumns, 3)}, 1fr)`;
+      }
+      if (row.fields && Array.isArray(row.fields)) {
+        row.fields.forEach((field2) => {
+          const fieldElement = renderField(field2);
+          rowContainer.appendChild(fieldElement);
+        });
+      }
+      fieldsContainer.appendChild(rowContainer);
+    });
+  }
+  stepElement.appendChild(fieldsContainer);
+  return stepElement;
+}
+function renderField(field2) {
+  const fieldWrapper = document.createElement("div");
+  fieldWrapper.className = "runtime-schema-field-wrapper";
+  const label = document.createElement("label");
+  label.className = "runtime-schema-field-label";
+  label.htmlFor = `field-${field2.id}`;
+  const labelText = document.createTextNode(field2.label || "");
+  label.appendChild(labelText);
+  if (field2.required) {
+    const asterisk = document.createElement("span");
+    asterisk.className = "runtime-schema-required-asterisk";
+    asterisk.textContent = " *";
+    asterisk.setAttribute("aria-label", "required");
+    label.appendChild(asterisk);
+  }
+  fieldWrapper.appendChild(label);
+  let inputElement;
+  switch (field2.type) {
+    case "textarea":
+      inputElement = document.createElement("textarea");
+      break;
+    case "select":
+      inputElement = document.createElement("select");
+      if (field2.options && Array.isArray(field2.options)) {
+        field2.options.forEach((option2) => {
+          const optionElement = document.createElement("option");
+          optionElement.value = option2.value || "";
+          optionElement.textContent = option2.label || option2.value || "";
+          if (option2.selected || option2.checked) {
+            optionElement.selected = true;
+          }
+          inputElement.appendChild(optionElement);
+        });
+      }
+      break;
+    case "radio":
+      inputElement = createRadioGroup(field2);
+      break;
+    case "checkbox":
+      inputElement = createCheckboxGroup(field2);
+      break;
+    case "file": {
+      const dropzone = document.createElement("div");
+      dropzone.className = "file-dropzone";
+      const dropContent = document.createElement("div");
+      dropContent.className = "drop-content";
+      const dropIcon = document.createElement("div");
+      dropIcon.className = "drop-icon";
+      try {
+        dropIcon.innerHTML = dom.icon("file-upload-image");
+      } catch (e2) {
+        dropIcon.innerHTML = "📁";
+      }
+      const dropText = document.createElement("div");
+      dropText.className = "drop-text";
+      dropText.textContent = field2.placeholder || "Drag & drop a file or click to browse";
+      const dropSub = document.createElement("div");
+      dropSub.className = "drop-subtext";
+      dropSub.textContent = "";
+      const nativeInput = document.createElement("input");
+      nativeInput.type = "file";
+      nativeInput.style.display = "none";
+      dropContent.appendChild(dropIcon);
+      dropContent.appendChild(dropText);
+      dropContent.appendChild(dropSub);
+      dropzone.appendChild(dropContent);
+      dropzone.appendChild(nativeInput);
+      if (field2.variant === "mirror") {
+        dropzone.classList.add("file-dropzone--mirror");
+      }
+      dropzone.addEventListener("click", () => nativeInput.click());
+      ["dragenter", "dragover"].forEach(
+        (evt) => dropzone.addEventListener(evt, (e2) => {
+          e2.preventDefault();
+          e2.stopPropagation();
+          dropzone.classList.add("dragover");
+        })
+      );
+      ["dragleave", "drop"].forEach(
+        (evt) => dropzone.addEventListener(evt, (e2) => {
+          e2.preventDefault();
+          e2.stopPropagation();
+          dropzone.classList.remove("dragover");
+        })
+      );
+      dropzone.addEventListener("drop", (e2) => {
+        const files = e2.dataTransfer?.files || [];
+        nativeInput.files = files;
+        if (files.length) {
+          dropSub.textContent = files[0].name;
+        }
+      });
+      nativeInput.addEventListener("change", (e2) => {
+        const files = e2.target.files || [];
+        if (files.length) {
+          dropSub.textContent = files[0].name;
+        }
+      });
+      inputElement = dropzone;
+      break;
+    }
+    default:
+      inputElement = document.createElement("input");
+      inputElement.type = field2.type || "text";
+  }
+  if (inputElement.tagName !== "DIV") {
+    inputElement.id = `field-${field2.id}`;
+    inputElement.name = `field-${field2.id}`;
+    inputElement.className = "runtime-schema-field-input";
+    if (field2.placeholder) {
+      inputElement.placeholder = field2.placeholder;
+    }
+    if (field2.required) {
+      inputElement.required = true;
+    }
+    if (field2.value !== void 0) {
+      inputElement.value = field2.value;
+    }
+    if (field2.type === "date") {
+      const dateWrapper = document.createElement("div");
+      dateWrapper.className = "runtime-schema-date-wrapper";
+      dateWrapper.appendChild(inputElement);
+      const calendarIcon = document.createElement("span");
+      calendarIcon.className = "runtime-schema-date-icon";
+      calendarIcon.innerHTML = "📅";
+      dateWrapper.appendChild(calendarIcon);
+      fieldWrapper.appendChild(label);
+      fieldWrapper.appendChild(dateWrapper);
+      return fieldWrapper;
+    }
+    if (field2.type === "select") {
+      const selectWrapper = document.createElement("div");
+      selectWrapper.className = "runtime-schema-select-wrapper";
+      selectWrapper.appendChild(inputElement);
+      fieldWrapper.appendChild(label);
+      fieldWrapper.appendChild(selectWrapper);
+      return fieldWrapper;
+    }
+  }
+  fieldWrapper.appendChild(inputElement);
+  return fieldWrapper;
+}
+function createRadioGroup(field2) {
+  const container = document.createElement("div");
+  container.className = "runtime-schema-radio-group";
+  if (field2.options && Array.isArray(field2.options)) {
+    field2.options.forEach((option2, index2) => {
+      const radioWrapper = document.createElement("div");
+      radioWrapper.className = "runtime-schema-radio-option";
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.id = `field-${field2.id}-${index2}`;
+      radio.name = `field-${field2.id}`;
+      radio.value = option2.value || "";
+      radio.className = "runtime-schema-field-input";
+      if (option2.checked || option2.selected) {
+        radio.checked = true;
+      }
+      if (field2.required) {
+        radio.required = true;
+      }
+      const radioLabel = document.createElement("label");
+      radioLabel.htmlFor = `field-${field2.id}-${index2}`;
+      radioLabel.textContent = option2.label || option2.value || "";
+      radioWrapper.appendChild(radio);
+      radioWrapper.appendChild(radioLabel);
+      container.appendChild(radioWrapper);
+    });
+  }
+  return container;
+}
+function createCheckboxGroup(field2) {
+  const container = document.createElement("div");
+  container.className = "runtime-schema-checkbox-group";
+  if (field2.options && Array.isArray(field2.options)) {
+    field2.options.forEach((option2, index2) => {
+      const checkboxWrapper = document.createElement("div");
+      checkboxWrapper.className = "runtime-schema-checkbox-option";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = `field-${field2.id}-${index2}`;
+      checkbox.name = `field-${field2.id}`;
+      checkbox.value = option2.value || "";
+      checkbox.className = "runtime-schema-field-input";
+      if (option2.checked || option2.selected) {
+        checkbox.checked = true;
+      }
+      const checkboxLabel = document.createElement("label");
+      checkboxLabel.htmlFor = `field-${field2.id}-${index2}`;
+      checkboxLabel.textContent = option2.label || option2.value || "";
+      checkboxWrapper.appendChild(checkbox);
+      checkboxWrapper.appendChild(checkboxLabel);
+      container.appendChild(checkboxWrapper);
+    });
+  }
+  return container;
+}
+function createNavigation(totalSteps) {
+  const navigation = document.createElement("div");
+  navigation.className = "runtime-schema-navigation";
+  const prevButton = document.createElement("button");
+  prevButton.type = "button";
+  prevButton.className = "runtime-schema-nav-button runtime-schema-nav-prev";
+  prevButton.textContent = "Previous";
+  prevButton.style.display = "none";
+  const nextButton = document.createElement("button");
+  nextButton.type = "button";
+  nextButton.className = "runtime-schema-nav-button runtime-schema-nav-next";
+  nextButton.textContent = totalSteps > 1 ? "Next" : "Start";
+  navigation.appendChild(prevButton);
+  navigation.appendChild(nextButton);
+  return navigation;
+}
+function validateField(input, fieldSchema) {
+  const value = input.value.trim();
+  const label = fieldSchema.label || "Field";
+  if (fieldSchema.required && !value) {
+    return {
+      isValid: false,
+      error: `${label} is required`
+    };
+  }
+  if (!value && !fieldSchema.required) {
+    return { isValid: true };
+  }
+  switch (fieldSchema.type) {
+    case "email": {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (value && !emailRegex.test(value)) {
+        return {
+          isValid: false,
+          error: `${label} must be a valid email address`
+        };
+      }
+      break;
+    }
+    case "number":
+      if (value && isNaN(value)) {
+        return {
+          isValid: false,
+          error: `${label} must be a valid number`
+        };
+      }
+      break;
+    case "date":
+      if (value && isNaN(Date.parse(value))) {
+        return {
+          isValid: false,
+          error: `${label} must be a valid date`
+        };
+      }
+      break;
+  }
+  return { isValid: true };
+}
+function getAllFieldsFromStep(stepSchema) {
+  if (!stepSchema.rows || !Array.isArray(stepSchema.rows)) {
+    return [];
+  }
+  return stepSchema.rows.flatMap((row) => row.fields || []);
+}
+function validateStep(stepElement, stepSchema) {
+  const errors = [];
+  const invalidFields = [];
+  const fields2 = getAllFieldsFromStep(stepSchema);
+  fields2.forEach((fieldSchema) => {
+    const input = stepElement.querySelector(`#field-${fieldSchema.id}`);
+    if (fieldSchema.type === "radio") {
+      const radios = stepElement.querySelectorAll(`input[name="field-${fieldSchema.id}"]`);
+      if (radios.length > 0) {
+        const isChecked = Array.from(radios).some((radio) => radio.checked);
+        if (fieldSchema.required && !isChecked) {
+          errors.push(`${fieldSchema.label || "Field"} is required`);
+          invalidFields.push(...Array.from(radios));
+        }
+        return;
+      }
+    }
+    if (fieldSchema.type === "checkbox") {
+      const checkboxes = stepElement.querySelectorAll(`input[name="field-${fieldSchema.id}"]`);
+      if (checkboxes.length > 0) {
+        const isChecked = Array.from(checkboxes).some((checkbox) => checkbox.checked);
+        if (fieldSchema.required && !isChecked) {
+          errors.push(`${fieldSchema.label || "Field"} is required`);
+          invalidFields.push(...Array.from(checkboxes));
+        }
+        return;
+      }
+    }
+    if (!input) {
+      return;
+    }
+    const validation = validateField(input, fieldSchema);
+    if (!validation.isValid) {
+      errors.push(validation.error);
+      invalidFields.push(input);
+    }
+  });
+  return {
+    isValid: errors.length === 0,
+    errors,
+    invalidFields
+  };
+}
+function collectFormData(form, schema) {
+  const formData = {};
+  schema.steps.forEach((step) => {
+    const fields2 = step.rows ? step.rows.flatMap((row) => row.fields || []) : [];
+    fields2.forEach((field2) => {
+      const fieldId = `field-${field2.id}`;
+      let value = "";
+      if (field2.type === "radio") {
+        const checkedRadio = form.querySelector(`input[name="${fieldId}"]:checked`);
+        value = checkedRadio ? checkedRadio.value : "";
+      } else if (field2.type === "checkbox") {
+        const checkedBoxes = form.querySelectorAll(`input[name="${fieldId}"]:checked`);
+        if (checkedBoxes.length > 0) {
+          value = Array.from(checkedBoxes).map((cb) => cb.value).join(", ");
+        }
+      } else {
+        const input = form.querySelector(`#${fieldId}`);
+        if (input) {
+          value = input.value.trim();
+        }
+      }
+      const label = (field2.label || `Field ${field2.id}`).trim();
+      formData[label] = value || "";
+    });
+  });
+  return formData;
+}
+function initializeStepNavigation(wrapper, totalSteps, schema) {
+  let currentStep = 0;
+  const steps = wrapper.querySelectorAll(".runtime-schema-step");
+  const stepItems = wrapper.querySelectorAll(".runtime-schema-step-item");
+  const prevButton = wrapper.querySelector(".runtime-schema-nav-prev");
+  const nextButton = wrapper.querySelector(".runtime-schema-nav-next");
+  const form = wrapper.querySelector(".runtime-schema-form");
+  function showStep(stepIndex) {
+    steps.forEach((step, index2) => {
+      step.style.display = index2 === stepIndex ? "block" : "none";
+    });
+    stepItems.forEach((item, index2) => {
+      item.classList.toggle("active", index2 === stepIndex);
+    });
+    prevButton.style.display = stepIndex === 0 ? "none" : "block";
+    if (stepIndex === 0) {
+      nextButton.textContent = "Start";
+    } else if (stepIndex === totalSteps - 1) {
+      nextButton.textContent = "Submit";
+    } else {
+      nextButton.textContent = "Next";
+    }
+    currentStep = stepIndex;
+    const currentStepElement = steps[currentStep];
+    if (currentStepElement) {
+      const allInputs = currentStepElement.querySelectorAll(".runtime-schema-field-input, input, select, textarea");
+      allInputs.forEach((input) => {
+        input.classList.remove("error");
+      });
+    }
+  }
+  nextButton.addEventListener("click", () => {
+    const currentStepElement = steps[currentStep];
+    const currentStepSchema = schema.steps[currentStep];
+    const validation = validateStep(currentStepElement, currentStepSchema);
+    if (!validation.isValid) {
+      validation.invalidFields.forEach((field2) => {
+        field2.classList.add("error");
+        if (validation.invalidFields.indexOf(field2) === 0) {
+          field2.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+      const errorMessage = validation.errors.join("\n");
+      alert(`Please fix the following errors:
+
+${errorMessage}`);
+      return;
+    }
+    const allInputs = currentStepElement.querySelectorAll(".runtime-schema-field-input, input, select, textarea");
+    allInputs.forEach((input) => {
+      input.classList.remove("error");
+    });
+    if (currentStep < totalSteps - 1) {
+      showStep(currentStep + 1);
+    } else {
+      const finalValidation = validateStep(currentStepElement, currentStepSchema);
+      if (finalValidation.isValid) {
+        const formData = collectFormData(form, schema);
+        let alertMessage = "";
+        Object.entries(formData).forEach(([label, value]) => {
+          alertMessage += `${label}: ${value}
+`;
+        });
+        alert(alertMessage.trim());
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      } else {
+        finalValidation.invalidFields.forEach((field2) => {
+          field2.classList.add("error");
+        });
+        const errorMessage = finalValidation.errors.join("\n");
+        alert(`Please fix the following errors:
+
+${errorMessage}`);
+      }
+    }
+  });
+  prevButton.addEventListener("click", () => {
+    if (currentStep > 0) {
+      showStep(currentStep - 1);
+    }
+  });
+  stepItems.forEach((item, index2) => {
+    item.addEventListener("click", () => {
+      if (index2 <= currentStep) {
+        showStep(index2);
+      }
+    });
+  });
+  form.addEventListener("input", (e2) => {
+    if (e2.target.classList.contains("error")) {
+      e2.target.classList.remove("error");
+    }
+  });
+  form.addEventListener("change", (e2) => {
+    if (e2.target.type === "radio" || e2.target.type === "checkbox") {
+      const name2 = e2.target.name;
+      const groupInputs = form.querySelectorAll(`input[name="${name2}"]`);
+      groupInputs.forEach((input) => {
+        input.classList.remove("error");
+      });
+    }
+  });
+}
 new SmartTooltip();
 let FormeoEditor$1 = class FormeoEditor {
   /**
@@ -12398,6 +13857,15 @@ let FormeoEditor$1 = class FormeoEditor {
     this.userFormData = cleanFormData(data);
     this.load(this.userFormData, this.opts);
   }
+  /**
+   * Returns the legacy Formeo format for rendering/preview
+   * This is the old structure (stages, rows, columns, fields, sections)
+   * that the FormeoRenderer expects
+   * @return {Object} legacy Formeo formData structure
+   */
+  getLegacyFormData() {
+    return this.Components.getLegacyFormData();
+  }
   loadData(data = {}) {
     this.formData = data;
   }
@@ -12423,7 +13891,10 @@ let FormeoEditor$1 = class FormeoEditor {
     promises.push(
       fetchIcons(this.opts.svgSprite),
       fetchFormeoStyle(this.opts.style),
-      mi18n.init({ ...this.opts.i18n, locale: globalThis.sessionStorage?.getItem(SESSION_LOCALE_KEY) })
+      mi18n.init({
+        ...this.opts.i18n,
+        locale: globalThis.sessionStorage?.getItem(SESSION_LOCALE_KEY)
+      })
     );
     await Promise.all(promises);
     if (this.opts.allowEdit) {
@@ -12514,6 +13985,7 @@ let FormeoEditor$1 = class FormeoEditor {
     const controlsContainer = this.controls.container || this.editor;
     controlsContainer.appendChild(this.controls.dom);
     const stageArea = this.stages[0]?.dom;
+    console.log("🚀 ~ FormeoEditor ~ render ~ stageArea:", stageArea);
     if (stageArea) {
       stageArea.insertBefore(stageHeader, stageArea.firstChild);
       stageHeader.after(this.previewContainer);
@@ -12531,6 +14003,376 @@ let FormeoEditor$1 = class FormeoEditor {
     document.dispatchEvent(events.formeoLoaded);
   }
   /**
+   * Get CSS styles for runtime schema form
+   * @return {String} CSS string
+   */
+  getRuntimeSchemaStyles() {
+    return `
+      .runtime-schema-form-wrapper {
+        display: flex;
+        min-height: 600px;
+        background: #f5f7fa;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .runtime-schema-sidebar {
+        width: 280px;
+        background: #ffffff;
+        border-right: 1px solid #e0e0e0;
+        padding: 24px 0;
+        flex-shrink: 0;
+      }
+      
+      .runtime-schema-steps-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      
+      .runtime-schema-step-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin-bottom: 0;
+      }
+      
+      .runtime-schema-step-item:hover:not(.active) {
+        background-color: transparent;
+      }
+      
+      .runtime-schema-step-item.active {
+        background-color: transparent;
+        border-left: none;
+        padding-left: 24px;
+      }
+      
+      .runtime-schema-step-item.active .runtime-schema-step-number {
+        background-color: #8b1538;
+        color: #ffffff;
+      }
+      
+      .runtime-schema-step-item.active .runtime-schema-step-label {
+        color: #8b1538;
+        font-weight: 600;
+      }
+      
+      .runtime-schema-step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: #666666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+        margin-right: 12px;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+        position: relative;
+        z-index: 1;
+      }
+      
+      .runtime-schema-step-label {
+        color: #666666;
+        font-size: 14px;
+        font-weight: 400;
+        transition: color 0.2s ease;
+      }
+      
+      .runtime-schema-step-item.active .runtime-schema-step-label {
+        color: #8b1538;
+        font-weight: 600;
+      }
+      
+      .runtime-schema-step-connector {
+        position: absolute;
+        left: 40px;
+        top: 48px;
+        width: 2px;
+        height: 24px;
+        background-color: #e0e0e0;
+        z-index: 0;
+      }
+      
+      .runtime-schema-form-content {
+        flex: 1;
+        background: #ffffff;
+        padding: 40px 48px;
+        overflow-y: auto;
+        width: 100%;
+      }
+      
+      .runtime-schema-form {
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .runtime-schema-step-header {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0 0 24px 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+      
+      .runtime-schema-step-description {
+        font-size: 14px;
+        color: #666666;
+        margin: 0 0 24px 0;
+      }
+      
+      .runtime-schema-fields-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+      
+      .runtime-schema-row {
+        display: grid;
+        gap: 20px 24px;
+        width: 100%;
+      }
+      
+      .runtime-schema-field-wrapper {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .runtime-schema-field-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333333;
+        margin-bottom: 8px;
+        display: block;
+      }
+      
+      .runtime-schema-required-asterisk {
+        color: #d32f2f;
+        margin-left: 2px;
+      }
+      
+      .runtime-schema-field-input {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 14px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        background-color: #ffffff;
+        color: #1a1a1a;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        font-family: inherit;
+      }
+      
+      .runtime-schema-field-input:focus {
+        outline: none;
+        border-color: #8b1538;
+        box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
+      }
+      
+      .runtime-schema-field-input:invalid.error,
+      .runtime-schema-field-input.error {
+        border-color: #d32f2f;
+        box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+      }
+      
+      .runtime-schema-field-input::placeholder {
+        color: #999999;
+      }
+      
+      .runtime-schema-date-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      
+      .runtime-schema-date-wrapper .runtime-schema-field-input {
+        padding-right: 40px;
+      }
+      
+      .runtime-schema-date-icon {
+        position: absolute;
+        right: 12px;
+        pointer-events: none;
+        font-size: 18px;
+        opacity: 0.6;
+      }
+      
+      .runtime-schema-select-wrapper {
+        position: relative;
+      }
+      
+      .runtime-schema-select-wrapper .runtime-schema-field-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+        cursor: pointer;
+      }
+      
+      .runtime-schema-radio-group,
+      .runtime-schema-checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .runtime-schema-radio-option,
+      .runtime-schema-checkbox-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .runtime-schema-radio-option input[type="radio"],
+      .runtime-schema-checkbox-option input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+        cursor: pointer;
+      }
+      
+      input[type="radio"].error,
+      input[type="checkbox"].error {
+        outline: 2px solid #d32f2f;
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+      
+      .runtime-schema-radio-option label,
+      .runtime-schema-checkbox-option label {
+        font-weight: 400;
+        margin: 0;
+        cursor: pointer;
+        color: #333333;
+      }
+      
+      textarea.runtime-schema-field-input {
+        min-height: 100px;
+        resize: vertical;
+        font-family: inherit;
+      }
+      
+      .runtime-schema-navigation {
+        display: flex;
+        justify-content: flex-start;
+        gap: 16px;
+        margin-top: 32px;
+        padding-top: 0;
+        border-top: none;
+      }
+      
+      .runtime-schema-nav-button {
+        padding: 14px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        min-width: 120px;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-prev {
+        background-color: #ffffff;
+        color: #666666;
+        border: 1px solid #d0d0d0;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-prev:hover {
+        background-color: #f8f9fa;
+        border-color: #8b1538;
+        color: #8b1538;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-next {
+        background-color: #000000;
+        color: #ffffff;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-next:hover {
+        background-color: #333333;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-next:active {
+        transform: translateY(1px);
+      }
+      
+      .runtime-schema-nav-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      @media (max-width: 768px) {
+        .runtime-schema-form-wrapper {
+          flex-direction: column;
+        }
+        
+        .runtime-schema-sidebar {
+          width: 100%;
+          border-right: none;
+          border-bottom: 1px solid #e0e0e0;
+          padding: 16px 0;
+        }
+        
+        .runtime-schema-steps-list {
+          display: flex;
+          overflow-x: auto;
+          padding: 0 16px;
+        }
+        
+        .runtime-schema-step-item {
+          flex-direction: column;
+          align-items: center;
+          min-width: 80px;
+          padding: 8px;
+          margin-right: 16px;
+        }
+        
+        .runtime-schema-step-item.active {
+          border-left: none;
+          border-bottom: 3px solid #8b1538;
+          padding-left: 8px;
+          padding-bottom: 5px;
+        }
+        
+        .runtime-schema-step-connector {
+          display: none;
+        }
+        
+        .runtime-schema-form-content {
+          padding: 24px 16px;
+        }
+        
+        .runtime-schema-fields-container {
+          gap: 20px;
+        }
+        
+        .runtime-schema-row {
+          grid-template-columns: 1fr !important;
+          gap: 20px;
+        }
+        
+        .runtime-schema-navigation {
+          flex-direction: column;
+        }
+        
+        .runtime-schema-nav-button {
+          width: 100%;
+        }
+      }
+    `;
+  }
+  /**
    * Toggle between edit mode and preview mode
    * @return {void}
    */
@@ -12544,10 +14386,26 @@ let FormeoEditor$1 = class FormeoEditor {
         this.stageContent.style.display = "none";
       }
       this.previewContainer.style.display = "block";
-      const renderer = new FormeoRenderer$1({
-        renderContainer: this.previewContainer
-      });
-      renderer.render(this.formData);
+      const runtimeSchema = this.formData;
+      if (!runtimeSchema || !runtimeSchema.steps || runtimeSchema.steps.length === 0) {
+        alert("No form steps found. Please add at least one section with fields to the form.");
+        this.isPreviewMode = false;
+        this.previewButton.innerHTML = dom.icon("new-eye");
+        this.previewButton.classList.remove("active");
+        if (this.stageContent) {
+          this.stageContent.style.display = "";
+        }
+        this.previewContainer.style.display = "none";
+        return;
+      }
+      const styleId = "formeo-runtime-schema-styles";
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement("style");
+        style.id = styleId;
+        style.textContent = this.getRuntimeSchemaStyles();
+        document.head.appendChild(style);
+      }
+      renderRuntimeSchemaForm(runtimeSchema, this.previewContainer);
       events.formeoUpdated({ type: "preview", isPreviewMode: true }, "formeoPreview");
     } else {
       if (this.stageContent) {
@@ -12980,7 +14838,8 @@ class TinyMCEControl extends Control {
       attrs: {
         required: false
       },
-      dependencies: { js: "https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.9.11/tinymce.min.js" },
+      dependencies: { js: null },
+      // No CDN - provide TinyMCE dependency yourself
       // this action is passed to the rendered control/element
       // useful for actions and events on the control preview
       action: {
