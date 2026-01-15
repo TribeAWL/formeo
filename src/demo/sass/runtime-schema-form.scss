@@ -189,6 +189,44 @@
   }
 }
 
+/* File Dropzone (demo-specific adjustments) - dotted large box like Image 1 */
+.file-dropzone {
+  border: 1px dotted #d9d9d9;
+  border-radius: 6px;
+  padding: 40px 24px;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  text-align: center;
+}
+
+.file-dropzone .drop-icon { font-size: 16px; margin-bottom: 6px; color: #bdbdbd }
+.file-dropzone .drop-text { font-weight: 400; color: #6b6b6b }
+.file-dropzone .drop-subtext { color: #bdbdbd; font-size: 12px }
+
+.file-dropzone.dragover { border-color: #b3b3b3; background: transparent }
+
+/* Mirror variant for right-aligned dropzone */
+.file-dropzone--mirror {
+  margin-left: auto;
+  margin-right: 40px;
+  width: 80%;
+}
+
+/* Navigation buttons */
+.runtime-schema-nav-button {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.runtime-schema-nav-prev { background: transparent; color: #333; padding-left: 6px }
+
 /* Date Input Wrapper */
 .runtime-schema-date-wrapper {
   position: relative;

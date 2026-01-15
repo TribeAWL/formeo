@@ -5,6 +5,7 @@
  * Creates a professional stepper interface with sidebar navigation and form content.
  */
 
+import dom from '../common/dom.js'
 import { buildRuntimeSchema } from '../components/runtime-schema.js'
 
 /**
@@ -218,6 +219,86 @@ function renderField(field) {
     case 'checkbox':
       inputElement = createCheckboxGroup(field)
       break
+    case 'file': {
+      // Create a styled dropzone wrapper for file uploads
+      const dropzone = document.createElement('div')
+      dropzone.className = 'file-dropzone'
+
+      const dropContent = document.createElement('div')
+      dropContent.className = 'drop-content'
+
+      const dropIcon = document.createElement('div')
+      dropIcon.className = 'drop-icon'
+      // use project icon sprite if available, fallback to emoji
+      try {
+        dropIcon.innerHTML = dom.icon('file-upload-image')
+      } catch (e) {
+        dropIcon.innerHTML = '📁'
+      }
+
+      const dropText = document.createElement('div')
+      dropText.className = 'drop-text'
+      dropText.textContent = field.placeholder || 'Drag & drop a file or click to browse'
+
+      const dropSub = document.createElement('div')
+      dropSub.className = 'drop-subtext'
+      dropSub.textContent = ''
+
+      // Hidden native file input to open file dialog
+      const nativeInput = document.createElement('input')
+      nativeInput.type = 'file'
+      nativeInput.style.display = 'none'
+
+      dropContent.appendChild(dropIcon)
+      dropContent.appendChild(dropText)
+      dropContent.appendChild(dropSub)
+      dropzone.appendChild(dropContent)
+      dropzone.appendChild(nativeInput)
+
+      // support mirror variant (right-aligned) via field.variant
+      if (field.variant === 'mirror') {
+        dropzone.classList.add('file-dropzone--mirror')
+      }
+
+      // Click opens file dialog
+      dropzone.addEventListener('click', () => nativeInput.click())
+
+      // Drag events for visual state
+      ;['dragenter', 'dragover'].forEach(evt =>
+        dropzone.addEventListener(evt, e => {
+          e.preventDefault()
+          e.stopPropagation()
+          dropzone.classList.add('dragover')
+        })
+      )
+      ;['dragleave', 'drop'].forEach(evt =>
+        dropzone.addEventListener(evt, e => {
+          e.preventDefault()
+          e.stopPropagation()
+          dropzone.classList.remove('dragover')
+        })
+      )
+
+      // Handle dropped files or selected files
+      dropzone.addEventListener('drop', e => {
+        const files = e.dataTransfer?.files || []
+        nativeInput.files = files
+        // show filename
+        if (files.length) {
+          dropSub.textContent = files[0].name
+        }
+      })
+
+      nativeInput.addEventListener('change', e => {
+        const files = e.target.files || []
+        if (files.length) {
+          dropSub.textContent = files[0].name
+        }
+      })
+
+      inputElement = dropzone
+      break
+    }
     default:
       inputElement = document.createElement('input')
       inputElement.type = field.type || 'text'
