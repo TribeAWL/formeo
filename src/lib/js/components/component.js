@@ -19,6 +19,9 @@ import {
   EVENT_FORMEO_REMOVED_ROW,
   PARENT_TYPE_MAP,
   PROPERTY_OPTIONS,
+  ROW_CLASSNAME,
+  SECTION_CLASSNAME,
+  STAGE_CLASSNAME,
 } from '../constants.js'
 import Data from './data.js'
 import EditPanel from './edit-panel/edit-panel.js'
@@ -31,7 +34,7 @@ import Panels from './panels.js'
 let Controls = null
 
 const propertyOptions = objectFromStringArray(PROPERTY_OPTIONS)
-
+// this file have methods to hanlde drag and drop component
 export default class Component extends Data {
   constructor(name, dataArg = {}) {
     const data = { ...dataArg, id: dataArg.id || uuid() }
@@ -268,10 +271,15 @@ export default class Component extends Data {
         },
       },
       children: [
-        {
-          ...dom.btnTemplate({ content: dom.icon(`handle-${this.name}`) }),
-          className: ['component-handle', `${this.name}-handle`],
-        },
+        // Only show component-handle for stage, hide for sections, rows, columns, and fields
+        ...(this.name === 'stage'
+          ? [
+              {
+                ...dom.btnTemplate({ content: dom.icon(`handle-${this.name}`) }),
+                className: ['component-handle', `${this.name}-handle`],
+              },
+            ]
+          : []),
         {
           className: ['action-btn-wrap', `${this.name}-action-btn-wrap`],
           children: this.buttons,
@@ -342,7 +350,7 @@ export default class Component extends Data {
           },
         }
       },
-      remove: (icon = 'remove') => {
+      remove: (icon = 'bin') => {
         return {
           ...dom.btnTemplate({ content: dom.icon(icon) }),
           className: ['item-remove'],
@@ -429,6 +437,20 @@ export default class Component extends Data {
     }
     const domChildren = this.domChildren
     const childGroup = CHILD_TYPE_MAP.get(this.name)
+
+    // Special handling for sections: return both rows and fields
+    if (this.name === 'section') {
+      return map(domChildren, child => {
+        // Try rows first
+        const row = Components.getAddress(`rows.${child.id}`)
+        if (row) return row
+        // Then try fields
+        const field = Components.getAddress(`fields.${child.id}`)
+        if (field) return field
+        return null
+      }).filter(Boolean)
+    }
+
     return map(domChildren, child => Components.getAddress(`${childGroup}s.${child.id}`)).filter(Boolean)
   }
 
@@ -460,8 +482,21 @@ export default class Component extends Data {
 
     const childComponentType = `${childGroup}s`
 
-    const child =
-      Components.getAddress(`${childComponentType}.${childId}`) || Components[childComponentType].add(childId, data)
+    // Special handling for stage: check if child exists as a section first
+    let child = null
+    if (this.name === 'stage') {
+      // Check if it's a section
+      const section = Components.getAddress(`sections.${childId}`)
+      if (section) {
+        child = section
+      }
+    }
+
+    // If not found as section (or not a stage), use normal lookup
+    if (!child) {
+      child =
+        Components.getAddress(`${childComponentType}.${childId}`) || Components[childComponentType].add(childId, data)
+    }
 
     if (index >= childWrap.children.length) {
       childWrap.appendChild(child.dom)
@@ -543,7 +578,58 @@ export default class Component extends Data {
           return newChild.addChild.bind(newChild)
         },
       ],
-      [0, () => this.addChild.bind(this)],
+      [
+        0,
+        controlData => {
+          // For sections, depth 0 can mean add field, row, or other component directly to section
+          if (this.name === 'section') {
+            return (childData, childIndex) => {
+              // Determine component type from childData.config.controlId
+              const controlId = childData?.config?.controlId || ''
+              const controlType = controlId.startsWith('layout-')
+                ? controlId.replace(/^layout-/, '')
+                : controlId || 'field'
+
+              // If it's a row, create a Row component
+              if (controlType === 'row') {
+                const Rows = Components.rows
+                const row = Rows.add(uuid(), childData)
+                const childWrap = this.dom.querySelector('.children')
+                if (childIndex >= childWrap.children.length) {
+                  childWrap.appendChild(row.dom)
+                } else {
+                  childWrap.children[childIndex].before(row.dom)
+                }
+                this.removeClasses('empty')
+                this.saveChildOrder()
+                return row
+              } else {
+                // For fields and other types, use normal addChild (which will create a field)
+                // But we need to ensure it creates the right type
+                // For fields, addChild with CHILD_TYPE_MAP will try to create a row, so we need special handling
+                if (controlType === 'field' || !controlId.startsWith('layout-')) {
+                  // It's a field - create it directly using Fields
+                  const Fields = Components.fields
+                  const field = Fields.add(uuid(), childData)
+                  const childWrap = this.dom.querySelector('.children')
+                  if (childIndex >= childWrap.children.length) {
+                    childWrap.appendChild(field.dom)
+                  } else {
+                    childWrap.children[childIndex].before(field.dom)
+                  }
+                  this.removeClasses('empty')
+                  this.saveChildOrder()
+                  return field
+                }
+                // For other types, use normal addChild
+                return this.addChild(childData, childIndex)
+              }
+            }
+          }
+          // For other components, use normal behavior
+          return (childData, childIndex) => this.addChild(childData, childIndex)
+        },
+      ],
       [
         1,
         controlData => {
@@ -552,6 +638,13 @@ export default class Component extends Data {
         },
       ],
       [2, controlData => () => this.parent.parent.addChild(controlData)],
+      [
+        -999,
+        () => {
+          // Invalid drop - should not happen due to validation, but return no-op
+          return () => undefined
+        },
+      ],
     ])
 
     const onAddConditions = {
@@ -572,27 +665,157 @@ export default class Component extends Data {
         set(elementData, 'config.controlId', metaId)
 
         const controlType = metaId.startsWith('layout-') ? metaId.replace(/^layout-/, '') : 'field'
+
+        // Special handling for section control - create Section component instead of Row
+        if (controlType === 'section') {
+          // Sections can only be added to stage, not to other sections
+          if (this.name !== 'stage') {
+            alert('Sections can only be added at the root level (stage), not inside other sections.')
+            const isInControlsPanel = from && from.contains && from.contains(item)
+            if (!isInControlsPanel) {
+              dom.remove(item)
+            }
+            return undefined
+          }
+
+          // Lazy import Sections to avoid circular dependency
+          const { default: Sections } = await import('./sections/index.js')
+
+          // Check if there are existing sections and validate previous section has a title
+          // Get sections from DOM order (more reliable than stage.children array)
+          const stageChildrenContainer = this.dom?.querySelector('.children')
+          const domChildren = stageChildrenContainer ? Array.from(stageChildrenContainer.children) : []
+
+          // Find existing sections in DOM order
+          const existingSections = []
+          for (const domChild of domChildren) {
+            const childId = domChild.id
+            if (!childId) continue
+
+            // Check if this DOM element is a section by class name
+            if (domChild.classList && domChild.classList.contains(SECTION_CLASSNAME)) {
+              const section = Components.getAddress(`sections.${childId}`)
+              if (section) {
+                existingSections.push({ section, domIndex: domChildren.indexOf(domChild) })
+              }
+            }
+          }
+
+          // If there are existing sections, check the previous section (before the insertion point)
+          if (existingSections.length > 0) {
+            let previousSection = null
+
+            // Determine which section would be immediately before the new one
+            if (newIndex === undefined || newIndex >= domChildren.length) {
+              // Adding at the end - check the last section
+              previousSection = existingSections[existingSections.length - 1].section
+            } else {
+              // Adding at a specific index - find the section that appears immediately before newIndex
+              // Sort sections by DOM index to find the one right before the insertion point
+              const sortedSections = [...existingSections].sort((a, b) => b.domIndex - a.domIndex)
+
+              // Find the last section that appears before newIndex
+              for (const sectionData of sortedSections) {
+                if (sectionData.domIndex < newIndex) {
+                  previousSection = sectionData.section
+                  break
+                }
+              }
+
+              // If inserting at the beginning (newIndex is 0 or before first section),
+              // there's no previous section, so we allow it
+              // But if there are sections and we're inserting between them, we need to check
+              if (!previousSection && newIndex > 0) {
+                // This shouldn't happen, but as fallback, check the first section
+                previousSection = existingSections[0].section
+              }
+            }
+
+            // Validate previous section has a title (only if we found a previous section)
+            if (previousSection) {
+              const previousSectionTitle =
+                previousSection.get('config.title') || previousSection.get('config.name') || ''
+
+              if (!previousSectionTitle.trim()) {
+                alert('Please add a title to the previous section before adding a new section.')
+                const isInControlsPanel = from && from.contains && from.contains(item)
+                if (!isInControlsPanel) {
+                  dom.remove(item)
+                }
+                return undefined
+              }
+            }
+          }
+
+          const section = Sections.add()
+
+          // Get the stage's children container
+          const childWrap = this.dom.querySelector('.children')
+          if (childWrap) {
+            // Insert at the specified index
+            if (newIndex >= childWrap.children.length) {
+              childWrap.appendChild(section.dom)
+            } else {
+              childWrap.children[newIndex].before(section.dom)
+            }
+          }
+
+          // Update stage's children array to include the section
+          const currentChildren = this.get('children') || []
+          const updatedChildren = [...currentChildren]
+          updatedChildren.splice(newIndex !== undefined ? newIndex : updatedChildren.length, 0, section.id)
+          this.set('children', updatedChildren)
+
+          // Remove empty class from stage since it now has content
+          this.removeClasses('empty')
+
+          // Remove the clone item
+          const isInControlsPanel = from && from.contains && from.contains(item)
+          if (!isInControlsPanel) {
+            dom.remove(item)
+          }
+
+          return section
+        }
+
         const targets = {
           stage: {
             row: 0,
             column: -1,
             field: -2,
+            section: 0, // sections can be added to stage
+          },
+          section: {
+            row: 0, // sections can contain rows
+            column: -1, // columns must be inside rows
+            field: 0, // sections can contain fields directly
+            section: -999, // sections cannot contain other sections
           },
           row: {
             row: 1,
             column: 0,
             field: -1,
+            section: 1, // section treated like row
           },
           column: {
             row: 2,
             column: 1,
             field: 0,
+            section: 2, // section treated like row
           },
           field: 1,
         }
         const depth = get(targets, `${this.name}.${controlType}`)
         const action = depthMap.get(depth)()
-        dom.remove(item)
+
+        // Only remove the item if it's not in the controls panel (i.e., it's the clone, not the original)
+        // With pull: 'clone', the original stays in controls and the clone is what gets dropped
+        const isInControlsPanel = from && from.contains && from.contains(item)
+        if (!isInControlsPanel) {
+          // Item is the clone in the drop target, safe to remove
+          dom.remove(item)
+        }
+
         const component = action(elementData, newIndex)
 
         return component
@@ -809,25 +1032,81 @@ export default class Component extends Data {
     return clonedData
   }
 
+  /**
+   * Clone this component. Fallback to a sensible parent when `this.parent` is
+   * not available (fields inside sections) and special-case cloning a field
+   * into a section so a Field (not a Row) is created.
+   */
   clone = (parent = this.parent) => {
-    const newClone = parent.addChild(this.cloneData(), this.index + 1)
+    // Resolve a valid parent: prefer explicit param, then this.parent,
+    // then try to find a nearest valid container in the DOM.
+    let targetParent = parent || this.parent
+    if (!targetParent && this.dom) {
+      const nearest = this.dom.closest(
+        `.${COLUMN_CLASSNAME}, .${ROW_CLASSNAME}, .${SECTION_CLASSNAME}, .${STAGE_CLASSNAME}`
+      )
+      if (nearest) {
+        targetParent = dom.asComponent(nearest)
+      }
+    }
+
+    if (!targetParent) {
+      console.error('Clone failed: no valid parent found for', this)
+      return null
+    }
+
+    // If cloning a field directly into a section, create a Field (sections
+    // accept fields directly) instead of letting section.addChild try to
+    // create a Row.
+    if (this.name === 'field' && targetParent.name === 'section') {
+      const Fields = Components.fields
+      const newField = Fields.add(uuid(), this.cloneData())
+      const childWrap = targetParent.dom.querySelector('.children')
+      const insertIndex = this.index + 1
+      if (!childWrap) {
+        return newField
+      }
+      if (insertIndex >= childWrap.children.length) {
+        childWrap.appendChild(newField.dom)
+      } else {
+        childWrap.children[insertIndex].before(newField.dom)
+      }
+      targetParent.removeClasses('empty')
+      targetParent.saveChildOrder()
+
+      this.dispatchComponentEvent('onClone', {
+        original: this,
+        clone: newField,
+        parent: targetParent,
+      })
+
+      return newField
+    }
+
+    const newClone = targetParent.addChild(this.cloneData(), this.index + 1)
+
+    // For non-field types, clone children into the new clone.
     if (this.name !== 'field') {
       this.cloneChildren(newClone)
     }
 
-    // Dispatch clone event
     this.dispatchComponentEvent('onClone', {
       original: this,
       clone: newClone,
-      parent,
+      parent: targetParent,
     })
 
     return newClone
   }
 
+  /**
+   * Clone children into target parent/component
+   */
   cloneChildren(toParent) {
     for (const child of this.children) {
-      child?.clone(toParent)
+      if (child) {
+        child.clone(toParent)
+      }
     }
   }
 

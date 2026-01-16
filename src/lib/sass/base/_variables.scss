@@ -6,7 +6,7 @@ $half-space: calc($base-space / 2);
 $double-space: calc($base-space * 2);
 $icon-size: calc($base-space * 3);
 $prop-btn-width: $icon-size;
-$action-btn-width: $icon-size;
+$action-btn-width: calc($base-space * 4.5); // Increased from 24px to 36px for better visibility
 $border-radius: $base-space;
 $input-border-radius: $half-space;
 $input-btn-border-width: 1px;

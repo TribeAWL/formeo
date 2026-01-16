@@ -5,6 +5,7 @@
   "main": "dist/formeo.cjs.js",
   "module": "dist/formeo.es.js",
   "unpkg": "dist/formeo.umd.js",
+  "style": "dist/formeo.css",
   "exports": {
     ".": {
       "import": "./dist/formeo.es.js",
@@ -15,10 +16,13 @@
       "import": "./dist/formeo.min.css",
       "require": "./dist/formeo.min.css",
       "default": "./dist/formeo.min.css"
-    }
+    },
+    "./sass": "./dist/sass/formeo.scss",
+    "./sass/*": "./dist/sass/*"
   },
   "files": [
     "dist/*",
+    "dist/sass/**/*",
     "demo/**/*"
   ],
   "homepage": "https://formeo.io",
@@ -69,10 +73,11 @@
   "scripts": {
     "dev": "NODE_ENV=development vite",
     "preview": "vite preview",
-    "build:lib": "npm run build:lib:clean && npm run build:lib:unminified && npm run build:lib:minified",
+    "build:lib": "npm run build:lib:clean && npm run build:lib:unminified && npm run build:lib:minified && npm run copy:scss",
     "build:lib:clean": "rm -rf dist",
     "build:lib:unminified": "vite build --config vite.config.lib.mjs --mode production",
     "build:lib:minified": "vite build --config vite.config.lib.mjs --mode production-minified",
+    "copy:scss": "node --no-warnings tools/copy-scss.mjs",
     "build": "npm-run-all -p build:icons build:demo",
     "prebuild": "npm run build:lib",
     "postbuild": "npm run generate:jsonSchema",

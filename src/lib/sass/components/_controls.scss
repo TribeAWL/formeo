@@ -5,12 +5,19 @@
 @use "../base/variables" as var;
 
 .formeo-controls {
-  width: 30%;
-  max-width: mixins.space(40);
-  min-width: mixins.space(30);
+  width: 35%;
+  max-width: mixins.space(50);
+  min-width: mixins.space(38);
   overflow: hidden;
   container-type: inline-size;
   container-name: controls;
+  order: -1;
+  border: 0 none;
+  border-right: 1px solid #dadde2;
+  background-color: #fff;
+  box-shadow: none;
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
 
   &.formeo-sticky {
     position: sticky;
@@ -33,16 +40,48 @@
     width: calc(100% - 2px);
   }
 
+  // Hide prev/next navigation buttons - Figma design uses clean tabs
+  .prev-group,
+  .next-group {
+    display: none !important;
+  }
+
   .tabbed-panels {
     nav {
       padding: 0;
+      overflow: visible;
+    }
+
+    .panel-labels {
+      overflow: hidden !important;
+      width: 100%;
+
+      div {
+        display: flex !important;
+        flex-wrap: nowrap;
+        transform: none !important;
+        width: 100%;
+        overflow: hidden;
+      }
+    }
+
+    .panels {
+      transform: none !important;
+    }
+
+    .control-group {
+      display: grid !important;
+
+      &.active-panel {
+        padding: mixins.space(2);
+      }
     }
   }
 
   nav {
     position: relative;
-    padding: 0 var.$action-btn-width;
-    overflow: hidden;
+    padding: 0;
+    overflow: visible;
     margin-bottom: 0;
 
     h5 {
@@ -82,7 +121,7 @@
   .formeo-panels-wrap {
     font-size: 0.85em;
     line-height: 1;
-    overflow: hidden;
+    overflow: visible;
     margin: 0;
     padding: 0;
   }
@@ -98,12 +137,6 @@
     .panel-nav {
       display: none;
     }
-
-    .control-group {
-      li:first-child {
-        border-radius: var.$border-radius;
-      }
-    }
   }
 
   ul {
@@ -113,8 +146,8 @@
   .control-group {
     vertical-align: top;
     display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: mixins.space(1.5);
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: mixins.space(1.5) mixins.space(1);
     width: 100%;
     padding: mixins.space(2);
     border-top: 0 none;
@@ -123,17 +156,6 @@
 
     &:not(.active-panel) {
       padding: 0;
-    }
-
-    > li {
-      &:first-child {
-        border-top-right-radius: var.$border-radius;
-      }
-
-      &:last-child {
-        border-radius: var.$border-radius;
-        margin-bottom: 0;
-      }
     }
   }
 
@@ -144,10 +166,6 @@
 
     .control-group {
       display: grid;
-
-      > li {
-        border-radius: var.$border-radius;
-      }
     }
   }
 
@@ -290,14 +308,67 @@
   }
 }
 
+// Limit height of dragged placeholder/preview to 80px for form fields
+// Only target dragged clones, NOT the original controls in the left panel (.formeo-controls)
+// Target clones that are appended to body during drag - these are definitely not in the left panel
+body > .field-control,
+body > [class*="field-control"],
+body > .formeo-section,
+body > .formeo-row,
+body > .formeo-column {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+
+  .field-preview {
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    * {
+      max-height: 80px !important;
+      overflow: hidden !important;
+    }
+  }
+}
+
+// Also target dragged elements in the stage area (right side), but exclude controls panel (left side)
+.formeo-stage .field-control.sortable-ghost,
+.formeo-stage .field-control.control-moving,
+.formeo-stage .field-control[class*="sortable"] {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+
+  .field-preview {
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    * {
+      max-height: 80px !important;
+      overflow: hidden !important;
+    }
+  }
+}
+
 @container controls (max-width: 300px) {
   .control-group {
     grid-template-columns: 1fr !important;
   }
 
-  .field-control button {
-    min-height: 80px;
-    padding: mixins.space(1);
+  .field-control {
+    aspect-ratio: auto;
+
+    button {
+      padding: mixins.space(1);
+    }
   }
 
   .control-icon {
@@ -322,6 +393,474 @@
       border-bottom-right-radius: var.$input-border-radius !important;
       border-top-right-radius: 0 !important;
       border-top-left-radius: 0 !important;
+    }
+  }
+}
+
+// Settings tab for field editing
+#settings-control-group {
+  display: block !important;
+  padding: 0 !important;
+
+  &.active-panel {
+    padding: 0 !important;
+    // Add top padding to create space between tabs and content
+    padding-top: mixins.space(3) !important;
+  }
+
+  // Override grid layout for settings panel
+  grid-template-columns: 1fr !important;
+}
+
+// Settings placeholder when no field is selected
+.settings-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: mixins.space(4) mixins.space(2);
+  text-align: center;
+  color: #9ca3af;
+  min-height: 200px;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+
+// Field settings content container - matches Figma design
+.field-settings-content,
+.section-settings-content {
+  padding: mixins.space(1) mixins.space(3) mixins.space(4);
+
+  .settings-row {
+    margin-bottom: mixins.space(4);
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+      margin-bottom: mixins.space(1.5);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: mixins.space(1.5) mixins.space(2);
+      border: 1px solid #dadde2;
+      border-radius: 8px;
+      font-size: 14px;
+      background: color.$white;
+      box-sizing: border-box;
+      font-family: inherit;
+      line-height: 1.5;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: color.$brand-primary;
+        box-shadow: 0 0 0 3px rgba(color.$brand-primary, 0.1);
+      }
+
+      &::placeholder {
+        color: #9ca3af;
+      }
+    }
+
+    // Textarea specific styling
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+      padding-top: mixins.space(2);
+      padding-bottom: mixins.space(2);
+    }
+
+    // Toggle switch row layout
+    &.settings-row-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+
+      label {
+        margin-bottom: 0;
+      }
+
+      // Toggle switch styling
+      input[type="checkbox"] {
+        appearance: none;
+        width: 44px;
+        height: 24px;
+        background: #dadde2;
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.2s ease;
+        flex-shrink: 0;
+
+        &::before {
+          content: "";
+          position: absolute;
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          background: color.$white;
+          top: 2px;
+          left: 2px;
+          transition: transform 0.2s ease;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        &:checked {
+          background: color.$brand-primary;
+
+          &::before {
+            transform: translateX(20px);
+          }
+        }
+      }
+    }
+  }
+
+  // Add conditions button
+  .settings-add-conditions {
+    margin-top: mixins.space(4);
+    padding-top: mixins.space(3);
+    border-top: 1px solid #dadde2;
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: mixins.space(1);
+      color: color.$brand-primary;
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+
+      &:hover {
+        color: sass-color.adjust(color.$brand-primary, $lightness: -10%);
+      }
+
+      .add-conditions-plus {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 1;
+      }
+
+      span {
+        color: inherit;
+      }
+    }
+  }
+
+  // Conditions section - matches Figma design
+  .settings-conditions-section {
+    margin-top: mixins.space(4);
+    padding-top: mixins.space(3);
+    border-top: 1px solid #dadde2;
+
+    .conditions-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: mixins.space(3);
+
+      h4 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .conditions-delete-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #6b7280;
+
+        &:hover {
+          background: #f3f4f6;
+          color: #ef4444;
+        }
+
+        .svg-icon {
+          width: 18px;
+          height: 18px;
+          fill: currentColor;
+        }
+      }
+    }
+
+    .condition-type-label {
+      display: block;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: mixins.space(2);
+    }
+
+    .condition-field-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6b7280;
+      margin-top: mixins.space(2);
+      margin-bottom: mixins.space(1);
+    }
+
+    .settings-row {
+      margin-bottom: mixins.space(1);
+
+      select {
+        width: 100%;
+        padding: mixins.space(1.5) mixins.space(2);
+        border: 1px solid #dadde2;
+        border-radius: 8px;
+        font-size: 14px;
+        background: color.$white;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right mixins.space(2) center;
+        padding-right: mixins.space(5);
+        cursor: pointer;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: color.$brand-primary;
+          box-shadow: 0 0 0 3px rgba(color.$brand-primary, 0.1);
+        }
+      }
+
+      input[type="text"] {
+        width: 100%;
+        padding: mixins.space(1.5) mixins.space(2);
+        border: 1px solid #dadde2;
+        border-radius: 8px;
+        font-size: 14px;
+        background: color.$white;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: color.$brand-primary;
+          box-shadow: 0 0 0 3px rgba(color.$brand-primary, 0.1);
+        }
+      }
+    }
+
+    .condition-value-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: mixins.space(1);
+      margin-top: mixins.space(1.5);
+    }
+
+    .condition-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: mixins.space(0.5);
+      padding: mixins.space(0.5) mixins.space(1.5);
+      background: #f3f4f6;
+      border-radius: 16px;
+      font-size: 14px;
+      color: #1f2937;
+
+      .tag-remove-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        background: transparent;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 14px;
+        color: #6b7280;
+        padding: 0;
+        line-height: 1;
+
+        &:hover {
+          background: #dadde2;
+          color: #1f2937;
+        }
+      }
+    }
+
+    .conditions-divider {
+      height: 1px;
+      background: #dadde2;
+      margin: mixins.space(3) 0;
+    }
+  }
+
+  // Options section for select/checkbox/radio
+  .settings-options-section {
+    margin-top: mixins.space(3);
+    padding-top: mixins.space(3);
+    border-top: 1px solid #dadde2;
+
+    > label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f2937;
+      margin-bottom: mixins.space(2);
+    }
+  }
+
+  .settings-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: mixins.space(1);
+    margin-bottom: mixins.space(2);
+  }
+
+  .settings-option-row {
+    display: flex;
+    gap: mixins.space(1);
+    align-items: center;
+
+    input[type="text"] {
+      flex: 1;
+      padding: mixins.space(1.5) mixins.space(2);
+      border: 1px solid #dadde2;
+      border-radius: 8px;
+      font-size: 14px;
+      background: color.$white;
+      box-sizing: border-box;
+
+      &:focus {
+        outline: none;
+        border-color: color.$brand-primary;
+        box-shadow: 0 0 0 3px rgba(color.$brand-primary, 0.1);
+      }
+    }
+
+    .option-remove-btn {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: #9ca3af;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background: #f3f4f6;
+        color: #ef4444;
+      }
+    }
+  }
+
+  .settings-add-option-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: mixins.space(1);
+    color: color.$brand-primary;
+    background: transparent;
+    border: none;
+    padding: mixins.space(1) 0;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+
+    &:hover {
+      color: sass-color.adjust(color.$brand-primary, $lightness: -10%);
+    }
+
+    .svg-icon {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+  }
+
+  // Double row for min/max
+  .settings-row-double {
+    display: flex;
+    gap: mixins.space(2);
+    margin-bottom: mixins.space(3);
+
+    .settings-half {
+      flex: 1;
+
+      label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #1f2937;
+        margin-bottom: mixins.space(1);
+      }
+
+      input[type="number"] {
+        width: 100%;
+        padding: mixins.space(1.5) mixins.space(2);
+        border: 1px solid #dadde2;
+        border-radius: 8px;
+        font-size: 14px;
+        background: color.$white;
+        box-sizing: border-box;
+
+        &:focus {
+          outline: none;
+          border-color: color.$brand-primary;
+          box-shadow: 0 0 0 3px rgba(color.$brand-primary, 0.1);
+        }
+      }
+    }
+  }
+
+  // Info text for fields with no settings
+  .settings-info {
+    color: #6b7280;
+    font-size: 14px;
+    margin: 0;
+    padding: mixins.space(2);
+    background: #f9fafb;
+    border-radius: 8px;
+    text-align: center;
+  }
+
+  // Textarea in settings
+  textarea {
+    width: 100%;
+    padding: mixins.space(1.5) mixins.space(2);
+    border: 1px solid #dadde2;
+    border-radius: 8px;
+    font-size: 14px;
+    background: color.$white;
+    box-sizing: border-box;
+    resize: vertical;
+    font-family: inherit;
+
+    &:focus {
+      outline: none;
+      border-color: color.$brand-primary;
+      box-shadow: 0 0 0 3px rgba(color.$brand-primary, 0.1);
     }
   }
 }

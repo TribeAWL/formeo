@@ -39,8 +39,12 @@ export default class Control {
         type: 'button',
       },
       content: [
-        { tag: 'span', className: 'control-icon', children: dom.icon(meta.icon) },
-        { tag: 'span', className: 'control-label', content: controlLabel },
+        {
+          tag: 'span',
+          className: 'control-icon',
+          children: dom.icon(meta.icon),
+        },
+        { tag: 'span', className: 'control-label', content: 'controlLabel' },
       ],
       action: {
         // Prevent button from receiving focus on mousedown (which would trigger panel switch)

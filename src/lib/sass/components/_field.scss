@@ -77,10 +77,26 @@
   &.sortable-ghost {
     background-color: color.$field-highlight-color;
     box-shadow: 0 0 0 1px color.$field-outline-color;
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
 
     * {
       opacity: 0;
     }
+  }
+}
+
+// Limit height of dragged fields (clones appended to body)
+body > .formeo-field {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+
+  .field-preview {
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
   }
 }
 
@@ -109,6 +125,27 @@
 
   .field-handle {
     display: none;
+  }
+}
+
+// Field selected state - shows when field is selected for editing in Settings tab
+.field-selected {
+  box-shadow: 0 0 0 2px color.$brand-primary;
+  border-radius: var.$input-border-radius;
+  cursor: pointer;
+
+  .field-tag {
+    display: flex;
+    background-color: color.$brand-primary;
+    color: color.$white;
+
+    .svg-icon {
+      fill: color.$white;
+    }
+  }
+
+  .field-action-btn-wrap {
+    display: flex;
   }
 }
 
@@ -163,5 +200,53 @@
     &.highlight-component {
       box-shadow: 0 0 2px 1px color.$option-outline-color inset;
     }
+  }
+
+  // File upload dropzone styles (variants)
+  .file-dropzone {
+    border: 1px dotted color.$gray-lighter;
+    border-radius: 8px;
+    padding: 36px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 220px;
+    background-color: transparent;
+    color: color.$gray-dark;
+    text-align: center;
+  }
+
+  .file-dropzone.dragover {
+    border-color: color.$brand-primary;
+    background-color: color.$white;
+  }
+
+  .file-dropzone .drop-content {
+    max-width: 60%;
+  }
+
+  .file-dropzone .drop-icon {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: color.$gray;
+  }
+
+  .file-dropzone .drop-text {
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: color.$gray-dark;
+  }
+
+  .file-dropzone .drop-subtext {
+    font-size: 12px;
+    color: color.$gray;
+  }
+
+  // Mirror / mirrored variant: right-aligned, same visual style
+  .file-dropzone--mirror {
+    margin-left: auto;
+    margin-right: 40px;
+    width: 80%;
   }
 }

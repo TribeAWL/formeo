@@ -1,4 +1,4 @@
-import { BUNDLED_SVG_SPRITE, FALLBACK_CSS_URL, FALLBACK_SVG_SPRITE_URL, SVG_SPRITE_URL } from '../constants.js'
+import { BUNDLED_SVG_SPRITE, /* FALLBACK_CSS_URL, */ FALLBACK_SVG_SPRITE_URL, SVG_SPRITE_URL } from '../constants.js'
 import dom from './dom.js'
 import { noop } from './utils/index.mjs'
 
@@ -179,12 +179,16 @@ export const fetchDependencies = dependencies => {
  * @returns {Promise<void>} A promise that resolves when the style sheet is loaded.
  */
 export const fetchFormeoStyle = async cssUrl => {
+  // If no CSS URL provided, skip loading (use bundled SCSS instead)
+  if (!cssUrl) {
+    return
+  }
   // check if necessary styles were loaded
   if (!loaded.css.has(cssUrl)) {
     await insertStyle(cssUrl)
     // check again and use fallback if necessary styles were not loaded
-    if (!loaded.css.has(FALLBACK_CSS_URL)) {
-      return await insertStyle(FALLBACK_CSS_URL)
-    }
+    // if (!loaded.css.has(FALLBACK_CSS_URL)) {
+    //   return await insertStyle(FALLBACK_CSS_URL)
+    // }
   }
 }

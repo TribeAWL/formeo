@@ -132,3 +132,29 @@ fieldset.formeo-row-wrap {
   }
 }
 
+// Rendered sections
+.formeo-rendered-section {
+  margin-bottom: mixins.space(3);
+  padding: mixins.space(2);
+  border: 1px solid #DADDE2;
+  border-radius: mixins.space(1);
+  background-color: color.$white;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  .formeo-section-name {
+    margin: 0 0 mixins.space(1) 0;
+    font-size: 1.25em;
+    font-weight: 600;
+    color: #1F2937;
+  }
+
+  .formeo-section-instruction {
+    margin: 0 0 mixins.space(2) 0;
+    font-size: 0.95em;
+    color: #6B7280;
+  }
+}
+

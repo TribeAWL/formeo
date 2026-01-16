@@ -117,11 +117,21 @@
   &.sortable-ghost {
     background-color: color.$column-highlight-color;
     box-shadow: 0 0 0 1px color.$column-outline-color;
+    max-height: 80px !important;
+    height: 80px !important;
+    overflow: hidden !important;
 
     * {
       opacity: 0;
     }
   }
+}
+
+// Limit height of dragged columns (clones appended to body)
+body > .formeo-column {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
 
   &:has(.editing-field) {
     .column-actions {

@@ -11,6 +11,8 @@
 }
 
 .formeo {
+  accent-color: #975daa;
+
   * {
     box-sizing: inherit;
     font-family: inherit;
@@ -22,10 +24,11 @@
     display: flex;
     flex-direction: row;
     text-align: left;
-    gap: variables.$component-gap;
+    gap: 0;
 
     @include meta.load-css("components/component");
     @include meta.load-css("components/stage");
+    @include meta.load-css("components/section");
 
     @include meta.load-css("base/rtl");
   }

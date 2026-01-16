@@ -1,0 +1,435 @@
+/**
+ * Runtime Schema Form Styles
+ * Professional multi-step form UI with sidebar navigation
+ */
+
+.runtime-schema-form-wrapper {
+  display: flex;
+  min-height: 600px;
+  background: #ffffff;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+/* Sidebar Styles */
+.runtime-schema-sidebar {
+  width: 280px;
+  background: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  padding: 24px 0;
+  flex-shrink: 0;
+}
+
+.runtime-schema-steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.runtime-schema-step-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 16px 24px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-bottom: 0;
+
+  &:hover:not(.active) {
+    background-color: transparent;
+  }
+
+  &.active {
+    background-color: transparent;
+    border-left: none;
+    padding-left: 24px;
+
+    .runtime-schema-step-number {
+      background-color: #8b1538;
+      color: #ffffff;
+    }
+
+    .runtime-schema-step-label {
+      color: #8b1538;
+      font-weight: 600;
+    }
+  }
+}
+
+.runtime-schema-step-number {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  color: #666666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  margin-right: 12px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.runtime-schema-step-label {
+  color: #666666;
+  font-size: 14px;
+  font-weight: 400;
+  transition: color 0.2s ease;
+  
+  .runtime-schema-step-item.active & {
+    color: #8b1538;
+    font-weight: 600;
+  }
+}
+
+.runtime-schema-step-connector {
+  position: absolute;
+  left: 40px;
+  top: 48px;
+  width: 2px;
+  height: 24px;
+  background-color: #e0e0e0;
+  z-index: 0;
+}
+
+/* Main Content Styles */
+.runtime-schema-form-content {
+  flex: 1;
+  background: #ffffff;
+  padding: 40px 48px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.runtime-schema-form {
+  width: 100%;
+  max-width: 100%;
+}
+
+.runtime-schema-step-header {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 24px 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.runtime-schema-step-description {
+  font-size: 14px;
+  color: #666666;
+  margin: 0 0 24px 0;
+}
+
+/* Fields Container */
+.runtime-schema-fields-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* Row Container - each row can have its own column layout */
+.runtime-schema-row {
+  display: grid;
+  gap: 20px 24px;
+  width: 100%;
+}
+
+/* Field Wrapper */
+.runtime-schema-field-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.runtime-schema-field-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.runtime-schema-required-asterisk {
+  color: #d32f2f;
+  margin-left: 2px;
+}
+
+/* Input Styles */
+.runtime-schema-field-input {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background-color: #ffffff;
+  color: #1a1a1a;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: #8b1538;
+    box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
+  }
+
+  &:invalid.error,
+  &.error {
+    border-color: #d32f2f;
+    box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+  }
+
+  &::placeholder {
+    color: #999999;
+  }
+}
+
+/* File Dropzone (demo-specific adjustments) - dotted large box like Image 1 */
+.file-dropzone {
+  border: 1px dotted #d9d9d9;
+  border-radius: 6px;
+  padding: 40px 24px;
+  min-height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  text-align: center;
+}
+
+.file-dropzone .drop-icon { font-size: 16px; margin-bottom: 6px; color: #bdbdbd }
+.file-dropzone .drop-text { font-weight: 400; color: #6b6b6b }
+.file-dropzone .drop-subtext { color: #bdbdbd; font-size: 12px }
+
+.file-dropzone.dragover { border-color: #b3b3b3; background: transparent }
+
+/* Mirror variant for right-aligned dropzone */
+.file-dropzone--mirror {
+  margin-left: auto;
+  margin-right: 40px;
+  width: 80%;
+}
+
+/* Navigation buttons */
+.runtime-schema-nav-button {
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.runtime-schema-nav-prev { background: transparent; color: #333; padding-left: 6px }
+
+/* Date Input Wrapper */
+.runtime-schema-date-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  .runtime-schema-field-input {
+    padding-right: 40px;
+  }
+}
+
+.runtime-schema-date-icon {
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  font-size: 18px;
+  opacity: 0.6;
+}
+
+/* Select Wrapper */
+.runtime-schema-select-wrapper {
+  position: relative;
+
+  .runtime-schema-field-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+}
+
+/* Radio and Checkbox Groups */
+.runtime-schema-radio-group,
+.runtime-schema-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.runtime-schema-radio-option,
+.runtime-schema-checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  input[type="radio"],
+  input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+
+    &.error {
+      outline: 2px solid #d32f2f;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  label {
+    font-weight: 400;
+    margin: 0;
+    cursor: pointer;
+    color: #333333;
+  }
+}
+
+/* Textarea */
+textarea.runtime-schema-field-input {
+  min-height: 100px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Navigation Buttons */
+.runtime-schema-navigation {
+  display: flex;
+  justify-content: flex-start;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 0;
+  border-top: none;
+}
+
+.runtime-schema-nav-button {
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  min-width: 120px;
+
+  &.runtime-schema-nav-prev {
+    background-color: #ffffff;
+    color: #666666;
+    border: 1px solid #d0d0d0;
+
+    &:hover {
+      background-color: #f8f9fa;
+      border-color: #8b1538;
+      color: #8b1538;
+    }
+  }
+
+  &.runtime-schema-nav-next {
+    background-color: #000000;
+    color: #ffffff;
+
+    &:hover {
+      background-color: #333333;
+    }
+
+    &:active {
+      transform: translateY(1px);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .runtime-schema-form-wrapper {
+    flex-direction: column;
+  }
+
+  .runtime-schema-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 16px 0;
+  }
+
+  .runtime-schema-steps-list {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 16px;
+  }
+
+  .runtime-schema-step-item {
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+    padding: 8px;
+    margin-right: 16px;
+
+    &.active {
+      border-left: none;
+      border-bottom: 3px solid #8b1538;
+      padding-left: 8px;
+      padding-bottom: 5px;
+    }
+  }
+
+  .runtime-schema-step-connector {
+    display: none;
+  }
+
+  .runtime-schema-form-content {
+    padding: 24px 16px;
+  }
+
+  .runtime-schema-fields-container {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .runtime-schema-navigation {
+    flex-direction: column;
+  }
+
+  .runtime-schema-nav-button {
+    width: 100%;
+  }
+}
+
+/* Consent Section Styling (for special cases like tele-health) */
+.runtime-schema-consent-section {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+
+  .runtime-schema-consent-text {
+    font-size: 14px;
+    color: #333333;
+    margin-bottom: 12px;
+
+    a {
+      color: #8b1538;
+      text-decoration: none;
+      font-weight: 500;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

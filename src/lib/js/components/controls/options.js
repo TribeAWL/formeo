@@ -5,18 +5,23 @@ const defaultOptions = Object.freeze({
   groups: [
     {
       id: 'layout',
-      label: 'controls.groups.layout',
+      label: 'Layout',
       elementOrder: ['row', 'column'],
     },
     {
       id: 'common',
-      label: 'controls.groups.form',
+      label: 'Form Fields',
       elementOrder: ['button', 'checkbox'],
     },
     {
       id: 'html',
-      label: 'controls.groups.html',
+      label: 'HTML Elements',
       elementOrder: ['header', 'block-text'],
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      elementOrder: [],
     },
   ],
   disable: {
@@ -26,7 +31,7 @@ const defaultOptions = Object.freeze({
   },
   elements: [],
   container: null,
-  panels: { displayType: 'slider' },
+  panels: { displayType: 'auto' },
 })
 
 export default defaultOptions

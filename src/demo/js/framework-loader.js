@@ -110,7 +110,7 @@ class FrameworkLoader {
         this.updateURL(framework)
       }
 
-      console.log(`Loaded ${framework} demo successfully`)
+      // Framework loaded successfully
     } catch (error) {
       console.error(`Failed to load ${framework} demo:`, error)
       this.showErrorState(framework, error)

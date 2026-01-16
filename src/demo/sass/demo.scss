@@ -1,3 +1,5 @@
+@use "./runtime-schema-form.scss";
+
 * {
   margin: 0;
   padding: 0;
@@ -28,7 +30,6 @@ body {
   margin: 0 auto;
   position: relative;
   padding: 0 1rem;
-
 
   display: flex;
   align-items: center;
@@ -61,7 +62,8 @@ body {
 }
 
 #main_content {
-  padding: 32px 0;
+  padding-top: 70px;
+  padding-bottom: 30px;
   flex: 1;
   width: 100%;
   display: flex;
@@ -139,9 +141,8 @@ body {
 .render-form {
   display: none;
   width: 100%;
-  max-width: 800px;
-  margin: auto;
-  padding: 32px 0;
+  padding-top: 32px;
+  padding-bottom: 0;
 }
 
 .form-rendered .render-form {
@@ -274,7 +275,7 @@ body {
     margin-bottom: 20px;
 
     code {
-      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
       font-size: 13px;
       line-height: 1.4;
       color: #333;
@@ -379,7 +380,6 @@ body {
 }
 
 @keyframes shimmer {
-
   0%,
   80% {
     // Keep shimmer off for the first 80% of the duration
@@ -398,10 +398,12 @@ body {
 #formeo-logo {
   mask-image: url("/assets/img/formeo-logo.svg");
   mask-repeat: no-repeat;
-  background-image: linear-gradient(-60deg,
-      black 45%,
-      rgba(255, 255, 255, 0.6) 50%,
-      black 55%);
+  background-image: linear-gradient(
+    -60deg,
+    black 45%,
+    rgba(255, 255, 255, 0.6) 50%,
+    black 55%
+  );
   background-position: -120px 0;
   background-size: 105% 100%;
 

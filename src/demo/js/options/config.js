@@ -3,7 +3,7 @@ const config = {
     all: {
       events: {
         onAdd: evt => {
-          console.log(`You just added a new row with the id "${evt.target.id}"`, evt.index)
+          // Example: Add custom button to third row
           if (evt.index === 2) {
             const actionBtnWrap = evt.target.dom.querySelector('.action-btn-wrap')
             const addColumnBtn = document.createElement('button')
@@ -24,9 +24,7 @@ const config = {
   fields: {
     all: {
       events: {
-        onRemove: evt => {
-          console.log(`You just removed the field with the id "${evt.target.id}"`, evt)
-        },
+        // onRemove: evt => {},
       },
     },
     checkbox: {

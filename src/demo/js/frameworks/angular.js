@@ -384,7 +384,8 @@ async function initializeAngularApp() {
 
     if (renderBtn) {
       renderBtn.addEventListener('click', () => {
-        const formData = editor.formData
+        // Use legacy format for rendering (renderer expects old Formeo structure)
+        const formData = editor.getLegacyFormData()
         if (formData && Object.keys(formData).length > 0) {
           renderElement.style.display = 'block'
           renderer.render(formData)
@@ -556,7 +557,8 @@ export class FormBuilderComponent implements OnInit, OnDestroy {
   renderForm() {
     if (!this.editor || !this.renderer) return;
     
-    const formData = this.editor.formData;
+    // Use legacy format for rendering (renderer expects old Formeo structure)
+    const formData = this.editor.getLegacyFormData();
     
     if (formData && Object.keys(formData).length > 0) {
       this.renderer.render(formData);

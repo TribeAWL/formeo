@@ -6,13 +6,16 @@ import ColumnsData from './columns/index.js'
 import Data from './data.js'
 import FieldsData from './fields/index.js'
 import RowsData from './rows/index.js'
+import SectionsData from './sections/index.js'
 import StagesData from './stages/index.js'
 import ControlsData from './controls/index.js'
+import { buildRuntimeSchema } from './runtime-schema.js'
 
 export const Stages = StagesData
 export const Rows = RowsData
 export const Columns = ColumnsData
 export const Fields = FieldsData
+export const Sections = SectionsData
 export const Controls = ControlsData
 
 const getFormData = (formData, useSessionStorage = false) => {
@@ -34,6 +37,7 @@ export class Components extends Data {
     this.rows = Rows
     this.columns = Columns
     this.fields = Fields
+    this.sections = Sections
     this.controls = Controls
   }
 
@@ -48,6 +52,7 @@ export class Components extends Data {
     this.add('rows', Rows.load(formData.rows))
     this.add('columns', Columns.load(formData.columns))
     this.add('fields', Fields.load(formData.fields))
+    this.add('sections', Sections.load(formData.sections || {}))
 
     for (const stage of Object.values(this.get('stages'))) {
       stage.loadChildren()
@@ -84,13 +89,64 @@ export class Components extends Data {
     })
   }
 
-  get formData() {
-    return {
+  /**
+   * Returns the legacy Formeo format (stages, rows, columns, fields, sections)
+   * Used for preview rendering which expects the old structure
+   * @return {Object} legacy Formeo formData structure
+   */
+  getLegacyFormData() {
+    const stages = this.get('stages') || {}
+    const rows = this.get('rows') || {}
+    const columns = this.get('columns') || {}
+    const fields = this.get('fields') || {}
+    const sections = this.get('sections') || {}
+
+    // Build legacy structure by getting data from each component
+    const legacyData = {
       id: this.get('id'),
-      stages: StagesData.getData(),
-      rows: RowsData.getData(),
-      columns: ColumnsData.getData(),
-      fields: FieldsData.getData(),
+      stages: {},
+      rows: {},
+      columns: {},
+      fields: {},
+      sections: {},
+    }
+
+    // Convert stages
+    for (const [stageId, stage] of Object.entries(stages)) {
+      legacyData.stages[stageId] = stage.getData()
+    }
+
+    // Convert rows
+    for (const [rowId, row] of Object.entries(rows)) {
+      legacyData.rows[rowId] = row.getData()
+    }
+
+    // Convert columns
+    for (const [columnId, column] of Object.entries(columns)) {
+      legacyData.columns[columnId] = column.getData()
+    }
+
+    // Convert fields
+    for (const [fieldId, field] of Object.entries(fields)) {
+      legacyData.fields[fieldId] = field.getData()
+    }
+
+    // Convert sections
+    for (const [sectionId, section] of Object.entries(sections)) {
+      legacyData.sections[sectionId] = section.getData()
+    }
+
+    return legacyData
+  }
+
+  get formData() {
+    // Use runtime schema serializer instead of default Formeo structure
+    // This generates a step-based schema optimized for React stepper UI
+    try {
+      return buildRuntimeSchema(this)
+    } catch (error) {
+      console.error('Error building runtime schema:', error)
+      throw error // Re-throw to prevent invalid exports
     }
   }
 

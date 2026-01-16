@@ -3,6 +3,7 @@ import { fetchDependencies } from '../common/loaders'
 import { cleanFormData, isAddress, merge, uuid } from '../common/utils/index.mjs'
 import { splitAddress } from '../common/utils/string.mjs'
 import { STAGE_CLASSNAME } from '../constants'
+import { SECTION_CLASSNAME } from '../constants.js'
 import {
   baseId,
   comparisonMap,
@@ -232,13 +233,84 @@ export default class FormeoRenderer {
     })
 
   get processedData() {
-    return Object.values(this.form.stages).map(stage => {
+    const processedStages = Object.values(this.form.stages).map(stage => {
       stage.children = this.processRows(stage.id)
       stage.className = STAGE_CLASSNAME
 
       this.components[baseId(stage.id)] = stage
       return stage
     })
+
+    // Process sections if they exist
+    const processedSections = this.form.sections
+      ? Object.values(this.form.sections).map(section => this.processSection(section))
+      : []
+
+    return [...processedStages, ...processedSections]
+  }
+
+  /**
+   * Process a section for rendering
+   * @param {Object} section - The section data
+   * @return {Object} Processed section config
+   */
+  processSection = section => {
+    const { id, config = {}, children = [] } = section
+
+    // Process children - can be either rows (old format) or fields (new format)
+    const processedChildren = children.reduce((acc, childId) => {
+      // Check if it's a row first (old format)
+      const row = this.form.rows?.[childId]
+      if (row) {
+        acc.push(this.processRow(row))
+        return acc
+      }
+
+      // Check if it's a field (new format - sections contain fields directly)
+      const field = this.form.fields?.[childId]
+      if (field) {
+        // Process the field
+        const processedField = this.processFields([childId])[0]
+        if (processedField) {
+          acc.push(processedField)
+        }
+        return acc
+      }
+
+      return acc
+    }, [])
+
+    // Build section header
+    const sectionHeader = []
+
+    // Use title first, then fall back to name
+    const sectionTitle = config.title || config.name
+    if (sectionTitle) {
+      sectionHeader.push({
+        tag: 'h3',
+        className: 'formeo-section-name',
+        children: sectionTitle,
+      })
+    }
+
+    // Use description first, then fall back to instruction
+    const sectionDescription = config.description || config.instruction
+    if (sectionDescription) {
+      sectionHeader.push({
+        tag: 'p',
+        className: 'formeo-section-instruction',
+        children: sectionDescription,
+      })
+    }
+
+    const sectionData = {
+      id: this.prefixId(id),
+      className: [SECTION_CLASSNAME, STAGE_CLASSNAME, 'formeo-rendered-section'],
+      children: [...sectionHeader, ...processedChildren],
+    }
+
+    this.components[baseId(id)] = sectionData
+    return sectionData
   }
 
   /**
@@ -288,7 +360,7 @@ export default class FormeoRenderer {
   }
 
   applyConditions = () => {
-    for (const [componentId, componentData] of Object.entries(this.components)) {
+    for (const [_componentId, componentData] of Object.entries(this.components)) {
       const { conditions } = componentData
       if (conditions) {
         for (const condition of conditions) {
