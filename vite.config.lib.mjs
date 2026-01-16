@@ -21,7 +21,15 @@ export default defineConfig(({ mode }) => {
       lib: {
         entry: resolve(__dirname, 'src/lib/js/index.js'),
         name: 'formeo',
-        fileName: format => (isMinified ? `[name].min.${format}.js` : `[name].${format}.js`),
+        fileName: format => {
+          const formatMap = {
+            es: 'es',
+            cjs: 'cjs',
+            umd: 'umd',
+          }
+          const ext = formatMap[format] || format
+          return isMinified ? `formeo.min.${ext}.js` : `formeo.${ext}.js`
+        },
         formats: ['es', 'cjs', 'umd'],
       },
       outDir: 'dist',

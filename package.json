@@ -4,19 +4,32 @@
   "type": "module",
   "main": "dist/formeo.cjs.js",
   "module": "dist/formeo.es.js",
-  "unpkg": "dist/formeo.umd.js",
+  "unpkg": "dist/formeo.min.umd.js",
   "style": "dist/formeo.css",
   "exports": {
     ".": {
       "import": "./dist/formeo.es.js",
       "require": "./dist/formeo.cjs.js",
-      "default": "./dist/formeo.umd.js"
+      "default": "./dist/formeo.min.umd.js"
     },
     "./dist/formeo.css": {
       "import": "./dist/formeo.css",
       "require": "./dist/formeo.css",
       "default": "./dist/formeo.css"
-    }
+    },
+    "./dist/formeo.min.css": {
+      "import": "./dist/formeo.min.css",
+      "require": "./dist/formeo.min.css",
+      "default": "./dist/formeo.min.css"
+    },
+    "./dist/formeo.es.js": "./dist/formeo.es.js",
+    "./dist/formeo.min.es.js": "./dist/formeo.min.es.js",
+    "./dist/formeo.cjs.js": "./dist/formeo.cjs.js",
+    "./dist/formeo.min.cjs.js": "./dist/formeo.min.cjs.js",
+    "./dist/formeo.umd.js": "./dist/formeo.umd.js",
+    "./dist/formeo.min.umd.js": "./dist/formeo.min.umd.js",
+    "./dist/formData_schema.json": "./dist/formData_schema.json",
+    "./dist/runtime_schema.json": "./dist/runtime_schema.json"
   },
   "files": [
     "dist/*",
@@ -75,12 +88,15 @@
     "build:lib:unminified": "vite build --config vite.config.lib.mjs --mode production",
     "build:lib:minified": "vite build --config vite.config.lib.mjs --mode production-minified",
     "prebuild": "npm run build:lib",
-    "build": "npm run clean && webpack",
+    "build": "npm run build:css && npm run build:css:min",
     "clean": "rimraf dist",
-    "build:css": "sass src/scss/formeo.scss dist/formeo.css --style=expanded",
-    "build:css:min": "sass src/scss/formeo.scss dist/formeo.min.css --style=compressed",
+    "build:css": "sass src/lib/sass/formeo.scss dist/formeo.css --style=expanded",
+    "build:css:min": "sass src/lib/sass/formeo.scss dist/formeo.min.css --style=compressed",
     "build:js": "rollup -c",
-    "postbuild": "npm run generate:jsonSchema",
+    "postbuild": "npm run generate:jsonSchema && npm run generate:runtimeSchema && npm run copy:assets && npm run verify:build",
+    "copy:assets": "node --no-warnings tools/copy-assets.mjs",
+    "verify:build": "node --no-warnings tools/verify-build.mjs",
+    "generate:runtimeSchema": "node --experimental-strip-types --no-warnings ./tools/generate-runtime-schema.ts",
     "build:demo": "vite build --mode demo",
     "postbuild:demo": "node --no-warnings tools/copy-assets.mjs",
     "build:demo:watch": "vite build --mode demo --watch",
@@ -120,6 +136,7 @@
     "ace-builds": "^1.36.5",
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
+    "glob": "^13.0.0",
     "jsdom": "^25.0.1",
     "lefthook": "^1.7.18",
     "mini-css-extract-plugin": "^2.9.4",

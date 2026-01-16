@@ -171,3 +171,5 @@ const jsonSchema = zodToJsonSchema(formDataSchema, { name: 'formData', nameStrat
 const orderedJsonSchema = reorderSchema(jsonSchema)
 const distDir = join(projectRoot, 'dist')
 writeFileSync(join(distDir, 'formData_schema.json'), JSON.stringify(orderedJsonSchema, null, 2))
+
+console.log('FormData schema generated successfully')
