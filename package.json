@@ -29,7 +29,14 @@
     "./dist/formeo.umd.js": "./dist/formeo.umd.js",
     "./dist/formeo.min.umd.js": "./dist/formeo.min.umd.js",
     "./dist/formData_schema.json": "./dist/formData_schema.json",
-    "./dist/runtime_schema.json": "./dist/runtime_schema.json"
+    "./dist/runtime_schema.json": "./dist/runtime_schema.json",
+    "./dist/demo.min.css": "./dist/demo.min.css",
+    "./dist/demo.min.js": "./dist/demo.min.js",
+    "./dist/index.min.js": "./dist/index.min.js",
+    "./dist/index.min2.js": "./dist/index.min2.js",
+    "./dist/index.min3.js": "./dist/index.min3.js",
+    "./dist/mode-json.min.js": "./dist/mode-json.min.js",
+    "./dist/theme-github_light_default.min.js": "./dist/theme-github_light_default.min.js"
   },
   "files": [
     "dist/**/*",
