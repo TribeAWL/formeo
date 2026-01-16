@@ -32,7 +32,7 @@
     "./dist/runtime_schema.json": "./dist/runtime_schema.json"
   },
   "files": [
-    "dist/*",
+    "dist/**/*",
     "demo/**/*"
   ],
   "homepage": "https://formeo.io",
@@ -117,7 +117,7 @@
     "playwright:test:report": "playwright show-report",
     "playwright:test:ci": "playwright test --reporter=dot",
     "prepush": "npm test",
-    "prepare": "lefthook install || true",
+    "prepare": "npm run build || true && lefthook install || true",
     "postmerge": "lefthook install",
     "generate:jsonSchema": "node --experimental-strip-types --no-warnings ./tools/generate-json-schema.ts"
   },
