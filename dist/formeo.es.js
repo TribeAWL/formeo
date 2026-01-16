@@ -10318,7 +10318,12 @@ class Control {
    * @param {Object} [config.dependencies={}] - The dependencies required by the control. ex { js: 'https://example.com/script.js', css: 'https://example.com/style.css' }
    * @param {...Object} [controlData] - Additional configuration properties. ex { meta: {}, config: { label: 'Control Name' } }
    */
-  constructor({ events: events2 = {}, dependencies = {}, controlAction, ...controlData }) {
+  constructor({
+    events: events2 = {},
+    dependencies = {},
+    controlAction,
+    ...controlData
+  }) {
     this.events = events2;
     this.controlData = controlData;
     this.controlAction = controlAction;
@@ -10330,15 +10335,19 @@ class Control {
   }
   get dom() {
     const { meta, config } = this.controlData;
-    const controlLabel = this.i18n(config.label) || config.label;
+    this.i18n(config.label) || config.label;
     const button = {
       tag: "button",
       attrs: {
         type: "button"
       },
       content: [
-        { tag: "span", className: "control-icon", children: dom.icon(meta.icon) },
-        { tag: "span", className: "control-label", content: controlLabel }
+        {
+          tag: "span",
+          className: "control-icon",
+          children: dom.icon(meta.icon)
+        },
+        { tag: "span", className: "control-label", content: "controlLabel" }
       ],
       action: {
         // Prevent button from receiving focus on mousedown (which would trigger panel switch)
@@ -10366,7 +10375,11 @@ class Control {
     return dom.create({
       tag: "li",
       id: this.id,
-      className: ["field-control", `${meta.group}-control`, `${meta.id}-control`],
+      className: [
+        "field-control",
+        `${meta.group}-control`,
+        `${meta.id}-control`
+      ],
       content: button,
       meta,
       action: this.controlAction
