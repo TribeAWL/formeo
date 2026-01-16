@@ -10,8 +10,8 @@ Author: Draggable https://draggable.io
 */
 .svg-icon {
   display: inline-block;
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   pointer-events: none;
 }
 
@@ -298,14 +298,16 @@ button[class*=-clone]:hover .svg-icon {
 }
 
 .formeo {
-  accent-color: #975DAA;
-  /*
-    Mixins
-  */
+  accent-color: #975daa;
 }
 .formeo * {
   box-sizing: inherit;
   font-family: inherit;
+}
+.formeo {
+  /*
+    Mixins
+  */
 }
 .formeo .pill-buttons > button {
   border-radius: 50px;
@@ -391,11 +393,13 @@ button[class*=-clone]:hover .svg-icon {
   width: 100%;
   padding: 0.3em 0.6em;
   box-sizing: border-box;
-  height: auto;
 }
 .formeo textarea:focus {
   border: 1px solid #975DAA;
   outline: none;
+}
+.formeo textarea {
+  height: auto;
 }
 .formeo button {
   border-radius: 4px;
@@ -403,13 +407,15 @@ button[class*=-clone]:hover .svg-icon {
   color: #333333;
   background-color: #fff;
   padding: 4px 8px;
-  line-height: 1.5em;
 }
 .formeo button:active {
   transform: scale(0.97);
 }
 .formeo button:hover {
   filter: brightness(0.9);
+}
+.formeo button {
+  line-height: 1.5em;
 }
 .formeo button.primary, .formeo button.success, .formeo button.warning, .formeo button.error {
   color: #fff;
@@ -452,11 +458,13 @@ button[class*=-clone]:hover .svg-icon {
   width: 100%;
   padding: 0.3em 0.6em;
   box-sizing: border-box;
-  width: auto;
 }
 .formeo .f-addon:focus {
   border: 1px solid #975DAA;
   outline: none;
+}
+.formeo .f-addon {
+  width: auto;
 }
 .formeo .f-addon label {
   margin: 1px 0 0 3px;
@@ -507,13 +515,15 @@ button[class*=-clone]:hover .svg-icon {
 }
 .formeo .f-input-group select {
   appearance: none;
+}
+.formeo .f-input-group select::-ms-expand {
+  display: none;
+}
+.formeo .f-input-group select {
   background-image: url("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPCEtLSBHZW5lcmF0ZWQgYnkgSWNvTW9vbi5pbyAtLT4KPCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHdpZHRoPSIyNCIgaGVpZ2h0PSIzMiIgdmlld0JveD0iMCAwIDI0IDMyIj4KPHBhdGggZmlsbD0iIzQ0NCIgZD0iTTAgMTJsMTEuOTkyIDExLjk5MiAxMS45OTItMTEuOTkyaC0yMy45ODR6Ij48L3BhdGg+Cjwvc3ZnPgo=");
   background-position: right 10px top 2px;
   background-repeat: no-repeat;
   background-size: 16px;
-}
-.formeo .f-input-group select::-ms-expand {
-  display: none;
 }
 .formeo .f-input-group .f-addon,
 .formeo .f-input-group input,
@@ -691,18 +701,11 @@ button[class*=-clone]:hover .svg-icon {
   flex-direction: row;
   text-align: left;
   gap: 0;
-  background-color: #fff;
   /*
     Mixins
   */
   /*
     Animations
-  */
-  /*
-    Mixins
-  */
-  /*
-    Mixins
   */
 }
 @keyframes PLACEHOLDER {
@@ -778,7 +781,7 @@ button[class*=-clone]:hover .svg-icon {
   display: flex;
   transition: opacity 0.3s ease-in-out allow-discrete;
   position: absolute;
-  top: 0;
+  top: -35px;
   line-height: 0;
   z-index: 1;
   align-items: center;
@@ -790,6 +793,8 @@ button[class*=-clone]:hover .svg-icon {
   display: none;
   align-items: center;
   justify-content: center;
+  gap: 4px;
+  padding: 2px;
   border-top-right-radius: 8px;
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
@@ -802,24 +807,90 @@ button[class*=-clone]:hover .svg-icon {
   background-color: #fff;
 }
 .formeo.formeo-editor .group-actions button {
-  background-color: transparent;
-  width: 24px;
-  height: 24px;
-  padding: 6px;
-  border: 0 none;
+  background-color: #fff;
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+  border: 1px solid #cccccc;
   line-height: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0;
+  color: transparent;
+  text-indent: -9999px;
+  overflow: hidden;
+}
+.formeo.formeo-editor .group-actions button .svg-icon {
+  font-size: initial;
+  line-height: initial;
+  color: initial;
+  text-indent: initial;
+}
+.formeo.formeo-editor .group-actions button > *:not(.svg-icon) {
+  display: none;
+}
+.formeo.formeo-editor .group-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+  border-color: #999999;
+}
+.formeo.formeo-editor .group-actions button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 .formeo.formeo-editor .group-actions button:focus {
-  border: 0 none;
-  outline: 0 none;
-  box-shadow: none;
+  outline: 2px solid #975DAA;
+  outline-offset: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08), 0 0 0 3px rgba(151, 93, 170, 0.2);
+}
+.formeo.formeo-editor .group-actions button.item-move:hover {
+  background-color: rgb(153, 84, 187);
+  border-color: rgb(153, 84, 187);
+}
+.formeo.formeo-editor .group-actions button.item-move:hover .svg-icon {
+  fill: #fff;
+}
+.formeo.formeo-editor .group-actions button.edit-toggle:hover {
+  background-color: #975DAA;
+  border-color: #975DAA;
+}
+.formeo.formeo-editor .group-actions button.edit-toggle:hover .svg-icon {
+  fill: #fff;
+}
+.formeo.formeo-editor .group-actions button.item-clone:hover {
+  background-color: rgb(147, 197, 75);
+  border-color: rgb(147, 197, 75);
+}
+.formeo.formeo-editor .group-actions button.item-clone:hover .svg-icon {
+  fill: #fff;
+}
+.formeo.formeo-editor .group-actions button.item-remove:hover {
+  background-color: rgb(217, 83, 79);
+  border-color: rgb(217, 83, 79);
+}
+.formeo.formeo-editor .group-actions button.item-remove:hover .svg-icon {
+  fill: #fff;
+}
+.formeo.formeo-editor .group-actions button.item-move-up:hover, .formeo.formeo-editor .group-actions button.item-move-down:hover {
+  background-color: rgb(153, 84, 187);
+  border-color: rgb(153, 84, 187);
+}
+.formeo.formeo-editor .group-actions button.item-move-up:hover .svg-icon, .formeo.formeo-editor .group-actions button.item-move-down:hover .svg-icon {
+  fill: #fff;
 }
 .formeo.formeo-editor .group-actions .svg-icon {
-  width: 12px;
-  height: 12px;
+  width: 16.3636363636px;
+  height: 16.3636363636px;
+  transition: fill 0.2s ease-in-out;
+  fill: #333333;
 }
 .formeo.formeo-editor .last-field .group-actions button:last-child {
-  border-radius: 0;
+  border-radius: 6px;
 }
 .formeo.formeo-editor .column-editing-field .column-actions {
   display: none;
@@ -839,13 +910,10 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .hovering .group-actions .f-i-handle {
   display: none;
 }
-.formeo.formeo-editor .formeo-row {
-  transition: background-color 125ms ease-in-out;
-  position: relative;
-  clear: both;
-  background-color: #fff;
-  box-shadow: 0 0 0 1px #cccccc;
-  padding: 16px;
+.formeo.formeo-editor {
+  /*
+    Mixins
+  */
 }
 .formeo.formeo-editor .formeo-row > .children {
   display: flex;
@@ -857,17 +925,25 @@ button[class*=-clone]:hover .svg-icon {
   gap: 16px;
   min-height: 32px;
 }
+.formeo.formeo-editor .formeo-row {
+  transition: background-color 125ms ease-in-out;
+  position: relative;
+  clear: both;
+  background-color: #fff;
+  box-shadow: 0 0 0 1px #cccccc;
+  padding: 16px;
+}
 .formeo.formeo-editor .formeo-row::after {
   clear: both;
 }
 .formeo.formeo-editor .formeo-row.control-ghost {
   padding: 10px;
 }
-.formeo.formeo-editor .formeo-row:first-child {
-  border-top-right-radius: 8px;
-}
 .formeo.formeo-editor .formeo-row:first-child:not(.editing-row, .hovering-row) {
   border-top-left-radius: 8px;
+}
+.formeo.formeo-editor .formeo-row:first-child {
+  border-top-right-radius: 8px;
 }
 .formeo.formeo-editor .formeo-row:last-child {
   border-bottom-left-radius: 8px;
@@ -897,14 +973,22 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .formeo-row.sortable-ghost {
   background-color: rgb(244.7109004739, 181.7890995261, 228.56492891);
   box-shadow: 0 0 0 1px rgb(229, 70, 188.2);
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
 }
 .formeo.formeo-editor .formeo-row.sortable-ghost * {
   opacity: 0;
 }
-.formeo.formeo-editor .formeo-row:has(.editing-field) .row-actions {
+.formeo.formeo-editor body > .formeo-row {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+}
+.formeo.formeo-editor body > .formeo-row:has(.editing-field) .row-actions {
   display: none;
 }
-.formeo.formeo-editor .formeo-row.highlight-component {
+.formeo.formeo-editor body > .formeo-row.highlight-component {
   box-shadow: 0 0 4px 2px rgb(229, 70, 188.2);
 }
 .formeo.formeo-editor .row-moving {
@@ -1058,14 +1142,22 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .formeo-column.sortable-ghost {
   background-color: rgb(244.7109004739, 210.5194312796, 181.7890995261);
   box-shadow: 0 0 0 1px rgb(229, 142.6, 70);
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
 }
 .formeo.formeo-editor .formeo-column.sortable-ghost * {
   opacity: 0;
 }
-.formeo.formeo-editor .formeo-column:has(.editing-field) .column-actions {
+.formeo.formeo-editor body > .formeo-column {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+}
+.formeo.formeo-editor body > .formeo-column:has(.editing-field) .column-actions {
   display: none;
 }
-.formeo.formeo-editor .formeo-column.highlight-component {
+.formeo.formeo-editor body > .formeo-column.highlight-component {
   box-shadow: 0 0 4px 2px rgb(229, 142.6, 70);
 }
 .formeo.formeo-editor .editing-row .formeo-column,
@@ -1207,9 +1299,22 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .formeo-field.sortable-ghost {
   background-color: rgb(203.3962085308, 244.7109004739, 181.7890995261);
   box-shadow: 0 0 0 1px rgb(124.6, 229, 70);
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
 }
 .formeo.formeo-editor .formeo-field.sortable-ghost * {
   opacity: 0;
+}
+.formeo.formeo-editor body > .formeo-field {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+}
+.formeo.formeo-editor body > .formeo-field .field-preview {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
 }
 .formeo.formeo-editor .field-tag {
   right: -1px;
@@ -1283,6 +1388,45 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .field-preview .f-checkbox.highlight-component,
 .formeo.formeo-editor .field-preview .f-radio.highlight-component {
   box-shadow: 0 0 2px 1px rgb(70, 229, 206.2) inset;
+}
+.formeo.formeo-editor .field-preview .file-dropzone {
+  border: 1px dotted #cccccc;
+  border-radius: 8px;
+  padding: 36px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  background-color: transparent;
+  color: #333333;
+  text-align: center;
+}
+.formeo.formeo-editor .field-preview .file-dropzone.dragover {
+  border-color: #975DAA;
+  background-color: #fff;
+}
+.formeo.formeo-editor .field-preview .file-dropzone .drop-content {
+  max-width: 60%;
+}
+.formeo.formeo-editor .field-preview .file-dropzone .drop-icon {
+  display: block;
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #666666;
+}
+.formeo.formeo-editor .field-preview .file-dropzone .drop-text {
+  font-size: 13px;
+  margin-bottom: 4px;
+  color: #333333;
+}
+.formeo.formeo-editor .field-preview .file-dropzone .drop-subtext {
+  font-size: 12px;
+  color: #666666;
+}
+.formeo.formeo-editor .field-preview .file-dropzone--mirror {
+  margin-left: auto;
+  margin-right: 40px;
+  width: 80%;
 }
 .formeo.formeo-editor .component-edit {
   display: none;
@@ -1719,19 +1863,18 @@ button[class*=-clone]:hover .svg-icon {
   padding: 0;
   overflow: visible;
   border-radius: 0;
-  min-height: 500px;
+  border-bottom-right-radius: 15px;
   display: flex;
   flex-direction: column;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+}
+.formeo.formeo-editor .formeo-stage.empty:not(.formeo-section) {
+  min-height: 500px;
 }
 .formeo.formeo-editor .formeo-stage > .children {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   gap: 16px;
-  min-height: 100%;
   padding: 24px;
   flex: 1;
 }
@@ -1740,6 +1883,11 @@ button[class*=-clone]:hover .svg-icon {
 }
 .formeo.formeo-editor .formeo-stage > .formeo-field {
   background-color: #fff;
+}
+.formeo.formeo-editor .formeo-stage {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 @media (max-width: 481px) {
   .formeo.formeo-editor .formeo-stage {
@@ -1755,6 +1903,8 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .formeo-stage.empty {
   border: 0 none;
   background-color: #fff;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
 }
 .formeo.formeo-editor .formeo-stage.editing-stage, .formeo.formeo-editor .formeo-stage.hovering-stage, .formeo.formeo-editor .formeo-stage.hovering-stage.empty {
   border-color: #4F46E5;
@@ -1780,11 +1930,15 @@ button[class*=-clone]:hover .svg-icon {
   display: none;
   left: auto;
   overflow: hidden;
-  padding: 0 32px 2px 8px;
-  right: -1px;
+  padding: 24px 44px 24px 8px;
+  right: 0px;
+  top: -48px;
   transition: width 266ms ease-in-out;
   width: auto;
   border-bottom-width: 0;
+  min-height: 45px;
+  display: flex;
+  align-items: center;
 }
 .formeo.formeo-editor .stage-edit {
   padding: 16px;
@@ -1800,8 +1954,8 @@ button[class*=-clone]:hover .svg-icon {
   border-top: 1px solid #cccccc;
 }
 .formeo.formeo-editor .stage-actions {
-  right: -1px;
-  top: -24px;
+  right: 3px;
+  top: -42px;
   text-align: right;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 0;
@@ -1835,26 +1989,51 @@ button[class*=-clone]:hover .svg-icon {
   justify-content: center;
   flex-direction: column;
   height: 100%;
+  padding: 32px;
 }
 .formeo.formeo-editor .formeo-stage.empty:not(.formeo-section) > .children:empty::before {
   content: "+";
-  font-size: 28px;
-  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 32px;
+  background: linear-gradient(135deg, #f3eaf6 0%, #e8d5f0 100%);
+  border-radius: 24px;
+  border: 2px dashed #975daa;
+  font-size: 48px;
   font-weight: 300;
-  margin-bottom: 8px;
+  color: #975daa;
+  line-height: 1;
+  box-shadow: 0 4px 16px rgba(151, 93, 170, 0.12);
+  transition: all 0.3s ease;
 }
 .formeo.formeo-editor .formeo-stage.empty:not(.formeo-section) > .children:empty::after {
-  font-size: 14px;
-  color: #9CA3AF;
-  content: "Drag and drop a section first, then add fields to it";
-  font-weight: 400;
+  content: "Get Started\a Drag and drop a section from the Layout tab, then add form fields to build your form";
+  font-size: 15px;
+  color: #374151;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.7;
+  max-width: 420px;
+  white-space: pre-line;
+  padding: 0;
+  display: block;
+}
+.formeo.formeo-editor .formeo-stage.empty:not(.formeo-section) > .children:empty::after::first-line {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  letter-spacing: -0.02em;
+}
+.formeo.formeo-editor .formeo-stage.empty:not(.formeo-section) > .children:empty:hover::before {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(151, 93, 170, 0.16);
 }
 .formeo.formeo-editor .formeo-stage.empty:not(.formeo-section)[class*=editing-] > .children::after,
 .formeo.formeo-editor .formeo-stage.empty:not(.formeo-section)[class*=editing-] > .children::before {
   opacity: 0;
-}
-.formeo.formeo-editor .section-actions {
-  display: none;
 }
 .formeo.formeo-editor .formeo-settings {
   display: none;
@@ -1865,14 +2044,14 @@ button[class*=-clone]:hover .svg-icon {
   align-items: center;
   padding: 0 16px;
   min-height: 48px;
-  border-bottom: 1px solid #DADDE2;
+  border-bottom: 1px solid #dadde2;
   background-color: #fff;
 }
 .formeo.formeo-editor .formeo-preview-btn {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   background-color: #fff;
   cursor: pointer;
   display: flex;
@@ -1887,8 +2066,8 @@ button[class*=-clone]:hover .svg-icon {
   color: #374151;
 }
 .formeo.formeo-editor .formeo-preview-btn:hover {
-  border-color: #D1D5DB;
-  background-color: #F9FAFB;
+  border-color: #d1d5db;
+  background-color: #f9fafb;
 }
 .formeo.formeo-editor .formeo-preview-btn:hover .svg-icon {
   color: #111827;
@@ -1898,22 +2077,28 @@ button[class*=-clone]:hover .svg-icon {
   box-shadow: 0 0 0 2px #975DAA;
 }
 .formeo.formeo-editor .formeo-preview-btn.active {
-  border-color: #975DAA;
+  border-color: #975daa;
 }
 .formeo.formeo-editor .formeo-preview-container {
   padding: 24px;
   background-color: #fff;
   min-height: 400px;
   flex: 1;
+  border-bottom-right-radius: 15px;
 }
 .formeo.formeo-editor .formeo-preview-container .formeo-row {
   box-shadow: none;
+}
+.formeo.formeo-editor {
+  /*
+    Mixins
+  */
 }
 .formeo.formeo-editor .formeo-section.formeo-stage {
   width: 100%;
   min-height: auto;
   flex: none;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: 8px;
   margin-bottom: 16px;
 }
@@ -1926,7 +2111,7 @@ button[class*=-clone]:hover .svg-icon {
   margin: 0;
   padding: 0;
   background: #fff;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: 8px;
   transition: all 0.15s ease;
   width: 100%;
@@ -1934,7 +2119,22 @@ button[class*=-clone]:hover .svg-icon {
   box-sizing: border-box;
 }
 .formeo.formeo-editor .formeo-section:hover {
-  border-color: #D1D5DB;
+  border-color: #d1d5db;
+}
+.formeo.formeo-editor .formeo-section.hovering-section, .formeo.formeo-editor .formeo-section.editing-section {
+  box-shadow: 0 0 0 1px #dce546;
+}
+.formeo.formeo-editor .formeo-section.hovering-section .section-tag, .formeo.formeo-editor .formeo-section.editing-section .section-tag {
+  display: flex;
+}
+.formeo.formeo-editor .formeo-section.hovering-section .section-action-btn-wrap, .formeo.formeo-editor .formeo-section.editing-section .section-action-btn-wrap {
+  display: flex;
+}
+.formeo.formeo-editor .formeo-section.hovering-section .section-handle, .formeo.formeo-editor .formeo-section.editing-section .section-handle {
+  display: none;
+}
+.formeo.formeo-editor .formeo-section.highlight-component {
+  box-shadow: 0 0 4px 2px #dce546;
 }
 .formeo.formeo-editor .formeo-section.collapsed > .children {
   display: none;
@@ -1961,7 +2161,7 @@ button[class*=-clone]:hover .svg-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #6B7280;
+  color: #6b7280;
   transition: color 0.15s ease;
 }
 .formeo.formeo-editor .formeo-section .section-collapse-toggle:hover {
@@ -1983,10 +2183,10 @@ button[class*=-clone]:hover .svg-icon {
   align-items: center;
   justify-content: center;
   cursor: move;
-  color: #9CA3AF;
+  color: #9ca3af;
 }
 .formeo.formeo-editor .formeo-section .section-drag-handle:hover {
-  color: #6B7280;
+  color: #6b7280;
 }
 .formeo.formeo-editor .formeo-section .section-drag-handle .svg-icon {
   width: 16px;
@@ -2002,7 +2202,7 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .formeo-section .section-name-input {
   font-size: 15px;
   font-weight: 500;
-  color: #1F2937;
+  color: #1f2937;
   border: none;
   background: transparent;
   padding: 0;
@@ -2010,7 +2210,7 @@ button[class*=-clone]:hover .svg-icon {
   outline: none;
 }
 .formeo.formeo-editor .formeo-section .section-name-input::placeholder {
-  color: #9CA3AF;
+  color: #9ca3af;
   font-weight: 400;
 }
 .formeo.formeo-editor .formeo-section .section-name-input:focus {
@@ -2021,7 +2221,7 @@ button[class*=-clone]:hover .svg-icon {
 }
 .formeo.formeo-editor .formeo-section .section-instruction-input {
   font-size: 14px;
-  color: #6B7280;
+  color: #6b7280;
   border: none;
   background: transparent;
   padding: 0;
@@ -2029,7 +2229,7 @@ button[class*=-clone]:hover .svg-icon {
   outline: none;
 }
 .formeo.formeo-editor .formeo-section .section-instruction-input::placeholder {
-  color: #9CA3AF;
+  color: #9ca3af;
 }
 .formeo.formeo-editor .formeo-section .section-instruction-input:focus {
   outline: none;
@@ -2044,27 +2244,55 @@ button[class*=-clone]:hover .svg-icon {
   content: "Drag fields here to build this section";
   display: block;
   text-align: center;
-  color: #9CA3AF;
+  color: #9ca3af;
   font-size: 14px;
   padding: 32px 16px;
-  border: 1px dashed #D1D5DB;
+  border: 1px dashed #d1d5db;
   border-radius: 8px;
-  background: #FAFAFA;
+  background: #fafafa;
 }
-.formeo.formeo-editor .formeo-section .action-buttons {
+.formeo.formeo-editor .formeo-section {
+  position: relative;
+}
+.formeo.formeo-editor .formeo-section .section-actions,
+.formeo.formeo-editor .formeo-section .group-actions {
+  display: flex !important;
   position: absolute;
   top: 8px;
   right: 8px;
   opacity: 0;
   transition: opacity 0.15s ease;
+  z-index: 10;
 }
-.formeo.formeo-editor .formeo-section:hover .action-buttons {
+.formeo.formeo-editor .formeo-section:hover .section-actions, .formeo.formeo-editor .formeo-section:hover .group-actions, .formeo.formeo-editor .formeo-section.hovering-section .section-actions, .formeo.formeo-editor .formeo-section.hovering-section .group-actions {
   opacity: 1;
+}
+.formeo.formeo-editor .formeo-section:hover .section-action-btn-wrap, .formeo.formeo-editor .formeo-section.hovering-section .section-action-btn-wrap, .formeo.formeo-editor .formeo-section:hover .action-btn-wrap, .formeo.formeo-editor .formeo-section.hovering-section .action-btn-wrap {
+  display: flex;
+}
+.formeo.formeo-editor .formeo-section .section-tag {
+  display: none;
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  background-color: #dce546;
+  color: #111827;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 8px 0 8px 0;
+  z-index: 11;
+}
+.formeo.formeo-editor .formeo-section.hovering-section .section-tag, .formeo.formeo-editor .formeo-section.editing-section .section-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 .formeo.formeo-editor .formeo-section .section-edit {
   padding: 16px;
-  background: #F9FAFB;
-  border-top: 1px solid #DADDE2;
+  background: #f9fafb;
+  border-top: 1px solid #dadde2;
 }
 .formeo.formeo-editor .formeo-section .formeo-row {
   box-shadow: none;
@@ -2077,16 +2305,34 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor .formeo-section .formeo-row .row-handle,
 .formeo.formeo-editor .formeo-section .formeo-row .row-actions,
 .formeo.formeo-editor .formeo-section .formeo-row .row-tag,
-.formeo.formeo-editor .formeo-section .formeo-row .action-btn-wrap {
+.formeo.formeo-editor .formeo-section .formeo-row .row-action-btn-wrap {
   display: none;
 }
-.formeo.formeo-editor [dir=rtl] {
-  /*
-    Mixins
-  */
-  /*
-    Mixins
-  */
+.formeo.formeo-editor .formeo-section .formeo-column.hovering-column .column-actions,
+.formeo.formeo-editor .formeo-section .formeo-column.hovering-column .column-action-btn-wrap,
+.formeo.formeo-editor .formeo-section .formeo-column.hovering-column .action-btn-wrap, .formeo.formeo-editor .formeo-section .formeo-column.editing-column .column-actions,
+.formeo.formeo-editor .formeo-section .formeo-column.editing-column .column-action-btn-wrap,
+.formeo.formeo-editor .formeo-section .formeo-column.editing-column .action-btn-wrap {
+  display: flex;
+}
+.formeo.formeo-editor .formeo-section .formeo-field.hovering-field .field-actions,
+.formeo.formeo-editor .formeo-section .formeo-field.hovering-field .field-action-btn-wrap,
+.formeo.formeo-editor .formeo-section .formeo-field.hovering-field .action-btn-wrap, .formeo.formeo-editor .formeo-section .formeo-field.editing-field .field-actions,
+.formeo.formeo-editor .formeo-section .formeo-field.editing-field .field-action-btn-wrap,
+.formeo.formeo-editor .formeo-section .formeo-field.editing-field .action-btn-wrap, .formeo.formeo-editor .formeo-section .formeo-field.field-selected .field-actions,
+.formeo.formeo-editor .formeo-section .formeo-field.field-selected .field-action-btn-wrap,
+.formeo.formeo-editor .formeo-section .formeo-field.field-selected .action-btn-wrap {
+  display: flex;
+}
+.formeo.formeo-editor .formeo-section.sortable-ghost, .formeo.formeo-editor .formeo-section.control-moving, .formeo.formeo-editor .formeo-section[class*=sortable] {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+}
+.formeo.formeo-editor body > .formeo-section {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
 }
 .formeo.formeo-editor [dir=rtl] .f-btn-group {
   display: inline-flex;
@@ -2129,12 +2375,22 @@ button[class*=-clone]:hover .svg-icon {
 .formeo.formeo-editor [dir=rtl] .formeo-controls .form-actions {
   float: left;
 }
+.formeo.formeo-editor [dir=rtl] {
+  /*
+    Mixins
+  */
+}
 .formeo.formeo-editor [dir=rtl] .formeo-stage-wrap {
   float: right;
 }
 .formeo.formeo-editor [dir=rtl] .formeo-stage-wrap .formeo-stage {
   padding-left: 4px;
   padding-right: 23px;
+}
+.formeo.formeo-editor [dir=rtl] {
+  /*
+    Mixins
+  */
 }
 .formeo.formeo-editor [dir=rtl] .formeo-row::before {
   border-bottom-left-radius: 8px;
@@ -2306,9 +2562,11 @@ button[class*=-clone]:hover .svg-icon {
   container-name: controls;
   order: -1;
   border: 0 none;
-  border-right: 1px solid #DADDE2;
+  border-right: 1px solid #dadde2;
   background-color: #fff;
   box-shadow: none;
+  border-top-left-radius: 15px;
+  border-bottom-left-radius: 15px;
 }
 
 .formeo-controls.formeo-sticky {
@@ -2381,7 +2639,7 @@ button[class*=-clone]:hover .svg-icon {
 
 .formeo-controls nav button {
   position: absolute;
-  width: 24px;
+  width: 36px;
   color: #000;
   height: calc(100% + 1px);
   padding: 0;
@@ -2673,6 +2931,64 @@ button[class*=-clone]:hover .svg-icon {
   padding: 2px;
 }
 
+body > .field-control,
+body > [class*=field-control],
+body > .formeo-section,
+body > .formeo-row,
+body > .formeo-column {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+}
+
+body > .field-control .field-preview,
+body > [class*=field-control] .field-preview,
+body > .formeo-section .field-preview,
+body > .formeo-row .field-preview,
+body > .formeo-column .field-preview {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body > .field-control .field-preview *,
+body > [class*=field-control] .field-preview *,
+body > .formeo-section .field-preview *,
+body > .formeo-row .field-preview *,
+body > .formeo-column .field-preview * {
+  max-height: 80px !important;
+  overflow: hidden !important;
+}
+
+.formeo-stage .field-control.sortable-ghost,
+.formeo-stage .field-control.control-moving,
+.formeo-stage .field-control[class*=sortable] {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+}
+
+.formeo-stage .field-control.sortable-ghost .field-preview,
+.formeo-stage .field-control.control-moving .field-preview,
+.formeo-stage .field-control[class*=sortable] .field-preview {
+  max-height: 80px !important;
+  height: 80px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.formeo-stage .field-control.sortable-ghost .field-preview *,
+.formeo-stage .field-control.control-moving .field-preview *,
+.formeo-stage .field-control[class*=sortable] .field-preview * {
+  max-height: 80px !important;
+  overflow: hidden !important;
+}
+
 @container controls (max-width: 300px) {
   .control-group {
     grid-template-columns: 1fr !important;
@@ -2707,11 +3023,15 @@ button[class*=-clone]:hover .svg-icon {
 #settings-control-group {
   display: block !important;
   padding: 0 !important;
-  grid-template-columns: 1fr !important;
 }
 
 #settings-control-group.active-panel {
   padding: 0 !important;
+  padding-top: 24px !important;
+}
+
+#settings-control-group {
+  grid-template-columns: 1fr !important;
 }
 
 .settings-placeholder {
@@ -2721,7 +3041,7 @@ button[class*=-clone]:hover .svg-icon {
   justify-content: center;
   padding: 32px 16px;
   text-align: center;
-  color: #9CA3AF;
+  color: #9ca3af;
   min-height: 200px;
 }
 
@@ -2730,39 +3050,58 @@ button[class*=-clone]:hover .svg-icon {
   font-size: 14px;
 }
 
-.field-settings-content {
-  padding: 24px;
+.field-settings-content,
+.section-settings-content {
+  padding: 8px 24px 32px;
 }
 
-.field-settings-content .settings-row {
-  margin-bottom: 24px;
+.field-settings-content .settings-row,
+.section-settings-content .settings-row {
+  margin-bottom: 32px;
 }
 
-.field-settings-content .settings-row label {
+.field-settings-content .settings-row:last-child,
+.section-settings-content .settings-row:last-child {
+  margin-bottom: 0;
+}
+
+.field-settings-content .settings-row label,
+.section-settings-content .settings-row label {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #1F2937;
-  margin-bottom: 8px;
+  color: #1f2937;
+  margin-bottom: 12px;
 }
 
 .field-settings-content .settings-row input[type=text],
 .field-settings-content .settings-row input[type=number],
 .field-settings-content .settings-row select,
-.field-settings-content .settings-row textarea {
+.field-settings-content .settings-row textarea,
+.section-settings-content .settings-row input[type=text],
+.section-settings-content .settings-row input[type=number],
+.section-settings-content .settings-row select,
+.section-settings-content .settings-row textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: 8px;
   font-size: 14px;
   background: #fff;
   box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .field-settings-content .settings-row input[type=text]:focus,
 .field-settings-content .settings-row input[type=number]:focus,
 .field-settings-content .settings-row select:focus,
-.field-settings-content .settings-row textarea:focus {
+.field-settings-content .settings-row textarea:focus,
+.section-settings-content .settings-row input[type=text]:focus,
+.section-settings-content .settings-row input[type=number]:focus,
+.section-settings-content .settings-row select:focus,
+.section-settings-content .settings-row textarea:focus {
   outline: none;
   border-color: #975DAA;
   box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
@@ -2771,25 +3110,40 @@ button[class*=-clone]:hover .svg-icon {
 .field-settings-content .settings-row input[type=text]::placeholder,
 .field-settings-content .settings-row input[type=number]::placeholder,
 .field-settings-content .settings-row select::placeholder,
-.field-settings-content .settings-row textarea::placeholder {
-  color: #9CA3AF;
+.field-settings-content .settings-row textarea::placeholder,
+.section-settings-content .settings-row input[type=text]::placeholder,
+.section-settings-content .settings-row input[type=number]::placeholder,
+.section-settings-content .settings-row select::placeholder,
+.section-settings-content .settings-row textarea::placeholder {
+  color: #9ca3af;
 }
 
-.field-settings-content .settings-row.settings-row-toggle {
+.field-settings-content .settings-row textarea,
+.section-settings-content .settings-row textarea {
+  min-height: 80px;
+  resize: vertical;
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.field-settings-content .settings-row.settings-row-toggle,
+.section-settings-content .settings-row.settings-row-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
-.field-settings-content .settings-row.settings-row-toggle label {
+.field-settings-content .settings-row.settings-row-toggle label,
+.section-settings-content .settings-row.settings-row-toggle label {
   margin-bottom: 0;
 }
 
-.field-settings-content .settings-row.settings-row-toggle input[type=checkbox] {
+.field-settings-content .settings-row.settings-row-toggle input[type=checkbox],
+.section-settings-content .settings-row.settings-row-toggle input[type=checkbox] {
   appearance: none;
   width: 44px;
   height: 24px;
-  background: #DADDE2;
+  background: #dadde2;
   border-radius: 12px;
   position: relative;
   cursor: pointer;
@@ -2797,7 +3151,8 @@ button[class*=-clone]:hover .svg-icon {
   flex-shrink: 0;
 }
 
-.field-settings-content .settings-row.settings-row-toggle input[type=checkbox]::before {
+.field-settings-content .settings-row.settings-row-toggle input[type=checkbox]::before,
+.section-settings-content .settings-row.settings-row-toggle input[type=checkbox]::before {
   content: "";
   position: absolute;
   width: 20px;
@@ -2810,21 +3165,25 @@ button[class*=-clone]:hover .svg-icon {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.field-settings-content .settings-row.settings-row-toggle input[type=checkbox]:checked {
+.field-settings-content .settings-row.settings-row-toggle input[type=checkbox]:checked,
+.section-settings-content .settings-row.settings-row-toggle input[type=checkbox]:checked {
   background: #975DAA;
 }
 
-.field-settings-content .settings-row.settings-row-toggle input[type=checkbox]:checked::before {
+.field-settings-content .settings-row.settings-row-toggle input[type=checkbox]:checked::before,
+.section-settings-content .settings-row.settings-row-toggle input[type=checkbox]:checked::before {
   transform: translateX(20px);
 }
 
-.field-settings-content .settings-add-conditions {
+.field-settings-content .settings-add-conditions,
+.section-settings-content .settings-add-conditions {
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid #DADDE2;
+  border-top: 1px solid #dadde2;
 }
 
-.field-settings-content .settings-add-conditions button {
+.field-settings-content .settings-add-conditions button,
+.section-settings-content .settings-add-conditions button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -2837,41 +3196,48 @@ button[class*=-clone]:hover .svg-icon {
   font-weight: 500;
 }
 
-.field-settings-content .settings-add-conditions button:hover {
+.field-settings-content .settings-add-conditions button:hover,
+.section-settings-content .settings-add-conditions button:hover {
   color: rgb(122.7368421053, 72.955465587, 139.044534413);
 }
 
-.field-settings-content .settings-add-conditions button .add-conditions-plus {
+.field-settings-content .settings-add-conditions button .add-conditions-plus,
+.section-settings-content .settings-add-conditions button .add-conditions-plus {
   font-size: 16px;
   font-weight: 400;
   line-height: 1;
 }
 
-.field-settings-content .settings-add-conditions button span {
+.field-settings-content .settings-add-conditions button span,
+.section-settings-content .settings-add-conditions button span {
   color: inherit;
 }
 
-.field-settings-content .settings-conditions-section {
+.field-settings-content .settings-conditions-section,
+.section-settings-content .settings-conditions-section {
   margin-top: 32px;
   padding-top: 24px;
-  border-top: 1px solid #DADDE2;
+  border-top: 1px solid #dadde2;
 }
 
-.field-settings-content .settings-conditions-section .conditions-header {
+.field-settings-content .settings-conditions-section .conditions-header,
+.section-settings-content .settings-conditions-section .conditions-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
 }
 
-.field-settings-content .settings-conditions-section .conditions-header h4 {
+.field-settings-content .settings-conditions-section .conditions-header h4,
+.section-settings-content .settings-conditions-section .conditions-header h4 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
-  color: #1F2937;
+  color: #1f2937;
 }
 
-.field-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn {
+.field-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn,
+.section-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2881,45 +3247,51 @@ button[class*=-clone]:hover .svg-icon {
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  color: #6B7280;
+  color: #6b7280;
 }
 
-.field-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn:hover {
-  background: #F3F4F6;
-  color: #EF4444;
+.field-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn:hover,
+.section-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn:hover {
+  background: #f3f4f6;
+  color: #ef4444;
 }
 
-.field-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn .svg-icon {
+.field-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn .svg-icon,
+.section-settings-content .settings-conditions-section .conditions-header .conditions-delete-btn .svg-icon {
   width: 18px;
   height: 18px;
   fill: currentColor;
 }
 
-.field-settings-content .settings-conditions-section .condition-type-label {
+.field-settings-content .settings-conditions-section .condition-type-label,
+.section-settings-content .settings-conditions-section .condition-type-label {
   display: block;
   font-size: 16px;
   font-weight: 600;
-  color: #1F2937;
+  color: #1f2937;
   margin-bottom: 16px;
 }
 
-.field-settings-content .settings-conditions-section .condition-field-label {
+.field-settings-content .settings-conditions-section .condition-field-label,
+.section-settings-content .settings-conditions-section .condition-field-label {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #6B7280;
+  color: #6b7280;
   margin-top: 16px;
   margin-bottom: 8px;
 }
 
-.field-settings-content .settings-conditions-section .settings-row {
+.field-settings-content .settings-conditions-section .settings-row,
+.section-settings-content .settings-conditions-section .settings-row {
   margin-bottom: 8px;
 }
 
-.field-settings-content .settings-conditions-section .settings-row select {
+.field-settings-content .settings-conditions-section .settings-row select,
+.section-settings-content .settings-conditions-section .settings-row select {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: 8px;
   font-size: 14px;
   background: #fff;
@@ -2932,47 +3304,53 @@ button[class*=-clone]:hover .svg-icon {
   box-sizing: border-box;
 }
 
-.field-settings-content .settings-conditions-section .settings-row select:focus {
+.field-settings-content .settings-conditions-section .settings-row select:focus,
+.section-settings-content .settings-conditions-section .settings-row select:focus {
   outline: none;
   border-color: #975DAA;
   box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
 }
 
-.field-settings-content .settings-conditions-section .settings-row input[type=text] {
+.field-settings-content .settings-conditions-section .settings-row input[type=text],
+.section-settings-content .settings-conditions-section .settings-row input[type=text] {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: 8px;
   font-size: 14px;
   background: #fff;
   box-sizing: border-box;
 }
 
-.field-settings-content .settings-conditions-section .settings-row input[type=text]:focus {
+.field-settings-content .settings-conditions-section .settings-row input[type=text]:focus,
+.section-settings-content .settings-conditions-section .settings-row input[type=text]:focus {
   outline: none;
   border-color: #975DAA;
   box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
 }
 
-.field-settings-content .settings-conditions-section .condition-value-tags {
+.field-settings-content .settings-conditions-section .condition-value-tags,
+.section-settings-content .settings-conditions-section .condition-value-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
 }
 
-.field-settings-content .settings-conditions-section .condition-tag {
+.field-settings-content .settings-conditions-section .condition-tag,
+.section-settings-content .settings-conditions-section .condition-tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 4px 12px;
-  background: #F3F4F6;
+  background: #f3f4f6;
   border-radius: 16px;
   font-size: 14px;
-  color: #1F2937;
+  color: #1f2937;
 }
 
-.field-settings-content .settings-conditions-section .condition-tag .tag-remove-btn {
+.field-settings-content .settings-conditions-section .condition-tag .tag-remove-btn,
+.section-settings-content .settings-conditions-section .condition-tag .tag-remove-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2983,72 +3361,81 @@ button[class*=-clone]:hover .svg-icon {
   border-radius: 50%;
   cursor: pointer;
   font-size: 14px;
-  color: #6B7280;
+  color: #6b7280;
   padding: 0;
   line-height: 1;
 }
 
-.field-settings-content .settings-conditions-section .condition-tag .tag-remove-btn:hover {
-  background: #DADDE2;
-  color: #1F2937;
+.field-settings-content .settings-conditions-section .condition-tag .tag-remove-btn:hover,
+.section-settings-content .settings-conditions-section .condition-tag .tag-remove-btn:hover {
+  background: #dadde2;
+  color: #1f2937;
 }
 
-.field-settings-content .settings-conditions-section .conditions-divider {
+.field-settings-content .settings-conditions-section .conditions-divider,
+.section-settings-content .settings-conditions-section .conditions-divider {
   height: 1px;
-  background: #DADDE2;
+  background: #dadde2;
   margin: 24px 0;
 }
 
-.field-settings-content .settings-options-section {
+.field-settings-content .settings-options-section,
+.section-settings-content .settings-options-section {
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #DADDE2;
+  border-top: 1px solid #dadde2;
 }
 
-.field-settings-content .settings-options-section > label {
+.field-settings-content .settings-options-section > label,
+.section-settings-content .settings-options-section > label {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #1F2937;
+  color: #1f2937;
   margin-bottom: 16px;
 }
 
-.field-settings-content .settings-options-list {
+.field-settings-content .settings-options-list,
+.section-settings-content .settings-options-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
 }
 
-.field-settings-content .settings-option-row {
+.field-settings-content .settings-option-row,
+.section-settings-content .settings-option-row {
   display: flex;
   gap: 8px;
   align-items: center;
 }
 
-.field-settings-content .settings-option-row input[type=text] {
+.field-settings-content .settings-option-row input[type=text],
+.section-settings-content .settings-option-row input[type=text] {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: 8px;
   font-size: 14px;
   background: #fff;
   box-sizing: border-box;
 }
 
-.field-settings-content .settings-option-row input[type=text]:focus {
+.field-settings-content .settings-option-row input[type=text]:focus,
+.section-settings-content .settings-option-row input[type=text]:focus {
   outline: none;
   border-color: #975DAA;
   box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
 }
 
-.field-settings-content .settings-option-row .option-remove-btn {
+.field-settings-content .settings-option-row .option-remove-btn,
+.section-settings-content .settings-option-row .option-remove-btn {
   width: 28px;
   height: 28px;
   padding: 0;
   border: none;
   background: transparent;
-  color: #9CA3AF;
+  color: #9ca3af;
   font-size: 18px;
   cursor: pointer;
   border-radius: 4px;
@@ -3057,12 +3444,14 @@ button[class*=-clone]:hover .svg-icon {
   justify-content: center;
 }
 
-.field-settings-content .settings-option-row .option-remove-btn:hover {
-  background: #F3F4F6;
-  color: #EF4444;
+.field-settings-content .settings-option-row .option-remove-btn:hover,
+.section-settings-content .settings-option-row .option-remove-btn:hover {
+  background: #f3f4f6;
+  color: #ef4444;
 }
 
-.field-settings-content .settings-add-option-btn {
+.field-settings-content .settings-add-option-btn,
+.section-settings-content .settings-add-option-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -3075,64 +3464,73 @@ button[class*=-clone]:hover .svg-icon {
   font-weight: 500;
 }
 
-.field-settings-content .settings-add-option-btn:hover {
+.field-settings-content .settings-add-option-btn:hover,
+.section-settings-content .settings-add-option-btn:hover {
   color: rgb(122.7368421053, 72.955465587, 139.044534413);
 }
 
-.field-settings-content .settings-add-option-btn .svg-icon {
+.field-settings-content .settings-add-option-btn .svg-icon,
+.section-settings-content .settings-add-option-btn .svg-icon {
   width: 16px;
   height: 16px;
   fill: currentColor;
 }
 
-.field-settings-content .settings-row-double {
+.field-settings-content .settings-row-double,
+.section-settings-content .settings-row-double {
   display: flex;
   gap: 16px;
   margin-bottom: 24px;
 }
 
-.field-settings-content .settings-row-double .settings-half {
+.field-settings-content .settings-row-double .settings-half,
+.section-settings-content .settings-row-double .settings-half {
   flex: 1;
 }
 
-.field-settings-content .settings-row-double .settings-half label {
+.field-settings-content .settings-row-double .settings-half label,
+.section-settings-content .settings-row-double .settings-half label {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: #1F2937;
+  color: #1f2937;
   margin-bottom: 8px;
 }
 
-.field-settings-content .settings-row-double .settings-half input[type=number] {
+.field-settings-content .settings-row-double .settings-half input[type=number],
+.section-settings-content .settings-row-double .settings-half input[type=number] {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: 8px;
   font-size: 14px;
   background: #fff;
   box-sizing: border-box;
 }
 
-.field-settings-content .settings-row-double .settings-half input[type=number]:focus {
+.field-settings-content .settings-row-double .settings-half input[type=number]:focus,
+.section-settings-content .settings-row-double .settings-half input[type=number]:focus {
   outline: none;
   border-color: #975DAA;
   box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
 }
 
-.field-settings-content .settings-info {
-  color: #6B7280;
+.field-settings-content .settings-info,
+.section-settings-content .settings-info {
+  color: #6b7280;
   font-size: 14px;
   margin: 0;
   padding: 16px;
-  background: #F9FAFB;
+  background: #f9fafb;
   border-radius: 8px;
   text-align: center;
 }
 
-.field-settings-content textarea {
+.field-settings-content textarea,
+.section-settings-content textarea {
   width: 100%;
   padding: 12px 16px;
-  border: 1px solid #DADDE2;
+  border: 1px solid #dadde2;
   border-radius: 8px;
   font-size: 14px;
   background: #fff;
@@ -3141,7 +3539,8 @@ button[class*=-clone]:hover .svg-icon {
   font-family: inherit;
 }
 
-.field-settings-content textarea:focus {
+.field-settings-content textarea:focus,
+.section-settings-content textarea:focus {
   outline: none;
   border-color: #975DAA;
   box-shadow: 0 0 0 3px rgba(151, 93, 170, 0.1);
