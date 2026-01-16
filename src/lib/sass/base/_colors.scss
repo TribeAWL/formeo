@@ -6,13 +6,15 @@
   $g: color.channel($bg-color, "green", $space: rgb);
   $b: color.channel($bg-color, "blue", $space: rgb);
   $brightness: math.div(($r * 299) + ($g * 587) + ($b * 114), 1000);
-  @return if($brightness > 150, $dark, $light
-);
+  @if $brightness > 150 {
+    @return $dark;
+  } @else {
+    @return $light;
+  }
 }
 
-
 // Colors
-$brand-primary: #975DAA !default;
+$brand-primary: #975daa !default;
 $brand-primary-dark: color.adjust($brand-primary, $lightness: -10%) !default;
 $brand-primary-light: color.adjust($brand-primary, $lightness: 20%) !default;
 
@@ -32,7 +34,7 @@ $brand-info: rgb(153, 84, 187) !default;
 
 $remove-bg: rgba($brand-error, 0.25) !default;
 
-$stage-outline-color: #4F46E5; // base indigo
+$stage-outline-color: #4f46e5; // base indigo
 $row-outline-color: color.adjust($stage-outline-color, $hue: 72deg);
 $column-outline-color: color.adjust($stage-outline-color, $hue: 144deg);
 $field-outline-color: color.adjust($stage-outline-color, $hue: 216deg);
@@ -46,14 +48,30 @@ $field-outline-color-text: text-color($field-outline-color) !default;
 $section-outline-color-text: text-color($section-outline-color) !default;
 $option-outline-color-text: text-color($option-outline-color) !default;
 
-
-$stage-highlight-color: color.adjust($stage-outline-color, $lightness: 25%) !default;
-$row-highlight-color: color.adjust($row-outline-color, $lightness: 25%) !default;
-$column-highlight-color: color.adjust($column-outline-color, $lightness: 25%) !default;
-$field-highlight-color: color.adjust($field-outline-color, $lightness: 25%) !default;
-$section-highlight-color: color.adjust($section-outline-color, $lightness: 25%) !default;
-$option-highlight-color: color.adjust($option-outline-color, $lightness: 25%) !default;
-
+$stage-highlight-color: color.adjust(
+  $stage-outline-color,
+  $lightness: 25%
+) !default;
+$row-highlight-color: color.adjust(
+  $row-outline-color,
+  $lightness: 25%
+) !default;
+$column-highlight-color: color.adjust(
+  $column-outline-color,
+  $lightness: 25%
+) !default;
+$field-highlight-color: color.adjust(
+  $field-outline-color,
+  $lightness: 25%
+) !default;
+$section-highlight-color: color.adjust(
+  $section-outline-color,
+  $lightness: 25%
+) !default;
+$option-highlight-color: color.adjust(
+  $option-outline-color,
+  $lightness: 25%
+) !default;
 
 $stage-highlight-color-text: text-color($stage-highlight-color) !default;
 $row-highlight-color-text: text-color($row-highlight-color) !default;
@@ -61,7 +79,7 @@ $column-highlight-color-text: text-color($column-highlight-color) !default;
 $field-highlight-color-text: text-color($field-highlight-color) !default;
 $option-highlight-color-text: text-color($option-highlight-color) !default;
 
-$input-focus: #975DAA;
+$input-focus: #975daa;
 
 // Grayscale and brand colors for use across Bootstrap.
 $black: #000;
@@ -76,7 +94,7 @@ $gray-lighter: color.scale($black, $lightness: 80%) !default;
 $gray-lightest: color.scale($black, $lightness: 90%) !default;
 
 // Tab colors
-$tab-active-bg: #F3EAF6;
+$tab-active-bg: #f3eaf6;
 $tab-inactive-bg: #fff;
 
 // Stage

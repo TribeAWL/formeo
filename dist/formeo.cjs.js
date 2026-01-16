@@ -31,7 +31,8 @@ const DEFAULT_CONFIG$5 = {
   // init with user's preferred language
   override: {}
 };
-class I18N {
+let instance = null;
+class I18NBase {
   /**
    * Process options and start the module
    * @param {Object} options
@@ -47,14 +48,16 @@ class I18N {
    */
   processConfig(options) {
     const { location, ...restOptions } = { ...DEFAULT_CONFIG$5, ...options };
-    const parsedLocation = location.replace(/\/?$/, "/");
+    const parsedLocation = location.endsWith("/") ? location : `${location}/`;
     this.config = { location: parsedLocation, ...restOptions };
-    const { override, preloaded = {} } = this.config;
-    const allLangs = Object.entries(this.langs).concat(Object.entries(override || preloaded));
-    this.langs = allLangs.reduce((acc, [locale2, lang]) => {
-      acc[locale2] = this.applyLanguage(locale2, lang);
-      return acc;
-    }, {});
+    const { preloaded = {}, override = {} } = this.config;
+    const allLocales = /* @__PURE__ */ new Set([...Object.keys(preloaded), ...Object.keys(override)]);
+    for (const locale2 of allLocales) {
+      const preloadedLang = preloaded[locale2] || {};
+      const overrideLang = override[locale2] || {};
+      const mergedLang = { ...preloadedLang, ...overrideLang };
+      this.applyLanguage(locale2, mergedLang);
+    }
     this.locale = this.config.locale || this.config.langs[0];
   }
   /**
@@ -72,9 +75,10 @@ class I18N {
    * @param {String|Object} lang
    */
   addLanguage(locale2, lang = {}) {
-    lang = typeof lang === "string" ? I18N.processFile(lang) : lang;
+    lang = typeof lang === "string" ? I18NBase.processFile(lang) : lang;
     this.applyLanguage(locale2, lang);
-    this.config.langs.push("locale");
+    this.loaded.push(locale2);
+    this.config.langs.push(locale2);
   }
   /**
    * get a string from a loaded language file
@@ -103,12 +107,12 @@ class I18N {
    */
   makeSafe(str) {
     const mapObj = {
-      "{": "\\{",
-      "}": "\\}",
-      "|": "\\|"
+      "{": String.raw`\{`,
+      "}": String.raw`\}`,
+      "|": String.raw`\|`
     };
-    str = str.replace(/[{}|]/g, (matched) => mapObj[matched]);
-    return new RegExp(str, "g");
+    const escapedStr = str.replaceAll(/[{}|]/g, (matched) => mapObj[matched]);
+    return new RegExp(escapedStr, "g");
   }
   /**
    * Temporarily put a string into the currently loaded language
@@ -127,21 +131,24 @@ class I18N {
    * @return {String}      updated string translation
    */
   get(key, args) {
-    const _this = this;
     let value = this.getValue(key);
     if (!value) {
       return;
     }
+    if (!args) {
+      return value;
+    }
     const tokens = value.match(/\{[^}]+?\}/g);
-    if (args && tokens) {
-      if ("object" === typeof args) {
-        for (const token of tokens) {
-          const key2 = token.substring(1, token.length - 1);
-          value = value.replace(_this.makeSafe(token), args[key2] || "");
-        }
-      } else {
-        value = value.replace(/\{[^}]+?\}/g, args);
+    if (!tokens) {
+      return value;
+    }
+    if (typeof args === "object") {
+      for (const token of tokens) {
+        const tokenKey = token.slice(1, -1);
+        value = value.replace(this.makeSafe(token), args[tokenKey] ?? "");
       }
+    } else {
+      value = value.replaceAll(/\{[^}]+?\}/g, args);
     }
     return value;
   }
@@ -151,7 +158,7 @@ class I18N {
    * @return {Object} processed language
    */
   static processFile(response) {
-    return I18N.fromFile(response.replace(/\n\n/g, "\n"));
+    return I18N.fromFile(response.replaceAll("\n\n", "\n"));
   }
   /**
    * Static method: Turn raw text from the language files into fancy JSON
@@ -165,10 +172,27 @@ class I18N {
       const regex = /^(.+?) *?= *?([^\n]+)/;
       matches2 = regex.exec(lines[i2]);
       if (matches2) {
-        lang[matches2[1]] = matches2[2].replace(/(^\s+|\s+$)/g, "");
+        lang[matches2[1]] = matches2[2].trim();
       }
     }
     return lang;
+  }
+  /**
+   * Get the singleton instance
+   * @param {Object} options
+   * @return {I18NBase} singleton instance
+   */
+  static getInstance(options) {
+    if (!instance) {
+      instance = new I18NBase(options);
+    }
+    return instance;
+  }
+  /**
+   * Reset the singleton instance (useful for testing)
+   */
+  static resetInstance() {
+    instance = null;
   }
   /**
    * Load a remotely stored language file
@@ -176,26 +200,20 @@ class I18N {
    * @param  {Boolean} useCache
    * @return {Promise}       resolves response
    */
-  loadLang(locale2, useCache = true) {
-    const _this = this;
-    return new Promise(function(resolve, reject) {
-      if (_this.loaded.indexOf(locale2) !== -1 && useCache) {
-        _this.applyLanguage(_this.langs[locale2]);
-        return resolve(_this.langs[locale2]);
-      } else {
-        const langFile = [_this.config.location, locale2, _this.config.extension].join("");
-        return fetchData(langFile).then((lang) => {
-          const processedFile = I18N.processFile(lang);
-          _this.applyLanguage(locale2, processedFile);
-          _this.loaded.push(locale2);
-          return resolve(_this.langs[locale2]);
-        }).catch((err) => {
-          console.error(err);
-          const lang = _this.applyLanguage(locale2);
-          resolve(lang);
-        });
-      }
-    });
+  async loadLang(locale2, useCache = true) {
+    if (this.loaded.includes(locale2) && useCache) {
+      return this.langs[locale2];
+    }
+    const langFile = `${this.config.location}${locale2}${this.config.extension}`;
+    try {
+      const lang = await fetchData(langFile);
+      const processedFile = I18NBase.processFile(lang);
+      this.applyLanguage(locale2, processedFile);
+      return this.langs[locale2];
+    } catch (err) {
+      console.error(err);
+      return this.applyLanguage(locale2);
+    }
   }
   /**
    * applies overrides from config
@@ -207,6 +225,7 @@ class I18N {
     const override = this.config.override[locale2] || {};
     const existingLang = this.langs[locale2] || {};
     this.langs[locale2] = { ...existingLang, ...lang, ...override };
+    this.loaded.push(locale2);
     return this.langs[locale2];
   }
   /**
@@ -222,13 +241,37 @@ class I18N {
    * @return {Promise} language
    */
   async setCurrent(locale2 = "en-US") {
-    await this.loadLang(locale2);
+    if (!this.loaded.includes(locale2)) {
+      await this.loadLang(locale2);
+    }
     this.locale = locale2;
     this.current = this.langs[locale2];
     return this.current;
   }
 }
-const mi18n = new I18N();
+const I18N = new Proxy(I18NBase, {
+  /**
+   * Called when I18N() is invoked as a function (without new)
+   * Returns the singleton instance
+   */
+  apply(target, thisArg, args) {
+    return target.getInstance(...args);
+  },
+  /**
+   * Called when new I18N() is invoked
+   * Creates a new instance
+   */
+  construct(target, args) {
+    return new target(...args);
+  },
+  /**
+   * Proxy property access to the base class
+   */
+  get(target, prop) {
+    return target[prop];
+  }
+});
+const mi18n = I18N.getInstance();
 !(function() {
   try {
     if ("undefined" != typeof document) {
@@ -1205,9 +1248,9 @@ var hasRequired_cloneBuffer;
 function require_cloneBuffer() {
   if (hasRequired_cloneBuffer) return _cloneBuffer.exports;
   hasRequired_cloneBuffer = 1;
-  (function(module2, exports2) {
+  (function(module2, exports$1) {
     var root = require_root();
-    var freeExports = exports2 && !exports2.nodeType && exports2;
+    var freeExports = exports$1 && !exports$1.nodeType && exports$1;
     var freeModule = freeExports && true && module2 && !module2.nodeType && module2;
     var moduleExports = freeModule && freeModule.exports === freeExports;
     var Buffer = moduleExports ? root.Buffer : void 0, allocUnsafe = Buffer ? Buffer.allocUnsafe : void 0;
@@ -1453,9 +1496,9 @@ var hasRequiredIsBuffer;
 function requireIsBuffer() {
   if (hasRequiredIsBuffer) return isBuffer.exports;
   hasRequiredIsBuffer = 1;
-  (function(module2, exports2) {
+  (function(module2, exports$1) {
     var root = require_root(), stubFalse = requireStubFalse();
-    var freeExports = exports2 && !exports2.nodeType && exports2;
+    var freeExports = exports$1 && !exports$1.nodeType && exports$1;
     var freeModule = freeExports && true && module2 && !module2.nodeType && module2;
     var moduleExports = freeModule && freeModule.exports === freeExports;
     var Buffer = moduleExports ? root.Buffer : void 0;
@@ -1526,9 +1569,9 @@ var hasRequired_nodeUtil;
 function require_nodeUtil() {
   if (hasRequired_nodeUtil) return _nodeUtil.exports;
   hasRequired_nodeUtil = 1;
-  (function(module2, exports2) {
+  (function(module2, exports$1) {
     var freeGlobal = require_freeGlobal();
-    var freeExports = exports2 && !exports2.nodeType && exports2;
+    var freeExports = exports$1 && !exports$1.nodeType && exports$1;
     var freeModule = freeExports && true && module2 && !module2.nodeType && module2;
     var moduleExports = freeModule && freeModule.exports === freeExports;
     var freeProcess = moduleExports && freeGlobal.process;
@@ -2182,6 +2225,7 @@ const STAGE_CLASSNAME = `${PACKAGE_NAME}-stage`;
 const ROW_CLASSNAME = `${PACKAGE_NAME}-row`;
 const COLUMN_CLASSNAME = `${PACKAGE_NAME}-column`;
 const FIELD_CLASSNAME = `${PACKAGE_NAME}-field`;
+const SECTION_CLASSNAME = `${PACKAGE_NAME}-section`;
 const CUSTOM_COLUMN_OPTION_CLASSNAME = "custom-column-widths";
 const COLUMN_PRESET_CLASSNAME = "column-preset";
 const COLUMN_RESIZE_CLASSNAME = "resizing-columns";
@@ -2190,7 +2234,7 @@ const CHILD_CLASSNAME_MAP = /* @__PURE__ */ new Map([
   [ROW_CLASSNAME, COLUMN_CLASSNAME],
   [COLUMN_CLASSNAME, FIELD_CLASSNAME]
 ]);
-const INTERNAL_COMPONENT_TYPES = ["stage", "row", "column", "field"];
+const INTERNAL_COMPONENT_TYPES = ["stage", "section", "row", "column", "field"];
 const INTERNAL_COMPONENT_INDEX_TYPES = INTERNAL_COMPONENT_TYPES.map((type) => `${type}s`);
 new Map(
   INTERNAL_COMPONENT_INDEX_TYPES.map((type, index2) => [type, INTERNAL_COMPONENT_TYPES[index2]])
@@ -2208,6 +2252,7 @@ const COMPONENT_TYPE_MAP = COMPONENT_TYPES.reduce((acc, type) => {
 const COMPONENT_TYPE_CONFIGS = [
   { name: "controls", className: CONTROL_GROUP_CLASSNAME },
   { name: "stage", className: STAGE_CLASSNAME },
+  { name: "section", className: SECTION_CLASSNAME },
   { name: "row", className: ROW_CLASSNAME },
   { name: "column", className: COLUMN_CLASSNAME },
   { name: "field", className: FIELD_CLASSNAME }
@@ -2215,6 +2260,7 @@ const COMPONENT_TYPE_CONFIGS = [
 const COMPONENT_TYPE_CLASSNAMES = {
   controls: CONTROL_GROUP_CLASSNAME,
   stage: STAGE_CLASSNAME,
+  section: SECTION_CLASSNAME,
   row: ROW_CLASSNAME,
   column: COLUMN_CLASSNAME,
   field: FIELD_CLASSNAME
@@ -2240,8 +2286,14 @@ const { childTypeMapVals, childTypeIndexMapVals } = COMPONENT_TYPE_CONFIGS.reduc
   { childTypeMapVals: [], childTypeIndexMapVals: [] }
 );
 const parentTypeMap = childTypeMapVals.slice().map((typeMap) => typeMap.slice().reverse()).reverse();
-const CHILD_TYPE_MAP = new Map(childTypeMapVals);
-const CHILD_TYPE_INDEX_MAP = new Map(childTypeIndexMapVals);
+const baseChildTypeMap = new Map(childTypeMapVals);
+const baseChildTypeIndexMap = new Map(childTypeIndexMapVals);
+baseChildTypeMap.set("stage", "row");
+baseChildTypeIndexMap.set("stages", "rows");
+baseChildTypeMap.set("section", "row");
+baseChildTypeIndexMap.set("sections", "rows");
+const CHILD_TYPE_MAP = baseChildTypeMap;
+const CHILD_TYPE_INDEX_MAP = baseChildTypeIndexMap;
 const PARENT_TYPE_MAP = new Map(parentTypeMap.slice());
 const columnTemplates = [
   [{ value: "100.0", label: "100%" }],
@@ -2347,7 +2399,8 @@ const DEFAULT_FORMDATA = () => ({
   stages: { [uuid()]: {} },
   rows: {},
   columns: {},
-  fields: {}
+  fields: {},
+  sections: {}
 });
 const CHECKED_TYPES = ["selected", "checked"];
 const REVERSED_CHECKED_TYPES = CHECKED_TYPES.toReversed();
@@ -3539,7 +3592,7 @@ function _objectWithoutProperties(source, excluded) {
   }
   return target;
 }
-var version = "1.15.3";
+var version = "1.15.6";
 function userAgent(pattern) {
   if (typeof window !== "undefined" && window.navigator) {
     return !!/* @__PURE__ */ navigator.userAgent.match(pattern);
@@ -3745,7 +3798,7 @@ function lastChild(el, selector) {
   }
   return last || null;
 }
-function index$9(el, selector) {
+function index$a(el, selector) {
   var index2 = 0;
   if (!el || !el.parentNode) {
     return -1;
@@ -4291,7 +4344,8 @@ function Sortable(el, options) {
       x: 0,
       y: 0
     },
-    supportPointer: Sortable.supportPointer !== false && "PointerEvent" in window && !Safari,
+    // Disabled on Safari: #1571; Enabled on Safari IOS: #2244
+    supportPointer: Sortable.supportPointer !== false && "PointerEvent" in window && (!Safari || IOS),
     emptyInsertThreshold: 5
   };
   PluginManager.initializePlugins(this, el, defaults2);
@@ -4356,8 +4410,8 @@ Sortable.prototype = /** @lends Sortable.prototype */
     if (lastDownEl === target) {
       return;
     }
-    oldIndex = index$9(target);
-    oldDraggableIndex = index$9(target, options.draggable);
+    oldIndex = index$a(target);
+    oldDraggableIndex = index$a(target, options.draggable);
     if (typeof filter === "function") {
       if (filter.call(this, evt, target, this)) {
         _dispatchEvent({
@@ -4371,7 +4425,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
         pluginEvent2("filter", _this, {
           evt
         });
-        preventOnFilter && evt.cancelable && evt.preventDefault();
+        preventOnFilter && evt.preventDefault();
         return;
       }
     } else if (filter) {
@@ -4393,7 +4447,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
         }
       });
       if (filter) {
-        preventOnFilter && evt.cancelable && evt.preventDefault();
+        preventOnFilter && evt.preventDefault();
         return;
       }
     }
@@ -4449,9 +4503,14 @@ Sortable.prototype = /** @lends Sortable.prototype */
       on(ownerDocument, "dragover", nearestEmptyInsertDetectEvent);
       on(ownerDocument, "mousemove", nearestEmptyInsertDetectEvent);
       on(ownerDocument, "touchmove", nearestEmptyInsertDetectEvent);
-      on(ownerDocument, "mouseup", _this._onDrop);
-      on(ownerDocument, "touchend", _this._onDrop);
-      on(ownerDocument, "touchcancel", _this._onDrop);
+      if (options.supportPointer) {
+        on(ownerDocument, "pointerup", _this._onDrop);
+        !this.nativeDraggable && on(ownerDocument, "pointercancel", _this._onDrop);
+      } else {
+        on(ownerDocument, "mouseup", _this._onDrop);
+        on(ownerDocument, "touchend", _this._onDrop);
+        on(ownerDocument, "touchcancel", _this._onDrop);
+      }
       if (FireFox && this.nativeDraggable) {
         this.options.touchStartThreshold = 4;
         dragEl.draggable = true;
@@ -4464,9 +4523,14 @@ Sortable.prototype = /** @lends Sortable.prototype */
           this._onDrop();
           return;
         }
-        on(ownerDocument, "mouseup", _this._disableDelayedDrag);
-        on(ownerDocument, "touchend", _this._disableDelayedDrag);
-        on(ownerDocument, "touchcancel", _this._disableDelayedDrag);
+        if (options.supportPointer) {
+          on(ownerDocument, "pointerup", _this._disableDelayedDrag);
+          on(ownerDocument, "pointercancel", _this._disableDelayedDrag);
+        } else {
+          on(ownerDocument, "mouseup", _this._disableDelayedDrag);
+          on(ownerDocument, "touchend", _this._disableDelayedDrag);
+          on(ownerDocument, "touchcancel", _this._disableDelayedDrag);
+        }
         on(ownerDocument, "mousemove", _this._delayedDragTouchMoveHandler);
         on(ownerDocument, "touchmove", _this._delayedDragTouchMoveHandler);
         options.supportPointer && on(ownerDocument, "pointermove", _this._delayedDragTouchMoveHandler);
@@ -4492,6 +4556,8 @@ Sortable.prototype = /** @lends Sortable.prototype */
     off(ownerDocument, "mouseup", this._disableDelayedDrag);
     off(ownerDocument, "touchend", this._disableDelayedDrag);
     off(ownerDocument, "touchcancel", this._disableDelayedDrag);
+    off(ownerDocument, "pointerup", this._disableDelayedDrag);
+    off(ownerDocument, "pointercancel", this._disableDelayedDrag);
     off(ownerDocument, "mousemove", this._delayedDragTouchMoveHandler);
     off(ownerDocument, "touchmove", this._delayedDragTouchMoveHandler);
     off(ownerDocument, "pointermove", this._delayedDragTouchMoveHandler);
@@ -4702,6 +4768,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
     _this._dragStartId = _nextTick(_this._dragStarted.bind(_this, fallback, evt));
     on(document, "selectstart", _this);
     moved = true;
+    window.getSelection().removeAllRanges();
     if (Safari) {
       css(document.body, "user-select", "none");
     }
@@ -4777,8 +4844,8 @@ Sortable.prototype = /** @lends Sortable.prototype */
       return completedFired = true;
     }
     function changed() {
-      newIndex = index$9(dragEl);
-      newDraggableIndex = index$9(dragEl, options.draggable);
+      newIndex = index$a(dragEl);
+      newDraggableIndex = index$a(dragEl, options.draggable);
       _dispatchEvent({
         sortable: _this,
         name: "change",
@@ -4864,7 +4931,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
         direction = _getSwapDirection(evt, target, targetRect, vertical, differentRowCol ? 1 : options.swapThreshold, options.invertedSwapThreshold == null ? options.swapThreshold : options.invertedSwapThreshold, isCircumstantialInvert, lastTarget === target);
         var sibling;
         if (direction !== 0) {
-          var dragIndex = index$9(dragEl);
+          var dragIndex = index$a(dragEl);
           do {
             dragIndex -= direction;
             sibling = parentEl.children[dragIndex];
@@ -4921,19 +4988,20 @@ Sortable.prototype = /** @lends Sortable.prototype */
     off(ownerDocument, "mouseup", this._onDrop);
     off(ownerDocument, "touchend", this._onDrop);
     off(ownerDocument, "pointerup", this._onDrop);
+    off(ownerDocument, "pointercancel", this._onDrop);
     off(ownerDocument, "touchcancel", this._onDrop);
     off(document, "selectstart", this);
   },
   _onDrop: function _onDrop(evt) {
     var el = this.el, options = this.options;
-    newIndex = index$9(dragEl);
-    newDraggableIndex = index$9(dragEl, options.draggable);
+    newIndex = index$a(dragEl);
+    newDraggableIndex = index$a(dragEl, options.draggable);
     pluginEvent2("drop", this, {
       evt
     });
     parentEl = dragEl && dragEl.parentNode;
-    newIndex = index$9(dragEl);
-    newDraggableIndex = index$9(dragEl, options.draggable);
+    newIndex = index$a(dragEl);
+    newDraggableIndex = index$a(dragEl, options.draggable);
     if (Sortable.eventCanceled) {
       this._nulling();
       return;
@@ -5280,7 +5348,7 @@ function _getSwapDirection(evt, target, targetRect, vertical, swapThreshold, inv
   return 0;
 }
 function _getInsertDirection(target) {
-  if (index$9(dragEl) < index$9(target)) {
+  if (index$a(dragEl) < index$a(target)) {
     return 1;
   } else {
     return -1;
@@ -5328,7 +5396,7 @@ Sortable.utils = {
   closest,
   toggleClass,
   clone,
-  index: index$9,
+  index: index$a,
   nextTick: _nextTick,
   cancelNextTick: _cancelNextTick,
   detectDirection: _detectDirection,
@@ -6873,7 +6941,7 @@ class Autocomplete {
     });
     this.clearButton = dom.create({
       tag: "span",
-      content: dom.icon("remove"),
+      content: dom.icon("bin"),
       className: "clear-button hidden",
       action: { click: () => this.clearValue() }
     });
@@ -7587,7 +7655,7 @@ class EditPanelItem {
           this.dom.classList.remove("to-remove");
         }
       },
-      content: dom.icon("remove")
+      content: dom.icon("bin")
     };
     const controls = {
       className: `${this.panelName}-prop-controls prop-controls`,
@@ -8341,10 +8409,13 @@ class Component extends Data {
         }
       },
       children: [
-        {
-          ...dom.btnTemplate({ content: dom.icon(`handle-${this.name}`) }),
-          className: ["component-handle", `${this.name}-handle`]
-        },
+        // Only show component-handle for stage, hide for sections, rows, columns, and fields
+        ...this.name === "stage" ? [
+          {
+            ...dom.btnTemplate({ content: dom.icon(`handle-${this.name}`) }),
+            className: ["component-handle", `${this.name}-handle`]
+          }
+        ] : [],
         {
           className: ["action-btn-wrap", `${this.name}-action-btn-wrap`],
           children: this.buttons
@@ -8409,7 +8480,7 @@ class Component extends Data {
           }
         };
       },
-      remove: (icon = "remove") => {
+      remove: (icon = "bin") => {
         return {
           ...dom.btnTemplate({ content: dom.icon(icon) }),
           className: ["item-remove"],
@@ -8490,6 +8561,15 @@ class Component extends Data {
     }
     const domChildren = this.domChildren;
     const childGroup = CHILD_TYPE_MAP.get(this.name);
+    if (this.name === "section") {
+      return map(domChildren, (child) => {
+        const row = components.getAddress(`rows.${child.id}`);
+        if (row) return row;
+        const field2 = components.getAddress(`fields.${child.id}`);
+        if (field2) return field2;
+        return null;
+      }).filter(Boolean);
+    }
     return map(domChildren, (child) => components.getAddress(`${childGroup}s.${child.id}`)).filter(Boolean);
   }
   loadChildren = (children = this.data.children) => children.map((rowId) => this.addChild({ id: rowId }));
@@ -8515,7 +8595,16 @@ class Component extends Data {
       return null;
     }
     const childComponentType = `${childGroup}s`;
-    const child = components.getAddress(`${childComponentType}.${childId}`) || components[childComponentType].add(childId, data);
+    let child = null;
+    if (this.name === "stage") {
+      const section = components.getAddress(`sections.${childId}`);
+      if (section) {
+        child = section;
+      }
+    }
+    if (!child) {
+      child = components.getAddress(`${childComponentType}.${childId}`) || components[childComponentType].add(childId, data);
+    }
     if (index2 >= childWrap.children.length) {
       childWrap.appendChild(child.dom);
     } else {
@@ -8585,7 +8674,46 @@ class Component extends Data {
           return newChild.addChild.bind(newChild);
         }
       ],
-      [0, () => this.addChild.bind(this)],
+      [
+        0,
+        (controlData) => {
+          if (this.name === "section") {
+            return (childData, childIndex) => {
+              const controlId = childData?.config?.controlId || "";
+              const controlType = controlId.startsWith("layout-") ? controlId.replace(/^layout-/, "") : controlId || "field";
+              if (controlType === "row") {
+                const Rows3 = components.rows;
+                const row = Rows3.add(uuid(), childData);
+                const childWrap = this.dom.querySelector(".children");
+                if (childIndex >= childWrap.children.length) {
+                  childWrap.appendChild(row.dom);
+                } else {
+                  childWrap.children[childIndex].before(row.dom);
+                }
+                this.removeClasses("empty");
+                this.saveChildOrder();
+                return row;
+              } else {
+                if (controlType === "field" || !controlId.startsWith("layout-")) {
+                  const Fields3 = components.fields;
+                  const field2 = Fields3.add(uuid(), childData);
+                  const childWrap = this.dom.querySelector(".children");
+                  if (childIndex >= childWrap.children.length) {
+                    childWrap.appendChild(field2.dom);
+                  } else {
+                    childWrap.children[childIndex].before(field2.dom);
+                  }
+                  this.removeClasses("empty");
+                  this.saveChildOrder();
+                  return field2;
+                }
+                return this.addChild(childData, childIndex);
+              }
+            };
+          }
+          return (childData, childIndex) => this.addChild(childData, childIndex);
+        }
+      ],
       [
         1,
         (controlData) => {
@@ -8593,7 +8721,13 @@ class Component extends Data {
           return () => this.parent.addChild(controlData, currentIndex + 1);
         }
       ],
-      [2, (controlData) => () => this.parent.parent.addChild(controlData)]
+      [2, (controlData) => () => this.parent.parent.addChild(controlData)],
+      [
+        -999,
+        () => {
+          return () => void 0;
+        }
+      ]
     ]);
     const onAddConditions = {
       controls: async () => {
@@ -8609,13 +8743,94 @@ class Component extends Data {
         } = Controls$3.get(item.id);
         set(elementData, "config.controlId", metaId);
         const controlType = metaId.startsWith("layout-") ? metaId.replace(/^layout-/, "") : "field";
+        if (controlType === "section") {
+          if (this.name !== "stage") {
+            alert("Sections can only be added at the root level (stage), not inside other sections.");
+            const isInControlsPanel3 = from && from.contains && from.contains(item);
+            if (!isInControlsPanel3) {
+              dom.remove(item);
+            }
+            return void 0;
+          }
+          const { default: Sections3 } = await Promise.resolve().then(() => index$9);
+          const stageChildrenContainer = this.dom?.querySelector(".children");
+          const domChildren = stageChildrenContainer ? Array.from(stageChildrenContainer.children) : [];
+          const existingSections = [];
+          for (const domChild of domChildren) {
+            const childId = domChild.id;
+            if (!childId) continue;
+            if (domChild.classList && domChild.classList.contains(SECTION_CLASSNAME)) {
+              const section2 = components.getAddress(`sections.${childId}`);
+              if (section2) {
+                existingSections.push({ section: section2, domIndex: domChildren.indexOf(domChild) });
+              }
+            }
+          }
+          if (existingSections.length > 0) {
+            let previousSection = null;
+            if (newIndex2 === void 0 || newIndex2 >= domChildren.length) {
+              previousSection = existingSections[existingSections.length - 1].section;
+            } else {
+              const sortedSections = [...existingSections].sort((a, b) => b.domIndex - a.domIndex);
+              for (const sectionData of sortedSections) {
+                if (sectionData.domIndex < newIndex2) {
+                  previousSection = sectionData.section;
+                  break;
+                }
+              }
+              if (!previousSection && newIndex2 > 0) {
+                previousSection = existingSections[0].section;
+              }
+            }
+            if (previousSection) {
+              const previousSectionTitle = previousSection.get("config.title") || previousSection.get("config.name") || "";
+              if (!previousSectionTitle.trim()) {
+                alert("Please add a title to the previous section before adding a new section.");
+                const isInControlsPanel3 = from && from.contains && from.contains(item);
+                if (!isInControlsPanel3) {
+                  dom.remove(item);
+                }
+                return void 0;
+              }
+            }
+          }
+          const section = Sections3.add();
+          const childWrap = this.dom.querySelector(".children");
+          if (childWrap) {
+            if (newIndex2 >= childWrap.children.length) {
+              childWrap.appendChild(section.dom);
+            } else {
+              childWrap.children[newIndex2].before(section.dom);
+            }
+          }
+          const currentChildren = this.get("children") || [];
+          const updatedChildren = [...currentChildren];
+          updatedChildren.splice(newIndex2 !== void 0 ? newIndex2 : updatedChildren.length, 0, section.id);
+          this.set("children", updatedChildren);
+          this.removeClasses("empty");
+          const isInControlsPanel2 = from && from.contains && from.contains(item);
+          if (!isInControlsPanel2) {
+            dom.remove(item);
+          }
+          return section;
+        }
         const targets = {
           stage: {
             row: 0,
             column: -1,
             field: -2,
             section: 0
-            // section is a specialized row
+            // sections can be added to stage
+          },
+          section: {
+            row: 0,
+            // sections can contain rows
+            column: -1,
+            // columns must be inside rows
+            field: 0,
+            // sections can contain fields directly
+            section: -999
+            // sections cannot contain other sections
           },
           row: {
             row: 1,
@@ -8635,7 +8850,10 @@ class Component extends Data {
         };
         const depth = get(targets, `${this.name}.${controlType}`);
         const action = depthMap.get(depth)();
-        dom.remove(item);
+        const isInControlsPanel = from && from.contains && from.contains(item);
+        if (!isInControlsPanel) {
+          dom.remove(item);
+        }
         const component2 = action(elementData, newIndex2);
         return component2;
       },
@@ -8817,21 +9035,66 @@ class Component extends Data {
     }
     return clonedData;
   };
+  /**
+   * Clone this component. Fallback to a sensible parent when `this.parent` is
+   * not available (fields inside sections) and special-case cloning a field
+   * into a section so a Field (not a Row) is created.
+   */
   clone = (parent = this.parent) => {
-    const newClone = parent.addChild(this.cloneData(), this.index + 1);
+    let targetParent = parent || this.parent;
+    if (!targetParent && this.dom) {
+      const nearest = this.dom.closest(
+        `.${COLUMN_CLASSNAME}, .${ROW_CLASSNAME}, .${SECTION_CLASSNAME}, .${STAGE_CLASSNAME}`
+      );
+      if (nearest) {
+        targetParent = dom.asComponent(nearest);
+      }
+    }
+    if (!targetParent) {
+      console.error("Clone failed: no valid parent found for", this);
+      return null;
+    }
+    if (this.name === "field" && targetParent.name === "section") {
+      const Fields3 = components.fields;
+      const newField = Fields3.add(uuid(), this.cloneData());
+      const childWrap = targetParent.dom.querySelector(".children");
+      const insertIndex = this.index + 1;
+      if (!childWrap) {
+        return newField;
+      }
+      if (insertIndex >= childWrap.children.length) {
+        childWrap.appendChild(newField.dom);
+      } else {
+        childWrap.children[insertIndex].before(newField.dom);
+      }
+      targetParent.removeClasses("empty");
+      targetParent.saveChildOrder();
+      this.dispatchComponentEvent("onClone", {
+        original: this,
+        clone: newField,
+        parent: targetParent
+      });
+      return newField;
+    }
+    const newClone = targetParent.addChild(this.cloneData(), this.index + 1);
     if (this.name !== "field") {
       this.cloneChildren(newClone);
     }
     this.dispatchComponentEvent("onClone", {
       original: this,
       clone: newClone,
-      parent
+      parent: targetParent
     });
     return newClone;
   };
+  /**
+   * Clone children into target parent/component
+   */
   cloneChildren(toParent) {
     for (const child of this.children) {
-      child?.clone(toParent);
+      if (child) {
+        child.clone(toParent);
+      }
     }
   }
   createChildWrap = (children) => dom.create({
@@ -9506,15 +9769,17 @@ let Rows$1 = class Rows extends ComponentData {
   }
 };
 const rows = new Rows$1();
-const SECTION_CLASSNAME = "formeo-section";
 const DEFAULT_DATA$2 = () => Object.freeze({
   config: {
     name: "",
     instruction: "",
-    collapsed: false
+    collapsed: false,
+    title: "",
+    description: ""
   },
   children: [],
-  className: [SECTION_CLASSNAME, STAGE_CLASSNAME]
+  className: [SECTION_CLASSNAME, STAGE_CLASSNAME],
+  order: 0
 });
 class Section extends Component {
   /**
@@ -9524,6 +9789,16 @@ class Section extends Component {
    */
   constructor(sectionData) {
     super("section", { ...DEFAULT_DATA$2(), ...sectionData });
+    this.getComponentTag = () => {
+      return dom.create({
+        tag: "span",
+        className: ["component-tag", `${this.name}-tag`],
+        children: ["Section"]
+      });
+    };
+    if (this.get("order") === void 0 || this.get("order") === 0) {
+      this.updateOrder();
+    }
     const children = this.createChildWrap();
     const sectionHeader = this.createSectionHeader();
     this.dom = dom.create({
@@ -9534,7 +9809,17 @@ class Section extends Component {
         editingHoverTag: mi18n.get("editing.section") || "Editing Section"
       },
       id: this.id,
-      content: [sectionHeader, this.getActionButtons(), this.editWindow, children]
+      content: [this.getComponentTag(), sectionHeader, this.getActionButtons(), children],
+      action: {
+        click: (evt) => {
+          const target = evt.target;
+          if (target.closest(".section-actions") || target.closest("button") || target.closest("input") || target.closest("textarea")) {
+            return;
+          }
+          evt.stopPropagation();
+          this.selectSection();
+        }
+      }
     });
     Sortable.create(children, {
       animation: 150,
@@ -9543,7 +9828,8 @@ class Section extends Component {
       group: {
         name: "section",
         pull: true,
-        put: ["row", "column", "controls"]
+        put: ["controls", "row", "column"]
+        // Allow controls (form fields), rows, and columns
       },
       sort: true,
       disabled: false,
@@ -9551,8 +9837,10 @@ class Section extends Component {
       onEnd: this.onEnd.bind(this),
       onAdd: this.onAdd.bind(this),
       onSort: this.onSort.bind(this),
-      draggable: `.${ROW_CLASSNAME}`,
-      handle: ".item-move"
+      draggable: `.${FIELD_CLASSNAME}, .${ROW_CLASSNAME}`,
+      handle: ".item-move",
+      filter: `.${SECTION_CLASSNAME}`
+      // Only prevent nested sections
     });
   }
   /**
@@ -9577,17 +9865,18 @@ class Section extends Component {
       className: "section-drag-handle",
       content: dom.icon("handle")
     };
-    const nameInput = {
+    const titleInput = {
       tag: "input",
-      className: "section-name-input",
+      className: "section-title-input",
       attrs: {
         type: "text",
-        placeholder: mi18n.get("section.name.placeholder") || "Section name (required)",
-        value: this.get("config.name") || "",
+        placeholder: mi18n.get("section.title.placeholder") || "Section title (required)",
+        value: this.get("config.title") || this.get("config.name") || "",
         required: true
       },
       action: {
         input: ({ target }) => {
+          this.set("config.title", target.value);
           this.set("config.name", target.value);
         },
         blur: ({ target }) => {
@@ -9599,23 +9888,24 @@ class Section extends Component {
         }
       }
     };
-    const instructionInput = {
+    const descriptionInput = {
       tag: "input",
-      className: "section-instruction-input",
+      className: "section-description-input",
       attrs: {
         type: "text",
-        placeholder: mi18n.get("section.instruction.placeholder") || "Add instruction or context (optional)",
-        value: this.get("config.instruction") || ""
+        placeholder: mi18n.get("section.description.placeholder") || "Section description (optional)",
+        value: this.get("config.description") || this.get("config.instruction") || ""
       },
       action: {
         input: ({ target }) => {
+          this.set("config.description", target.value);
           this.set("config.instruction", target.value);
         }
       }
     };
     const headerContent = {
       className: "section-header-content",
-      content: [nameInput, instructionInput]
+      content: [titleInput, descriptionInput]
     };
     return {
       className: "section-header",
@@ -9631,62 +9921,126 @@ class Section extends Component {
     this.dom.classList.toggle("collapsed", !isCollapsed);
   }
   /**
-   * Edit window for Section
-   * @return {Object} edit window dom config for Section
+   * Select this section and show its settings in the Settings tab
    */
-  get editWindow() {
-    const nameInput = {
-      tag: "input",
-      id: `${this.id}-name`,
-      attrs: {
-        type: "text",
-        value: this.get("config.name") || "",
-        placeholder: "Section name"
-      },
-      config: {
-        label: mi18n.get("section.name") || "Section Name"
-      },
-      action: {
-        input: ({ target }) => {
-          this.set("config.name", target.value);
-          const inlineInput = this.dom.querySelector(".section-name-input");
-          if (inlineInput) {
-            inlineInput.value = target.value;
-          }
-        }
-      }
-    };
-    const instructionInput = {
-      tag: "textarea",
-      id: `${this.id}-instruction`,
-      attrs: {
-        value: this.get("config.instruction") || "",
-        placeholder: "Add instruction or context for this section",
-        rows: 3
-      },
-      config: {
-        label: mi18n.get("section.instruction") || "Section Instruction (optional)"
-      },
-      action: {
-        input: ({ target }) => {
-          this.set("config.instruction", target.value);
-          const inlineInput = this.dom.querySelector(".section-instruction-input");
-          if (inlineInput) {
-            inlineInput.value = target.value;
-          }
-        }
-      }
-    };
-    const editWindow = dom.create({
-      className: `${this.name}-edit group-config`,
-      content: [dom.create(dom.formGroup(nameInput)), dom.create(dom.formGroup(instructionInput))]
+  selectSection = () => {
+    const event = new CustomEvent("formeo:section:selected", {
+      detail: { section: this },
+      bubbles: true
     });
-    return editWindow;
+    document.dispatchEvent(event);
+  };
+  /**
+   * Override onAdd to validate that sections cannot be nested
+   * @param {Object} evt - Sortable event
+   * @return {Object|undefined} component if added, undefined if prevented
+   */
+  async onAdd(evt) {
+    const { from, to, item } = evt;
+    if (item.classList && item.classList.contains(SECTION_CLASSNAME)) {
+      alert("Sections cannot be nested inside other sections.");
+      this._invalidDrop = { item, to };
+      return void 0;
+    }
+    return super.onAdd(evt);
+  }
+  /**
+   * Check if the dragged item is a form field (not a layout control)
+   * @param {HTMLElement} item - The element being dragged
+   * @return {Promise<Boolean>} true if it's a form field
+   */
+  async isFormField(item) {
+    if (!item || !item.id) {
+      return false;
+    }
+    const { default: Controls3 } = await Promise.resolve().then(() => index$8);
+    const controlData = Controls3.get(item.id);
+    if (!controlData) {
+      return false;
+    }
+    const { meta } = controlData.controlData || {};
+    if (!meta) {
+      return false;
+    }
+    if (meta.group === "layout") {
+      return false;
+    }
+    if (meta.id && meta.id.startsWith("layout-")) {
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Store invalid drop info to clean up in onEnd
+   */
+  _invalidDrop = null;
+  /**
+   * Override onEnd to clean up invalid drops after Sortable finishes
+   * @param {Object} evt - Sortable event
+   */
+  onEnd(evt) {
+    if (this._invalidDrop) {
+      const { item, to } = this._invalidDrop;
+      this._invalidDrop = null;
+      if (item && item.parentNode === to && to.contains(item)) {
+        requestAnimationFrame(() => {
+          if (item.parentNode === to) {
+            item.parentNode.removeChild(item);
+          }
+        });
+      }
+    }
+    this.updateOrder();
+    super.onEnd(evt);
+  }
+  /**
+   * Update the order of this section based on its position in the stage
+   */
+  updateOrder() {
+    const parent = this.parent;
+    if (parent && parent.name === "stage") {
+      const stageChildren = parent.get("children") || [];
+      const order = stageChildren.indexOf(this.id) + 1;
+      this.set("order", order);
+    }
+  }
+  /**
+   * Override onSort to update order when section is reordered
+   */
+  onSort() {
+    this.updateOrder();
+    return super.onSort();
+  }
+  /**
+   * Override getComponentTag to show just "Section" text
+   */
+  getComponentTag() {
+    return dom.create({
+      tag: "span",
+      className: ["component-tag", `${this.name}-tag`],
+      children: ["Section"]
+    });
+  }
+  /**
+   * Override buttons getter for sections to use shared actions from component.js
+   * Only customize the edit button to call selectSection instead of toggleEdit
+   */
+  get buttons() {
+    const buttons = super.buttons;
+    const editButton = buttons.find((btn) => btn.meta?.id === "edit");
+    if (editButton) {
+      editButton.action = {
+        click: () => {
+          this.selectSection();
+        }
+      };
+    }
+    return buttons;
   }
 }
 const DEFAULT_CONFIG$2 = {
   actionButtons: {
-    buttons: ["move", "edit", "clone", "remove"],
+    buttons: ["move", "edit", "remove"],
     disabled: []
   }
 };
@@ -9700,6 +10054,11 @@ let Sections$1 = class Sections extends ComponentData {
   }
 };
 const sections = new Sections$1();
+const index$9 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  Sections: Sections$1,
+  default: sections
+}, Symbol.toStringTag, { value: "Module" }));
 const DEFAULT_DATA$1 = () => ({ conditions: [CONDITION_TEMPLATE()], children: [] });
 class Stage extends Component {
   /**
@@ -9766,7 +10125,7 @@ class Stage extends Component {
       group: {
         name: "stage",
         pull: true,
-        put: ["row", "column", "controls"]
+        put: ["row", "column", "controls", "section"]
       },
       sort: true,
       disabled: false,
@@ -9776,8 +10135,12 @@ class Stage extends Component {
         stages.active = this;
       },
       onSort: this.onSort.bind(this),
-      draggable: `.${ROW_CLASSNAME}`,
-      handle: ".item-move"
+      onEnd: this.onEndValidation.bind(this),
+      draggable: `.${ROW_CLASSNAME}, .${SECTION_CLASSNAME}`,
+      handle: ".item-move",
+      onUpdate: () => {
+        this.updateSectionOrders();
+      }
     });
   }
   empty(isAnimated = true) {
@@ -9794,11 +10157,134 @@ class Stage extends Component {
       }
     });
   }
-  onAdd(...args) {
-    const component = super.onAdd(...args);
+  /**
+   * Check if a section exists in the stage
+   * @return {Boolean} true if at least one section exists
+   */
+  hasSection() {
+    const sections$1 = Object.keys(sections.data || {});
+    return sections$1.length > 0;
+  }
+  /**
+   * Check if the dragged item is a form field (not a layout control)
+   * @param {HTMLElement} item - The element being dragged
+   * @return {Promise<Boolean>} true if it's a form field
+   */
+  async isFormField(item) {
+    if (!item || !item.id) {
+      return false;
+    }
+    const { default: Controls3 } = await Promise.resolve().then(() => index$8);
+    const controlData = Controls3.get(item.id);
+    if (!controlData) {
+      return false;
+    }
+    const { meta } = controlData.controlData || {};
+    if (!meta) {
+      return false;
+    }
+    if (meta.group === "layout") {
+      return false;
+    }
+    if (meta.id && meta.id.startsWith("layout-")) {
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Check if the drop target is a section or inside a section
+   * @param {HTMLElement} target - The drop target element
+   * @return {Boolean} true if target is a section or inside a section
+   */
+  isDroppingIntoSection(target) {
+    if (!target) {
+      return false;
+    }
+    if (target.classList && target.classList.contains(SECTION_CLASSNAME)) {
+      return true;
+    }
+    if (target.classList && target.classList.contains("children")) {
+      const section2 = target.closest(`.${SECTION_CLASSNAME}`);
+      if (section2) {
+        return true;
+      }
+    }
+    const section = target.closest(`.${SECTION_CLASSNAME}`);
+    return !!section;
+  }
+  /**
+   * Store invalid drop info to clean up in onEnd
+   */
+  _invalidDrop = null;
+  /**
+   * Override onEnd to clean up invalid drops after Sortable finishes
+   * This ensures the clone is removed without affecting the original in controls panel
+   * @param {Object} evt - Sortable event
+   */
+  onEndValidation(evt) {
+    if (!this._invalidDrop) {
+      return;
+    }
+    const { item, to } = this._invalidDrop;
+    this._invalidDrop = null;
+    if (item && item.parentNode === to && to.contains(item)) {
+      requestAnimationFrame(() => {
+        if (item.parentNode === to) {
+          item.parentNode.removeChild(item);
+        }
+      });
+    }
+  }
+  /**
+   * Override onAdd to validate form fields before adding
+   * @param {Object} evt - Sortable event
+   * @return {Object|undefined} component if added, undefined if prevented
+   */
+  async onAdd(evt) {
+    const { from, to, item } = evt;
+    let fromElement = from;
+    if (from && !from.classList.contains(CONTROL_GROUP_CLASSNAME)) {
+      fromElement = from.parentElement;
+    }
+    const fromType = componentType(fromElement);
+    const stageChildren = this.dom.querySelector(".children");
+    const isDroppingOnStage = to === stageChildren;
+    if ((fromType === "controls" || fromType === CONTROL_GROUP_CLASSNAME) && isDroppingOnStage) {
+      const isField = await this.isFormField(item);
+      if (isField) {
+        if (!this.hasSection()) {
+          alert(
+            'Please add a section first before dragging form fields. Select "Section" from the layout fields, then you can drag and drop form fields into it.'
+          );
+          this._invalidDrop = { item, to };
+          return void 0;
+        } else {
+          alert("Please drag form fields into a section. Form fields can only be added inside sections.");
+          this._invalidDrop = { item, to };
+          return void 0;
+        }
+      }
+    }
+    const component = super.onAdd(evt);
     if (component?.name === "column") {
       component.parent.autoColumnWidths();
     }
+    if (component?.name === "section") {
+      this.updateSectionOrders();
+    }
+    return component;
+  }
+  /**
+   * Update the order property of all sections based on their position in the stage
+   */
+  updateSectionOrders() {
+    const children = this.get("children") || [];
+    children.forEach((childId, index2) => {
+      const section = components.getAddress(`sections.${childId}`);
+      if (section) {
+        section.set("order", index2 + 1);
+      }
+    });
   }
 }
 const DEFAULT_CONFIG$1 = () => ({
@@ -9865,16 +10351,16 @@ class Control {
         // this is used for keyboard navigation. when tabbing through controls it
         // will auto navigated between the groups
         focus: ({ target }) => {
-          if (Controls$2.isDragging) {
+          if (Controls$1.isDragging) {
             return;
           }
           const group = target.closest(`.${CONTROL_GROUP_CLASSNAME}`);
-          return group && Controls$2.panels.nav.refresh(indexOfNode(group));
+          return group && Controls$1.panels.nav.refresh(indexOfNode(group));
         },
         click: ({ target }) => {
           const controlId = target.closest(".field-control")?.id;
           if (controlId) {
-            Controls$2.addElement(controlId);
+            Controls$1.addElement(controlId);
           }
         }
       }
@@ -9941,11 +10427,12 @@ const defaultOptions = Object.freeze({
   container: null,
   panels: { displayType: "auto" }
 });
-let Controls$1 = class Controls {
+let Controls$2 = class Controls {
   constructor() {
     this.data = /* @__PURE__ */ new Map();
     this.isDragging = false;
     this.selectedField = null;
+    this.selectedSection = null;
     this.settingsGroupIndex = -1;
     this.buttonActions = {
       // this is used for keyboard navigation. when tabbing through controls it
@@ -10197,8 +10684,17 @@ let Controls$1 = class Controls {
           document.documentElement.style.overflow = "hidden";
         },
         onEnd: ({ from, item, clone: clone2 }) => {
-          if (from.contains(clone2)) {
+          if (from && item && !from.contains(item)) {
+            if (from.contains(clone2)) {
+              from.replaceChild(item, clone2);
+            } else if (clone2 && clone2.parentNode === from) {
+              from.replaceChild(item, clone2);
+            }
+          } else if (from && clone2 && from.contains(clone2)) {
             from.replaceChild(item, clone2);
+          }
+          if (item && item.parentNode && item.style.display === "none") {
+            item.style.display = "";
           }
           document.documentElement.style.overflow = this.originalDocumentOverflow;
           this.originalDocumentOverflow = null;
@@ -10252,14 +10748,21 @@ let Controls$1 = class Controls {
       const { field: field2 } = evt.detail;
       this.showFieldSettings(field2);
     });
+    document.addEventListener("formeo:section:selected", (evt) => {
+      const { section } = evt.detail;
+      this.showSectionSettings(section);
+    });
     document.addEventListener("click", (evt) => {
       if (evt.target.closest(".formeo-field")) {
+        return;
+      }
+      if (evt.target.closest(".formeo-section")) {
         return;
       }
       if (evt.target.closest(".formeo-controls")) {
         return;
       }
-      if (evt.target.closest(".field-actions") || evt.target.closest("button")) {
+      if (evt.target.closest(".field-actions") || evt.target.closest(".section-actions") || evt.target.closest("button")) {
         return;
       }
       if (evt.target.closest(".formeo-stage")) {
@@ -10290,6 +10793,19 @@ let Controls$1 = class Controls {
     if (group === "layout") {
       return this.layoutTypes[metaId.replace("layout-", "")]();
     }
+    const isFormField = group !== "layout" && !metaId.startsWith("layout-");
+    if (isFormField) {
+      const activeStage = stages.active;
+      if (!activeStage || !activeStage.hasSection()) {
+        alert(
+          'Please add a section first before adding form fields. Select "Section" from the layout fields, then you can add form fields into it.'
+        );
+        return null;
+      } else {
+        alert("Please add form fields into a section. Form fields can only be added inside sections.");
+        return null;
+      }
+    }
     return this.layoutTypes.field(elementData);
   };
   /**
@@ -10304,7 +10820,11 @@ let Controls$1 = class Controls {
     if (this.selectedField?.dom) {
       this.selectedField.dom.classList.remove("field-selected");
     }
+    if (this.selectedSection?.dom) {
+      this.selectedSection.dom.classList.remove("section-selected");
+    }
     this.selectedField = field2;
+    this.selectedSection = null;
     dom.empty(settingsPanel);
     if (field2) {
       field2.dom.classList.add("field-selected");
@@ -10323,6 +10843,140 @@ let Controls$1 = class Controls {
       settingsPanel.appendChild(placeholder);
     }
     this.switchToSettingsTab();
+  };
+  /**
+   * Show section settings in the Settings tab
+   * @param {Object} section - The section component to show settings for
+   */
+  showSectionSettings = (section) => {
+    const settingsPanel = this.dom?.querySelector("#settings-control-group");
+    if (!settingsPanel) {
+      return;
+    }
+    if (this.selectedField?.dom) {
+      this.selectedField.dom.classList.remove("field-selected");
+    }
+    if (this.selectedSection?.dom) {
+      this.selectedSection.dom.classList.remove("section-selected");
+    }
+    this.selectedSection = section;
+    this.selectedField = null;
+    dom.empty(settingsPanel);
+    if (section) {
+      section.dom.classList.add("section-selected");
+      const sectionSettingsContent = this.createSectionSettingsUI(section);
+      settingsPanel.appendChild(sectionSettingsContent);
+    } else {
+      const placeholder = dom.create({
+        className: "settings-placeholder",
+        children: [
+          {
+            tag: "p",
+            content: mi18n.get("settings.selectSection") || "Select a section to edit its settings"
+          }
+        ]
+      });
+      settingsPanel.appendChild(placeholder);
+    }
+    this.switchToSettingsTab();
+  };
+  /**
+   * Create the settings UI for a section
+   * @param {Object} section - The section component
+   * @return {HTMLElement} The settings UI element
+   */
+  createSectionSettingsUI = (section) => {
+    const settingsRows = [];
+    const title = section.get("config.title") || section.get("config.name") || "";
+    settingsRows.push(this.createSectionTitleRow(section, title));
+    const description = section.get("config.description") || section.get("config.instruction") || "";
+    settingsRows.push(this.createSectionDescriptionRow(section, description));
+    return dom.create({
+      className: "section-settings-content",
+      children: settingsRows.filter(Boolean)
+    });
+  };
+  /**
+   * Create a settings row for section title
+   * @param {Object} section - The section component
+   * @param {String} title - Current title value
+   * @return {Object} Settings row config
+   */
+  createSectionTitleRow = (section, title) => {
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: (mi18n.get("section.title") || "Section Title") + " *",
+          attrs: { for: `${section.id}-title` }
+        },
+        {
+          tag: "input",
+          attrs: {
+            type: "text",
+            id: `${section.id}-title`,
+            value: title,
+            placeholder: mi18n.get("section.title.placeholder") || "Section title (required)",
+            required: true
+          },
+          action: {
+            input: ({ target }) => {
+              section.set("config.title", target.value);
+              section.set("config.name", target.value);
+              const inlineInput = section.dom.querySelector(".section-title-input");
+              if (inlineInput) {
+                inlineInput.value = target.value;
+              }
+            },
+            blur: ({ target }) => {
+              if (!target.value.trim()) {
+                target.classList.add("invalid");
+              } else {
+                target.classList.remove("invalid");
+              }
+            }
+          }
+        }
+      ]
+    };
+  };
+  /**
+   * Create a settings row for section description
+   * @param {Object} section - The section component
+   * @param {String} description - Current description value
+   * @return {Object} Settings row config
+   */
+  createSectionDescriptionRow = (section, description) => {
+    return {
+      className: "settings-row",
+      children: [
+        {
+          tag: "label",
+          content: mi18n.get("section.description") || "Section Description",
+          attrs: { for: `${section.id}-description` }
+        },
+        {
+          tag: "textarea",
+          attrs: {
+            id: `${section.id}-description`,
+            placeholder: mi18n.get("section.description.placeholder") || "Add description for this section",
+            rows: 3
+          },
+          content: description,
+          action: {
+            input: ({ target }) => {
+              section.set("config.description", target.value);
+              section.set("config.instruction", target.value);
+              const inlineInput = section.dom.querySelector(".section-description-input");
+              if (inlineInput) {
+                inlineInput.value = target.value;
+              }
+            }
+          }
+        }
+      ]
+    };
   };
   /**
    * Get field type from field data
@@ -10858,7 +11512,10 @@ let Controls$1 = class Controls {
           {
             tag: "button",
             attrs: { type: "button" },
-            children: [{ tag: "span", className: "add-conditions-plus", content: "+" }, { tag: "span", content: mi18n.get("addConditions") || "Add conditions" }],
+            children: [
+              { tag: "span", className: "add-conditions-plus", content: "+" },
+              { tag: "span", content: mi18n.get("addConditions") || "Add conditions" }
+            ],
             action: {
               click: () => {
                 fieldConditionState.showConditions = true;
@@ -11166,6 +11823,10 @@ let Controls$1 = class Controls {
       this.selectedField.dom.classList.remove("field-selected");
     }
     this.selectedField = null;
+    if (this.selectedSection?.dom) {
+      this.selectedSection.dom.classList.remove("section-selected");
+    }
+    this.selectedSection = null;
     const settingsPanel = this.dom?.querySelector("#settings-control-group");
     if (settingsPanel) {
       dom.empty(settingsPanel);
@@ -11195,11 +11856,11 @@ let Controls$1 = class Controls {
     return Promise.all(this.registerControls([...allControls, ...elements]));
   };
 };
-const Controls$2 = new Controls$1();
+const Controls$1 = new Controls$2();
 const index$8 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  Controls: Controls$1,
-  default: Controls$2
+  Controls: Controls$2,
+  default: Controls$1
 }, Symbol.toStringTag, { value: "Module" }));
 const DEFAULT_DATA = () => ({
   conditions: [CONDITION_TEMPLATE()]
@@ -11228,12 +11889,7 @@ class Field extends Component {
         className: FIELD_CLASSNAME
       },
       id: this.id,
-      children: [
-        this.label,
-        this.getComponentTag(),
-        actionButtons,
-        this.preview
-      ].filter(Boolean),
+      children: [this.label, this.getComponentTag(), actionButtons, this.preview].filter(Boolean),
       panelNav: this.panelNav,
       dataset: {
         hoverTag: mi18n.get("field")
@@ -11437,7 +12093,7 @@ let Fields$1 = class Fields extends ComponentData {
   get = (path) => {
     let found = path && get(this.data, path);
     if (!found) {
-      const control = Controls$2.get(path);
+      const control = Controls$1.get(path);
       if (control) {
         found = this.add(null, control.controlData);
       }
@@ -11480,12 +12136,243 @@ const index$7 = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePrope
   Fields: Fields$1,
   default: fields
 }, Symbol.toStringTag, { value: "Module" }));
+function mapFieldType(fieldData) {
+  const controlId = fieldData.config?.controlId || fieldData.meta?.id || "";
+  const tag = fieldData.tag || "";
+  const attrsType = fieldData.attrs?.type || "";
+  const controlIdMap = {
+    "text-input": "text",
+    email: "email",
+    number: "number",
+    date: "date",
+    file: "file",
+    hidden: "hidden",
+    textarea: "textarea",
+    select: "select",
+    "checkbox-group": "checkbox",
+    "radio-group": "radio"
+  };
+  if (controlId && controlIdMap[controlId]) {
+    return controlIdMap[controlId];
+  }
+  const typeMap = {
+    input: {
+      text: "text",
+      email: "email",
+      number: "number",
+      date: "date",
+      file: "file",
+      hidden: "hidden"
+    },
+    textarea: {
+      "": "textarea"
+    },
+    select: {
+      "": "select"
+    },
+    checkbox: {
+      "": "checkbox"
+    },
+    radio: {
+      "": "radio"
+    }
+  };
+  if (typeMap[tag] && typeMap[tag][attrsType] !== void 0) {
+    return typeMap[tag][attrsType];
+  }
+  return attrsType || tag || "text";
+}
+function mapField(fieldData) {
+  const field2 = {
+    id: fieldData.id,
+    type: mapFieldType(fieldData),
+    label: fieldData.config?.label || "",
+    required: fieldData.attrs?.required || false,
+    placeholder: fieldData.attrs?.placeholder || ""
+  };
+  if (fieldData.attrs?.value !== void 0) {
+    field2.value = fieldData.attrs.value;
+  }
+  if (fieldData.options && Array.isArray(fieldData.options)) {
+    field2.options = fieldData.options.map((opt) => ({
+      label: opt.label || opt.value || "",
+      value: opt.value || "",
+      selected: opt.selected || false,
+      checked: opt.checked || false
+    }));
+  }
+  Object.keys(field2).forEach((key) => {
+    if (field2[key] === void 0) {
+      delete field2[key];
+    }
+  });
+  return field2;
+}
+function extractFieldsFromSection(section) {
+  const rows2 = [];
+  const sectionDom = section.dom;
+  const sectionChildrenContainer = sectionDom?.querySelector(".children");
+  const domChildren = sectionChildrenContainer ? Array.from(sectionChildrenContainer.children) : [];
+  for (const domChild of domChildren) {
+    const childId = domChild.id;
+    if (!childId) continue;
+    const field2 = components.getAddress(`fields.${childId}`);
+    if (field2) {
+      const fieldData = field2.getData();
+      rows2.push({
+        columns: 1,
+        fields: [mapField(fieldData)]
+      });
+      continue;
+    }
+    const row = components.getAddress(`rows.${childId}`);
+    if (row) {
+      const rowDom = row.dom;
+      const rowChildrenContainer = rowDom?.querySelector(".children");
+      const rowDomChildren = rowChildrenContainer ? Array.from(rowChildrenContainer.children) : [];
+      const columnCount = rowDomChildren.length || 1;
+      const rowFields = [];
+      for (const colDom of rowDomChildren) {
+        const columnId = colDom.id;
+        if (!columnId) continue;
+        const column = components.getAddress(`columns.${columnId}`);
+        if (!column) continue;
+        const columnChildrenContainer = column.dom?.querySelector(".children");
+        const columnDomChildren = columnChildrenContainer ? Array.from(columnChildrenContainer.children) : [];
+        for (const fieldDom of columnDomChildren) {
+          const fieldId = fieldDom.id;
+          if (!fieldId) continue;
+          const columnField = components.getAddress(`fields.${fieldId}`);
+          if (columnField) {
+            const fieldData = columnField.getData();
+            rowFields.push(mapField(fieldData));
+          }
+        }
+      }
+      rows2.push({
+        columns: columnCount,
+        fields: rowFields
+      });
+    }
+  }
+  return { rows: rows2 };
+}
+function getSectionOrder(section, stage) {
+  const stageChildren = stage.get("children") || [];
+  const sectionIndex = stageChildren.indexOf(section.id);
+  return sectionIndex >= 0 ? sectionIndex + 1 : 0;
+}
+function buildRuntimeSchema(formeoState = components) {
+  const formId = formeoState.get("id");
+  const stages2 = formeoState.get("stages") || {};
+  const sections2 = formeoState.get("sections") || {};
+  const sectionIds = Object.keys(sections2);
+  if (sectionIds.length === 0) {
+    throw new Error("Cannot export: No sections found. Please add at least one section to the form.");
+  }
+  const stageId = Object.keys(stages2)[0];
+  if (!stageId) {
+    throw new Error("Cannot export: No stage found.");
+  }
+  const stage = stages2[stageId];
+  const stageDom = stage.dom;
+  const stageChildrenContainer = stageDom?.querySelector(".children");
+  const domChildren = stageChildrenContainer ? Array.from(stageChildrenContainer.children) : [];
+  const steps = [];
+  const processedSections = /* @__PURE__ */ new Set();
+  const sectionIdToOrder = /* @__PURE__ */ new Map();
+  let sectionOrder = 1;
+  for (const domChild of domChildren) {
+    const childId = domChild.id;
+    if (!childId) continue;
+    if (!domChild.classList || !domChild.classList.contains(SECTION_CLASSNAME)) {
+      continue;
+    }
+    const section = sections2[childId];
+    if (section) {
+      sectionIdToOrder.set(section.id, sectionOrder++);
+    }
+  }
+  for (const domChild of domChildren) {
+    const childId = domChild.id;
+    if (!childId) continue;
+    if (!domChild.classList || !domChild.classList.contains(SECTION_CLASSNAME)) {
+      continue;
+    }
+    const section = sections2[childId];
+    if (!section) {
+      continue;
+    }
+    if (processedSections.has(section.id)) {
+      continue;
+    }
+    processedSections.add(section.id);
+    const title = section.get("config.title") || section.get("config.name") || "";
+    if (!title.trim()) {
+      throw new Error(`Cannot export: Section "${section.id}" is missing a required title.`);
+    }
+    const { rows: rows2 } = extractFieldsFromSection(section);
+    const order = sectionIdToOrder.get(section.id) || getSectionOrder(section, stage);
+    const step = {
+      id: section.id,
+      order,
+      title: title.trim(),
+      description: (section.get("config.description") || section.get("config.instruction") || "").trim(),
+      rows: rows2
+      // Preserve row structure
+    };
+    if (!step.description) {
+      delete step.description;
+    }
+    steps.push(step);
+  }
+  if (steps.length === 0 && sectionIds.length > 0) {
+    console.warn("No sections found in DOM, falling back to processing all sections");
+    for (const sectionId of sectionIds) {
+      const section = sections2[sectionId];
+      if (!section || processedSections.has(section.id)) {
+        continue;
+      }
+      processedSections.add(section.id);
+      const title = section.get("config.title") || section.get("config.name") || "";
+      if (!title.trim()) {
+        throw new Error(`Cannot export: Section "${section.id}" is missing a required title.`);
+      }
+      const { rows: rows2 } = extractFieldsFromSection(section);
+      const storedOrder = section.get("order");
+      const order = storedOrder > 0 ? storedOrder : processedSections.size;
+      const step = {
+        id: section.id,
+        order,
+        title: title.trim(),
+        description: (section.get("config.description") || section.get("config.instruction") || "").trim(),
+        rows: rows2
+        // Preserve row structure
+      };
+      if (!step.description) {
+        delete step.description;
+      }
+      steps.push(step);
+    }
+  }
+  steps.sort((a, b) => a.order - b.order);
+  const unprocessedSections = sectionIds.filter((id) => !processedSections.has(id));
+  if (unprocessedSections.length > 0) {
+    console.warn("Warning: Some sections are not in the stage DOM:", unprocessedSections);
+  }
+  const schema = {
+    formId,
+    version: "1.0",
+    steps
+  };
+  return schema;
+}
 const Stages2 = stages;
 const Rows2 = rows;
 const Columns2 = columns;
 const Fields2 = fields;
 const Sections2 = sections;
-const Controls2 = Controls$2;
+const Controls2 = Controls$1;
 const getFormData = (formData, useSessionStorage = false) => {
   if (formData) {
     return clone$1(parseData(formData));
@@ -11544,15 +12431,49 @@ class Components extends Data {
       ...this.formData
     });
   }
-  get formData() {
-    return {
+  /**
+   * Returns the legacy Formeo format (stages, rows, columns, fields, sections)
+   * Used for preview rendering which expects the old structure
+   * @return {Object} legacy Formeo formData structure
+   */
+  getLegacyFormData() {
+    const stages2 = this.get("stages") || {};
+    const rows2 = this.get("rows") || {};
+    const columns2 = this.get("columns") || {};
+    const fields2 = this.get("fields") || {};
+    const sections2 = this.get("sections") || {};
+    const legacyData = {
       id: this.get("id"),
-      stages: stages.getData(),
-      rows: rows.getData(),
-      columns: columns.getData(),
-      fields: fields.getData(),
-      sections: sections.getData()
+      stages: {},
+      rows: {},
+      columns: {},
+      fields: {},
+      sections: {}
     };
+    for (const [stageId, stage] of Object.entries(stages2)) {
+      legacyData.stages[stageId] = stage.getData();
+    }
+    for (const [rowId, row] of Object.entries(rows2)) {
+      legacyData.rows[rowId] = row.getData();
+    }
+    for (const [columnId, column] of Object.entries(columns2)) {
+      legacyData.columns[columnId] = column.getData();
+    }
+    for (const [fieldId, field2] of Object.entries(fields2)) {
+      legacyData.fields[fieldId] = field2.getData();
+    }
+    for (const [sectionId, section] of Object.entries(sections2)) {
+      legacyData.sections[sectionId] = section.getData();
+    }
+    return legacyData;
+  }
+  get formData() {
+    try {
+      return buildRuntimeSchema(this);
+    } catch (error) {
+      console.error("Error building runtime schema:", error);
+      throw error;
+    }
   }
   set config(config) {
     const { stages: stages2, rows: rows2, columns: columns2, fields: fields2 } = config;
@@ -11864,7 +12785,7 @@ const actions = {
     }
   }
 };
-const e = { "en-US": { "en-US": "English", dir: "ltr", "af-ZA": "Afrikaans (South Africa)", "ar-TN": "Arabic (Tunisia)", "cs-CZ": "Czech (Czechia)", "de-DE": "German (Germany)", "es-ES": "European Spanish", "fa-IR": "Persian (Iran)", "fi-FI": "Finnish (Finland)", "fr-FR": "French (France)", "hu-HU": "Hungarian (Hungary)", "it-IT": "Italian (Italy)", "ja-JP": "Japanese (Japan)", "nb-NO": "Norwegian Bokmål (Norway)", "pl-PL": "Polish (Poland)", "pt-BR": "Brazilian Portuguese", "pt-PT": "European Portuguese", "ro-RO": "Romanian (Romania)", "ru-RU": "Russian (Russia)", "th-TH": "Thai (Thailand)", "tr-TR": "Turkish (Türkiye)", "zh-CN": "Chinese (China)", "zh-HK": "Chinese (Hong Kong SAR China)", "action.add.attrs.attr": "What attribute would you like to add?", "action.add.attrs.value": "Default Value", addOption: "Add Option", allFieldsRemoved: "All fields were removed.", allowSelect: "Allow Select", and: "and", attribute: "Attribute", attributeNotPermitted: 'Attribute "{attribute}" is not permitted, please choose another.', attributes: "Attributes", "attrs.class": "Class", "attrs.className": "Class", "attrs.dir": "Direction", "attrs.id": "Id", "attrs.required": "Required", "attrs.style": "Style", "attrs.title": "Title", "attrs.type": "Type", "attrs.value": "Value", autocomplete: "Autocomplete", button: "Button", cannotBeEmpty: "This field cannot be empty", cannotClearFields: "There are no fields to clear", checkbox: "Checkbox", checkboxes: "Checkboxes", class: "Class", clear: "Clear", clearAllMessage: "Are you sure you want to clear all fields?", close: "Close", column: "Column", "condition.target.placeholder": "target", "condition.type.and": "And", "condition.type.if": "If", "condition.type.or": "Or", "condition.type.then": "Then", "condition.value.placeholder": "value", confirmClearAll: "Are you sure you want to remove all fields?", content: "Content", control: "Control", "controlGroups.nextGroup": "Next Group", "controlGroups.prevGroup": "Previous Group", "controls.filteringTerm": 'Filtering "{term}"', "controls.form.button": "Button", "controls.form.checkbox-group": "Checkbox Group", "controls.form.input.date": "Date", "controls.form.input.email": "Email", "controls.form.input.file": "File Upload", "controls.form.input.hidden": "Hidden Input", "controls.form.input.number": "Number", "controls.form.input.text": "Text Input", "controls.form.radio-group": "Radio Group", "controls.form.select": "Select", "controls.form.textarea": "TextArea", "controls.groups.form": "Form Fields", "controls.groups.html": "HTML Elements", "controls.groups.layout": "Layout", "controls.html.divider": "Divider", "controls.html.header": "Header", "controls.html.paragraph": "Paragraph", "controls.layout.column": "Column", "controls.layout.row": "Row", copy: "Copy To Clipboard", danger: "Danger", defineColumnLayout: "Define a column layout", defineColumnWidths: "Define column widths", description: "Help Text", descriptionField: "Description", "editing.row": "Editing Row", editorTitle: "Form Elements", field: "Field", "field.property.invalid": "not valid", "field.property.isChecked": "is checked", "field.property.isNotVisible": "is not visible", "field.property.isVisible": "is visible", "field.property.label": "label", "field.property.valid": "valid", "field.property.value": "value", fieldNonEditable: "This field cannot be edited.", fieldRemoveWarning: "Are you sure you want to remove this field?", fileUpload: "File Upload", formUpdated: "Form Updated", getStarted: "Drag a field from the right to get started.", group: "Group", grouped: "Grouped", hidden: "Hidden Input", hide: "Edit", htmlElements: "HTML Elements", if: "If", "if.condition.source.placeholder": "source", "if.condition.target.placeholder": "target / value", info: "Info", "input.date": "Date", "input.text": "Text", label: "Label", labelCount: "{label} {count}", labelEmpty: "Field Label cannot be empty", "lang.af": "Afrikaans", "lang.ar": "Arabic", "lang.cs": "Czech", "lang.de": "German", "lang.en": "English", "lang.es": "Spanish", "lang.fa": "Persian", "lang.fi": "Finnish", "lang.fr": "French", "lang.hu": "Hungarian", "lang.it": "Italian", "lang.ja": "Japanese", "lang.nb": "Norwegian Bokmål", "lang.pl": "Polish", "lang.pt": "Portuguese", "lang.ro": "Romanian", "lang.ru": "Russian", "lang.th": "Thai", "lang.tr": "Turkish", "lang.zh": "Chinese", layout: "Layout", limitRole: "Limit access to one or more of the following roles:", mandatory: "Mandatory", maxlength: "Max Length", "meta.group": "Group", "meta.icon": "Ico", "meta.label": "Label", minOptionMessage: "This field requires a minimum of 2 options", name: "Name", newOptionLabel: "New {type}", no: "No", number: "Number", off: "Off", on: "On", "operator.contains": "contains", "operator.equals": "equals", "operator.notContains": "not contains", "operator.notEquals": "not equal", "operator.notVisible": "not visible", "operator.visible": "visible", option: "Option", optional: "optional", optionEmpty: "Option value required", optionLabel: "Option {count}", options: "Options", or: "or", order: "Order", "panel.label.attrs": "Attributes", "panel.label.conditions": "Conditions", "panel.label.config": "Configuration", "panel.label.meta": "Meta", "panel.label.options": "Options", "panelEditButtons.attrs": "+ Attribute", "panelEditButtons.conditions": "+ Condition", "panelEditButtons.options": "+ Option", placeholder: "Placeholder", "placeholder.className": "space separated classes", "placeholder.email": "Enter you email", "placeholder.label": "Label", "placeholder.password": "Enter your password", "placeholder.placeholder": "Placeholder", "placeholder.text": "Enter some Text", "placeholder.textarea": "Enter a lot of text", "placeholder.value": "Value", preview: "Preview", primary: "Primary", remove: "Remove", removeMessage: "Remove Element", removeType: "Remove {type}", required: "Required", reset: "Reset", richText: "Rich Text Editor", roles: "Access", row: "Row", "row.makeInputGroup": "Make this row an input group.", "row.makeInputGroupDesc": "Input Groups enable users to add sets of inputs at a time.", "row.settings.fieldsetWrap": "Wrap row in a &lt;fieldset&gt; tag", "row.settings.fieldsetWrap.aria": "Wrap Row in Fieldset", save: "Save", secondary: "Secondary", select: "Select", selectColor: "Select Color", selectionsMessage: "Allow Multiple Selections", selectOptions: "Options", separator: "Separator", settings: "Settings", size: "Size", sizes: "Sizes", "sizes.lg": "Large", "sizes.m": "Default", "sizes.sm": "Small", "sizes.xs": "Extra Small", style: "Style", styles: "Styles", "styles.btn": "Button Style", "styles.btn.danger": "Danger", "styles.btn.default": "Default", "styles.btn.info": "Info", "styles.btn.primary": "Primary", "styles.btn.success": "Success", "styles.btn.warning": "Warning", subtype: "Type", success: "Success", text: "Text Field", then: "Then", "then.condition.target.placeholder": "target", toggle: "Toggle", ungrouped: "Un-Grouped", warning: "Warning", yes: "Yes" } }, i = e["en-US"];
+const e = { "en-US": { "en-US": "English", dir: "ltr", "af-ZA": "Afrikaans (South Africa)", "ar-TN": "Arabic (Tunisia)", "cs-CZ": "Czech (Czechia)", "de-DE": "German (Germany)", "es-ES": "European Spanish", "fa-IR": "Persian (Iran)", "fi-FI": "Finnish (Finland)", "fr-FR": "French (France)", "hu-HU": "Hungarian (Hungary)", "it-IT": "Italian (Italy)", "ja-JP": "Japanese (Japan)", "nb-NO": "Norwegian Bokmål (Norway)", "pl-PL": "Polish (Poland)", "pt-BR": "Brazilian Portuguese", "pt-PT": "European Portuguese", "ro-RO": "Romanian (Romania)", "ru-RU": "Russian (Russia)", "th-TH": "Thai (Thailand)", "tr-TR": "Turkish (Türkiye)", "zh-CN": "Chinese (China)", "zh-HK": "Chinese (Hong Kong SAR China)", "action.add.attrs.attr": "What attribute would you like to add?", "action.add.attrs.value": "Default Value", addOption: "Add Option", allFieldsRemoved: "All fields were removed.", allowSelect: "Allow Select", and: "and", attribute: "Attribute", attributeNotPermitted: 'Attribute "{attribute}" is not permitted, please choose another.', attributes: "Attributes", "attrs.class": "Class", "attrs.className": "Class", "attrs.dir": "Direction", "attrs.id": "Id", "attrs.required": "Required", "attrs.style": "Style", "attrs.title": "Title", "attrs.type": "Type", "attrs.value": "Value", autocomplete: "Autocomplete", button: "Button", cannotBeEmpty: "This field cannot be empty", cannotClearFields: "There are no fields to clear", checkbox: "Checkbox", checkboxes: "Checkboxes", class: "Class", clear: "Clear", clearAllMessage: "Are you sure you want to clear all fields?", close: "Close", column: "Column", "condition.target.placeholder": "target", "condition.type.and": "And", "condition.type.if": "If", "condition.type.or": "Or", "condition.type.then": "Then", "condition.value.placeholder": "value", confirmClearAll: "Are you sure you want to remove all fields?", content: "Content", control: "Control", "controlGroups.nextGroup": "Next Group", "controlGroups.prevGroup": "Previous Group", "controls.filteringTerm": 'Filtering "{term}"', "controls.form.button": "Button", "controls.form.checkbox-group": "Checkbox Group", "controls.form.input.date": "Date", "controls.form.input.email": "Email", "controls.form.input.file": "File Upload", "controls.form.input.hidden": "Hidden Input", "controls.form.input.number": "Number", "controls.form.input.text": "Text Input", "controls.form.radio-group": "Radio Group", "controls.form.select": "Select", "controls.form.textarea": "TextArea", "controls.groups.form": "Form Fields", "controls.groups.html": "HTML Elements", "controls.groups.layout": "Layout", "controls.html.divider": "Divider", "controls.html.header": "Header", "controls.html.paragraph": "Paragraph", "controls.layout.column": "Column", "controls.layout.row": "Row", copy: "Copy To Clipboard", danger: "Danger", defineColumnLayout: "Define a column layout", defineColumnWidths: "Define column widths", description: "Help Text", descriptionField: "Description", "editing.row": "Editing Row", editorTitle: "Form Elements", field: "Field", "field.property.invalid": "not valid", "field.property.isChecked": "is checked", "field.property.isNotVisible": "is not visible", "field.property.isVisible": "is visible", "field.property.label": "label", "field.property.valid": "valid", "field.property.value": "value", fieldNonEditable: "This field cannot be edited.", fieldRemoveWarning: "Are you sure you want to remove this field?", fileUpload: "File Upload", formUpdated: "Form Updated", getStarted: "Drag a field from the right to get started.", group: "Group", grouped: "Grouped", hidden: "Hidden Input", hide: "Edit", htmlElements: "HTML Elements", if: "If", "if.condition.source.placeholder": "source", "if.condition.target.placeholder": "target / value", info: "Info", "input.date": "Date", "input.text": "Text", label: "Label", labelCount: "{label} {count}", labelEmpty: "Field Label cannot be empty", "lang.af": "Afrikaans", "lang.ar": "Arabic", "lang.cs": "Czech", "lang.de": "German", "lang.en": "English", "lang.es": "Spanish", "lang.fa": "Persian", "lang.fi": "Finnish", "lang.fr": "French", "lang.hu": "Hungarian", "lang.it": "Italian", "lang.ja": "Japanese", "lang.nb": "Norwegian Bokmål", "lang.pl": "Polish", "lang.pt": "Portuguese", "lang.ro": "Romanian", "lang.ru": "Russian", "lang.th": "Thai", "lang.tr": "Turkish", "lang.zh": "Chinese", layout: "Layout", limitRole: "Limit access to one or more of the following roles:", mandatory: "Mandatory", maxlength: "Max Length", "meta.group": "Group", "meta.icon": "Ico", "meta.label": "Label", minOptionMessage: "This field requires a minimum of 2 options", name: "Name", newOptionLabel: "New {type}", no: "No", number: "Number", off: "Off", on: "On", "operator.contains": "contains", "operator.equals": "equals", "operator.notContains": "not contains", "operator.notEquals": "not equal", "operator.notVisible": "not visible", "operator.visible": "visible", option: "Option", optional: "optional", optionEmpty: "Option value required", optionLabel: "Option {count}", options: "Options", or: "or", order: "Order", "panel.label.attrs": "Attributes", "panel.label.conditions": "Conditions", "panel.label.config": "Configuration", "panel.label.meta": "Meta", "panel.label.options": "Options", "panelEditButtons.attrs": "+ Attribute", "panelEditButtons.conditions": "+ Condition", "panelEditButtons.options": "+ Option", "panelEditButtons.config": "+ Configuration", placeholder: "Placeholder", "placeholder.className": "space separated classes", "placeholder.email": "Enter you email", "placeholder.label": "Label", "placeholder.password": "Enter your password", "placeholder.placeholder": "Placeholder", "placeholder.text": "Enter some Text", "placeholder.textarea": "Enter a lot of text", "placeholder.value": "Value", preview: "Preview", primary: "Primary", remove: "Remove", removeMessage: "Remove Element", removeType: "Remove {type}", required: "Required", reset: "Reset", richText: "Rich Text Editor", roles: "Access", row: "Row", "row.makeInputGroup": "Make this row an input group.", "row.makeInputGroupDesc": "Input Groups enable users to add sets of inputs at a time.", "row.settings.fieldsetWrap": "Wrap row in a &lt;fieldset&gt; tag", "row.settings.fieldsetWrap.aria": "Wrap Row in Fieldset", save: "Save", cancel: "Cancel", secondary: "Secondary", select: "Select", selectColor: "Select Color", selectionsMessage: "Allow Multiple Selections", selectOptions: "Options", separator: "Separator", settings: "Settings", size: "Size", sizes: "Sizes", "sizes.lg": "Large", "sizes.m": "Default", "sizes.sm": "Small", "sizes.xs": "Extra Small", style: "Style", styles: "Styles", "styles.btn": "Button Style", "styles.btn.danger": "Danger", "styles.btn.default": "Default", "styles.btn.info": "Info", "styles.btn.primary": "Primary", "styles.btn.success": "Success", "styles.btn.warning": "Warning", subtype: "Type", success: "Success", text: "Text Field", then: "Then", "then.condition.target.placeholder": "target", toggle: "Toggle", ungrouped: "Un-Grouped", warning: "Warning", yes: "Yes" } }, i = e["en-US"];
 const locale = "en-US";
 mi18n.addLanguage(locale, i);
 mi18n.setCurrent(locale);
@@ -11938,7 +12859,7 @@ const propertyMap = {
 };
 const createRemoveButton = () => dom.btnTemplate({
   className: "remove-input-group",
-  children: dom.icon("remove"),
+  children: dom.icon("bin"),
   action: {
     mouseover: ({ target }) => target.parentElement.classList.add("will-remove"),
     mouseleave: ({ target }) => target.parentElement.classList.remove("will-remove"),
@@ -12186,32 +13107,43 @@ let FormeoRenderer$1 = class FormeoRenderer {
    */
   processSection = (section) => {
     const { id, config = {}, children = [] } = section;
-    const processedRows = children.reduce((acc, rowId) => {
-      const row = this.form.rows[rowId];
+    const processedChildren = children.reduce((acc, childId) => {
+      const row = this.form.rows?.[childId];
       if (row) {
         acc.push(this.processRow(row));
+        return acc;
+      }
+      const field2 = this.form.fields?.[childId];
+      if (field2) {
+        const processedField = this.processFields([childId])[0];
+        if (processedField) {
+          acc.push(processedField);
+        }
+        return acc;
       }
       return acc;
     }, []);
     const sectionHeader = [];
-    if (config.name) {
+    const sectionTitle = config.title || config.name;
+    if (sectionTitle) {
       sectionHeader.push({
         tag: "h3",
         className: "formeo-section-name",
-        children: config.name
+        children: sectionTitle
       });
     }
-    if (config.instruction) {
+    const sectionDescription = config.description || config.instruction;
+    if (sectionDescription) {
       sectionHeader.push({
         tag: "p",
         className: "formeo-section-instruction",
-        children: config.instruction
+        children: sectionDescription
       });
     }
     const sectionData = {
       id: this.prefixId(id),
       className: [SECTION_CLASSNAME, STAGE_CLASSNAME, "formeo-rendered-section"],
-      children: [...sectionHeader, ...processedRows]
+      children: [...sectionHeader, ...processedChildren]
     };
     this.components[baseId(id)] = sectionData;
     return sectionData;
@@ -12366,6 +13298,535 @@ const LISTEN_TYPE_MAP = (component) => {
   const [listenerEvent] = typesMap.find((typeMap) => typeMap[1](component)) || [false];
   return listenerEvent;
 };
+function renderRuntimeSchemaForm(schema, container) {
+  container.innerHTML = "";
+  const wrapper = document.createElement("div");
+  wrapper.className = "runtime-schema-form-wrapper";
+  const sidebar = createSidebar(schema.steps);
+  const mainContent = document.createElement("div");
+  mainContent.className = "runtime-schema-form-content";
+  const form = document.createElement("form");
+  form.className = "runtime-schema-form";
+  form.id = `form-${schema.formId || "default"}`;
+  schema.steps.forEach((step, index2) => {
+    const stepElement = renderStep(step, index2 === 0);
+    form.appendChild(stepElement);
+  });
+  const navigation = createNavigation(schema.steps.length);
+  form.appendChild(navigation);
+  mainContent.appendChild(form);
+  wrapper.appendChild(sidebar);
+  wrapper.appendChild(mainContent);
+  container.appendChild(wrapper);
+  initializeStepNavigation(wrapper, schema.steps.length, schema);
+  return wrapper;
+}
+function createSidebar(steps) {
+  const sidebar = document.createElement("div");
+  sidebar.className = "runtime-schema-sidebar";
+  const stepsList = document.createElement("ul");
+  stepsList.className = "runtime-schema-steps-list";
+  steps.forEach((step, index2) => {
+    const stepItem = document.createElement("li");
+    stepItem.className = "runtime-schema-step-item";
+    stepItem.dataset.stepIndex = index2;
+    if (index2 === 0) {
+      stepItem.classList.add("active");
+    }
+    const stepNumber = document.createElement("div");
+    stepNumber.className = "runtime-schema-step-number";
+    stepNumber.textContent = step.order || index2 + 1;
+    const stepLabel = document.createElement("div");
+    stepLabel.className = "runtime-schema-step-label";
+    stepLabel.textContent = step.title;
+    stepItem.appendChild(stepNumber);
+    stepItem.appendChild(stepLabel);
+    if (index2 < steps.length - 1) {
+      const connector = document.createElement("div");
+      connector.className = "runtime-schema-step-connector";
+      stepItem.appendChild(connector);
+    }
+    stepsList.appendChild(stepItem);
+  });
+  sidebar.appendChild(stepsList);
+  return sidebar;
+}
+function renderStep(step, isActive = false) {
+  const stepElement = document.createElement("div");
+  stepElement.className = "runtime-schema-step";
+  stepElement.dataset.stepId = step.id;
+  stepElement.dataset.stepOrder = step.order;
+  if (!isActive) {
+    stepElement.style.display = "none";
+  }
+  const stepHeader = document.createElement("h2");
+  stepHeader.className = "runtime-schema-step-header";
+  stepHeader.textContent = step.title;
+  stepElement.appendChild(stepHeader);
+  if (step.description) {
+    const stepDescription = document.createElement("p");
+    stepDescription.className = "runtime-schema-step-description";
+    stepDescription.textContent = step.description;
+    stepElement.appendChild(stepDescription);
+  }
+  const fieldsContainer = document.createElement("div");
+  fieldsContainer.className = "runtime-schema-fields-container";
+  if (step.rows && Array.isArray(step.rows) && step.rows.length > 0) {
+    step.rows.forEach((row) => {
+      const rowContainer = document.createElement("div");
+      rowContainer.className = "runtime-schema-row";
+      const rowColumns = row.columns || 1;
+      if (rowColumns === 1) {
+        rowContainer.style.gridTemplateColumns = "1fr";
+      } else {
+        rowContainer.style.gridTemplateColumns = `repeat(${Math.min(rowColumns, 3)}, 1fr)`;
+      }
+      if (row.fields && Array.isArray(row.fields)) {
+        row.fields.forEach((field2) => {
+          const fieldElement = renderField(field2);
+          rowContainer.appendChild(fieldElement);
+        });
+      }
+      fieldsContainer.appendChild(rowContainer);
+    });
+  }
+  stepElement.appendChild(fieldsContainer);
+  return stepElement;
+}
+function renderField(field2) {
+  const fieldWrapper = document.createElement("div");
+  fieldWrapper.className = "runtime-schema-field-wrapper";
+  const label = document.createElement("label");
+  label.className = "runtime-schema-field-label";
+  label.htmlFor = `field-${field2.id}`;
+  const labelText = document.createTextNode(field2.label || "");
+  label.appendChild(labelText);
+  if (field2.required) {
+    const asterisk = document.createElement("span");
+    asterisk.className = "runtime-schema-required-asterisk";
+    asterisk.textContent = " *";
+    asterisk.setAttribute("aria-label", "required");
+    label.appendChild(asterisk);
+  }
+  fieldWrapper.appendChild(label);
+  let inputElement;
+  switch (field2.type) {
+    case "textarea":
+      inputElement = document.createElement("textarea");
+      break;
+    case "select":
+      inputElement = document.createElement("select");
+      if (field2.options && Array.isArray(field2.options)) {
+        field2.options.forEach((option2) => {
+          const optionElement = document.createElement("option");
+          optionElement.value = option2.value || "";
+          optionElement.textContent = option2.label || option2.value || "";
+          if (option2.selected || option2.checked) {
+            optionElement.selected = true;
+          }
+          inputElement.appendChild(optionElement);
+        });
+      }
+      break;
+    case "radio":
+      inputElement = createRadioGroup(field2);
+      break;
+    case "checkbox":
+      inputElement = createCheckboxGroup(field2);
+      break;
+    case "file": {
+      const dropzone = document.createElement("div");
+      dropzone.className = "file-dropzone";
+      const dropContent = document.createElement("div");
+      dropContent.className = "drop-content";
+      const dropIcon = document.createElement("div");
+      dropIcon.className = "drop-icon";
+      try {
+        dropIcon.innerHTML = dom.icon("file-upload-image");
+      } catch (e2) {
+        dropIcon.innerHTML = "📁";
+      }
+      const dropText = document.createElement("div");
+      dropText.className = "drop-text";
+      dropText.textContent = field2.placeholder || "Drag & drop a file or click to browse";
+      const dropSub = document.createElement("div");
+      dropSub.className = "drop-subtext";
+      dropSub.textContent = "";
+      const nativeInput = document.createElement("input");
+      nativeInput.type = "file";
+      nativeInput.style.display = "none";
+      dropContent.appendChild(dropIcon);
+      dropContent.appendChild(dropText);
+      dropContent.appendChild(dropSub);
+      dropzone.appendChild(dropContent);
+      dropzone.appendChild(nativeInput);
+      if (field2.variant === "mirror") {
+        dropzone.classList.add("file-dropzone--mirror");
+      }
+      dropzone.addEventListener("click", () => nativeInput.click());
+      ["dragenter", "dragover"].forEach(
+        (evt) => dropzone.addEventListener(evt, (e2) => {
+          e2.preventDefault();
+          e2.stopPropagation();
+          dropzone.classList.add("dragover");
+        })
+      );
+      ["dragleave", "drop"].forEach(
+        (evt) => dropzone.addEventListener(evt, (e2) => {
+          e2.preventDefault();
+          e2.stopPropagation();
+          dropzone.classList.remove("dragover");
+        })
+      );
+      dropzone.addEventListener("drop", (e2) => {
+        const files = e2.dataTransfer?.files || [];
+        nativeInput.files = files;
+        if (files.length) {
+          dropSub.textContent = files[0].name;
+        }
+      });
+      nativeInput.addEventListener("change", (e2) => {
+        const files = e2.target.files || [];
+        if (files.length) {
+          dropSub.textContent = files[0].name;
+        }
+      });
+      inputElement = dropzone;
+      break;
+    }
+    default:
+      inputElement = document.createElement("input");
+      inputElement.type = field2.type || "text";
+  }
+  if (inputElement.tagName !== "DIV") {
+    inputElement.id = `field-${field2.id}`;
+    inputElement.name = `field-${field2.id}`;
+    inputElement.className = "runtime-schema-field-input";
+    if (field2.placeholder) {
+      inputElement.placeholder = field2.placeholder;
+    }
+    if (field2.required) {
+      inputElement.required = true;
+    }
+    if (field2.value !== void 0) {
+      inputElement.value = field2.value;
+    }
+    if (field2.type === "date") {
+      const dateWrapper = document.createElement("div");
+      dateWrapper.className = "runtime-schema-date-wrapper";
+      dateWrapper.appendChild(inputElement);
+      const calendarIcon = document.createElement("span");
+      calendarIcon.className = "runtime-schema-date-icon";
+      calendarIcon.innerHTML = "📅";
+      dateWrapper.appendChild(calendarIcon);
+      fieldWrapper.appendChild(label);
+      fieldWrapper.appendChild(dateWrapper);
+      return fieldWrapper;
+    }
+    if (field2.type === "select") {
+      const selectWrapper = document.createElement("div");
+      selectWrapper.className = "runtime-schema-select-wrapper";
+      selectWrapper.appendChild(inputElement);
+      fieldWrapper.appendChild(label);
+      fieldWrapper.appendChild(selectWrapper);
+      return fieldWrapper;
+    }
+  }
+  fieldWrapper.appendChild(inputElement);
+  return fieldWrapper;
+}
+function createRadioGroup(field2) {
+  const container = document.createElement("div");
+  container.className = "runtime-schema-radio-group";
+  if (field2.options && Array.isArray(field2.options)) {
+    field2.options.forEach((option2, index2) => {
+      const radioWrapper = document.createElement("div");
+      radioWrapper.className = "runtime-schema-radio-option";
+      const radio = document.createElement("input");
+      radio.type = "radio";
+      radio.id = `field-${field2.id}-${index2}`;
+      radio.name = `field-${field2.id}`;
+      radio.value = option2.value || "";
+      radio.className = "runtime-schema-field-input";
+      if (option2.checked || option2.selected) {
+        radio.checked = true;
+      }
+      if (field2.required) {
+        radio.required = true;
+      }
+      const radioLabel = document.createElement("label");
+      radioLabel.htmlFor = `field-${field2.id}-${index2}`;
+      radioLabel.textContent = option2.label || option2.value || "";
+      radioWrapper.appendChild(radio);
+      radioWrapper.appendChild(radioLabel);
+      container.appendChild(radioWrapper);
+    });
+  }
+  return container;
+}
+function createCheckboxGroup(field2) {
+  const container = document.createElement("div");
+  container.className = "runtime-schema-checkbox-group";
+  if (field2.options && Array.isArray(field2.options)) {
+    field2.options.forEach((option2, index2) => {
+      const checkboxWrapper = document.createElement("div");
+      checkboxWrapper.className = "runtime-schema-checkbox-option";
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.id = `field-${field2.id}-${index2}`;
+      checkbox.name = `field-${field2.id}`;
+      checkbox.value = option2.value || "";
+      checkbox.className = "runtime-schema-field-input";
+      if (option2.checked || option2.selected) {
+        checkbox.checked = true;
+      }
+      const checkboxLabel = document.createElement("label");
+      checkboxLabel.htmlFor = `field-${field2.id}-${index2}`;
+      checkboxLabel.textContent = option2.label || option2.value || "";
+      checkboxWrapper.appendChild(checkbox);
+      checkboxWrapper.appendChild(checkboxLabel);
+      container.appendChild(checkboxWrapper);
+    });
+  }
+  return container;
+}
+function createNavigation(totalSteps) {
+  const navigation = document.createElement("div");
+  navigation.className = "runtime-schema-navigation";
+  const prevButton = document.createElement("button");
+  prevButton.type = "button";
+  prevButton.className = "runtime-schema-nav-button runtime-schema-nav-prev";
+  prevButton.textContent = "Previous";
+  prevButton.style.display = "none";
+  const nextButton = document.createElement("button");
+  nextButton.type = "button";
+  nextButton.className = "runtime-schema-nav-button runtime-schema-nav-next";
+  nextButton.textContent = totalSteps > 1 ? "Next" : "Start";
+  navigation.appendChild(prevButton);
+  navigation.appendChild(nextButton);
+  return navigation;
+}
+function validateField(input, fieldSchema) {
+  const value = input.value.trim();
+  const label = fieldSchema.label || "Field";
+  if (fieldSchema.required && !value) {
+    return {
+      isValid: false,
+      error: `${label} is required`
+    };
+  }
+  if (!value && !fieldSchema.required) {
+    return { isValid: true };
+  }
+  switch (fieldSchema.type) {
+    case "email": {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (value && !emailRegex.test(value)) {
+        return {
+          isValid: false,
+          error: `${label} must be a valid email address`
+        };
+      }
+      break;
+    }
+    case "number":
+      if (value && isNaN(value)) {
+        return {
+          isValid: false,
+          error: `${label} must be a valid number`
+        };
+      }
+      break;
+    case "date":
+      if (value && isNaN(Date.parse(value))) {
+        return {
+          isValid: false,
+          error: `${label} must be a valid date`
+        };
+      }
+      break;
+  }
+  return { isValid: true };
+}
+function getAllFieldsFromStep(stepSchema) {
+  if (!stepSchema.rows || !Array.isArray(stepSchema.rows)) {
+    return [];
+  }
+  return stepSchema.rows.flatMap((row) => row.fields || []);
+}
+function validateStep(stepElement, stepSchema) {
+  const errors = [];
+  const invalidFields = [];
+  const fields2 = getAllFieldsFromStep(stepSchema);
+  fields2.forEach((fieldSchema) => {
+    const input = stepElement.querySelector(`#field-${fieldSchema.id}`);
+    if (fieldSchema.type === "radio") {
+      const radios = stepElement.querySelectorAll(`input[name="field-${fieldSchema.id}"]`);
+      if (radios.length > 0) {
+        const isChecked = Array.from(radios).some((radio) => radio.checked);
+        if (fieldSchema.required && !isChecked) {
+          errors.push(`${fieldSchema.label || "Field"} is required`);
+          invalidFields.push(...Array.from(radios));
+        }
+        return;
+      }
+    }
+    if (fieldSchema.type === "checkbox") {
+      const checkboxes = stepElement.querySelectorAll(`input[name="field-${fieldSchema.id}"]`);
+      if (checkboxes.length > 0) {
+        const isChecked = Array.from(checkboxes).some((checkbox) => checkbox.checked);
+        if (fieldSchema.required && !isChecked) {
+          errors.push(`${fieldSchema.label || "Field"} is required`);
+          invalidFields.push(...Array.from(checkboxes));
+        }
+        return;
+      }
+    }
+    if (!input) {
+      return;
+    }
+    const validation = validateField(input, fieldSchema);
+    if (!validation.isValid) {
+      errors.push(validation.error);
+      invalidFields.push(input);
+    }
+  });
+  return {
+    isValid: errors.length === 0,
+    errors,
+    invalidFields
+  };
+}
+function collectFormData(form, schema) {
+  const formData = {};
+  schema.steps.forEach((step) => {
+    const fields2 = step.rows ? step.rows.flatMap((row) => row.fields || []) : [];
+    fields2.forEach((field2) => {
+      const fieldId = `field-${field2.id}`;
+      let value = "";
+      if (field2.type === "radio") {
+        const checkedRadio = form.querySelector(`input[name="${fieldId}"]:checked`);
+        value = checkedRadio ? checkedRadio.value : "";
+      } else if (field2.type === "checkbox") {
+        const checkedBoxes = form.querySelectorAll(`input[name="${fieldId}"]:checked`);
+        if (checkedBoxes.length > 0) {
+          value = Array.from(checkedBoxes).map((cb) => cb.value).join(", ");
+        }
+      } else {
+        const input = form.querySelector(`#${fieldId}`);
+        if (input) {
+          value = input.value.trim();
+        }
+      }
+      const label = (field2.label || `Field ${field2.id}`).trim();
+      formData[label] = value || "";
+    });
+  });
+  return formData;
+}
+function initializeStepNavigation(wrapper, totalSteps, schema) {
+  let currentStep = 0;
+  const steps = wrapper.querySelectorAll(".runtime-schema-step");
+  const stepItems = wrapper.querySelectorAll(".runtime-schema-step-item");
+  const prevButton = wrapper.querySelector(".runtime-schema-nav-prev");
+  const nextButton = wrapper.querySelector(".runtime-schema-nav-next");
+  const form = wrapper.querySelector(".runtime-schema-form");
+  function showStep(stepIndex) {
+    steps.forEach((step, index2) => {
+      step.style.display = index2 === stepIndex ? "block" : "none";
+    });
+    stepItems.forEach((item, index2) => {
+      item.classList.toggle("active", index2 === stepIndex);
+    });
+    prevButton.style.display = stepIndex === 0 ? "none" : "block";
+    if (stepIndex === 0) {
+      nextButton.textContent = "Start";
+    } else if (stepIndex === totalSteps - 1) {
+      nextButton.textContent = "Submit";
+    } else {
+      nextButton.textContent = "Next";
+    }
+    currentStep = stepIndex;
+    const currentStepElement = steps[currentStep];
+    if (currentStepElement) {
+      const allInputs = currentStepElement.querySelectorAll(".runtime-schema-field-input, input, select, textarea");
+      allInputs.forEach((input) => {
+        input.classList.remove("error");
+      });
+    }
+  }
+  nextButton.addEventListener("click", () => {
+    const currentStepElement = steps[currentStep];
+    const currentStepSchema = schema.steps[currentStep];
+    const validation = validateStep(currentStepElement, currentStepSchema);
+    if (!validation.isValid) {
+      validation.invalidFields.forEach((field2) => {
+        field2.classList.add("error");
+        if (validation.invalidFields.indexOf(field2) === 0) {
+          field2.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      });
+      const errorMessage = validation.errors.join("\n");
+      alert(`Please fix the following errors:
+
+${errorMessage}`);
+      return;
+    }
+    const allInputs = currentStepElement.querySelectorAll(".runtime-schema-field-input, input, select, textarea");
+    allInputs.forEach((input) => {
+      input.classList.remove("error");
+    });
+    if (currentStep < totalSteps - 1) {
+      showStep(currentStep + 1);
+    } else {
+      const finalValidation = validateStep(currentStepElement, currentStepSchema);
+      if (finalValidation.isValid) {
+        const formData = collectFormData(form, schema);
+        let alertMessage = "";
+        Object.entries(formData).forEach(([label, value]) => {
+          alertMessage += `${label}: ${value}
+`;
+        });
+        alert(alertMessage.trim());
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      } else {
+        finalValidation.invalidFields.forEach((field2) => {
+          field2.classList.add("error");
+        });
+        const errorMessage = finalValidation.errors.join("\n");
+        alert(`Please fix the following errors:
+
+${errorMessage}`);
+      }
+    }
+  });
+  prevButton.addEventListener("click", () => {
+    if (currentStep > 0) {
+      showStep(currentStep - 1);
+    }
+  });
+  stepItems.forEach((item, index2) => {
+    item.addEventListener("click", () => {
+      if (index2 <= currentStep) {
+        showStep(index2);
+      }
+    });
+  });
+  form.addEventListener("input", (e2) => {
+    if (e2.target.classList.contains("error")) {
+      e2.target.classList.remove("error");
+    }
+  });
+  form.addEventListener("change", (e2) => {
+    if (e2.target.type === "radio" || e2.target.type === "checkbox") {
+      const name2 = e2.target.name;
+      const groupInputs = form.querySelectorAll(`input[name="${name2}"]`);
+      groupInputs.forEach((input) => {
+        input.classList.remove("error");
+      });
+    }
+  });
+}
 new SmartTooltip();
 let FormeoEditor$1 = class FormeoEditor {
   /**
@@ -12400,6 +13861,15 @@ let FormeoEditor$1 = class FormeoEditor {
     this.userFormData = cleanFormData(data);
     this.load(this.userFormData, this.opts);
   }
+  /**
+   * Returns the legacy Formeo format for rendering/preview
+   * This is the old structure (stages, rows, columns, fields, sections)
+   * that the FormeoRenderer expects
+   * @return {Object} legacy Formeo formData structure
+   */
+  getLegacyFormData() {
+    return this.Components.getLegacyFormData();
+  }
   loadData(data = {}) {
     this.formData = data;
   }
@@ -12425,7 +13895,10 @@ let FormeoEditor$1 = class FormeoEditor {
     promises.push(
       fetchIcons(this.opts.svgSprite),
       fetchFormeoStyle(this.opts.style),
-      mi18n.init({ ...this.opts.i18n, locale: globalThis.sessionStorage?.getItem(SESSION_LOCALE_KEY) })
+      mi18n.init({
+        ...this.opts.i18n,
+        locale: globalThis.sessionStorage?.getItem(SESSION_LOCALE_KEY)
+      })
     );
     await Promise.all(promises);
     if (this.opts.allowEdit) {
@@ -12438,7 +13911,7 @@ let FormeoEditor$1 = class FormeoEditor {
    * dom elements, actions events and more.
    */
   init() {
-    return Controls$2.init(this.opts.controls, this.opts.stickyControls).then((controls) => {
+    return Controls$1.init(this.opts.controls, this.opts.stickyControls).then((controls) => {
       this.controls = controls;
       this.load(this.userFormData, this.opts);
       this.formId = components.get("id");
@@ -12516,6 +13989,7 @@ let FormeoEditor$1 = class FormeoEditor {
     const controlsContainer = this.controls.container || this.editor;
     controlsContainer.appendChild(this.controls.dom);
     const stageArea = this.stages[0]?.dom;
+    console.log("🚀 ~ FormeoEditor ~ render ~ stageArea:", stageArea);
     if (stageArea) {
       stageArea.insertBefore(stageHeader, stageArea.firstChild);
       stageHeader.after(this.previewContainer);
@@ -12533,6 +14007,376 @@ let FormeoEditor$1 = class FormeoEditor {
     document.dispatchEvent(events.formeoLoaded);
   }
   /**
+   * Get CSS styles for runtime schema form
+   * @return {String} CSS string
+   */
+  getRuntimeSchemaStyles() {
+    return `
+      .runtime-schema-form-wrapper {
+        display: flex;
+        min-height: 600px;
+        background: #f5f7fa;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+      
+      .runtime-schema-sidebar {
+        width: 280px;
+        background: #ffffff;
+        border-right: 1px solid #e0e0e0;
+        padding: 24px 0;
+        flex-shrink: 0;
+      }
+      
+      .runtime-schema-steps-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      
+      .runtime-schema-step-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 16px 24px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin-bottom: 0;
+      }
+      
+      .runtime-schema-step-item:hover:not(.active) {
+        background-color: transparent;
+      }
+      
+      .runtime-schema-step-item.active {
+        background-color: transparent;
+        border-left: none;
+        padding-left: 24px;
+      }
+      
+      .runtime-schema-step-item.active .runtime-schema-step-number {
+        background-color: #8b1538;
+        color: #ffffff;
+      }
+      
+      .runtime-schema-step-item.active .runtime-schema-step-label {
+        color: #8b1538;
+        font-weight: 600;
+      }
+      
+      .runtime-schema-step-number {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #e0e0e0;
+        color: #666666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 14px;
+        margin-right: 12px;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+        position: relative;
+        z-index: 1;
+      }
+      
+      .runtime-schema-step-label {
+        color: #666666;
+        font-size: 14px;
+        font-weight: 400;
+        transition: color 0.2s ease;
+      }
+      
+      .runtime-schema-step-item.active .runtime-schema-step-label {
+        color: #8b1538;
+        font-weight: 600;
+      }
+      
+      .runtime-schema-step-connector {
+        position: absolute;
+        left: 40px;
+        top: 48px;
+        width: 2px;
+        height: 24px;
+        background-color: #e0e0e0;
+        z-index: 0;
+      }
+      
+      .runtime-schema-form-content {
+        flex: 1;
+        background: #ffffff;
+        padding: 40px 48px;
+        overflow-y: auto;
+        width: 100%;
+      }
+      
+      .runtime-schema-form {
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .runtime-schema-step-header {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0 0 24px 0;
+        padding-bottom: 0;
+        border-bottom: none;
+      }
+      
+      .runtime-schema-step-description {
+        font-size: 14px;
+        color: #666666;
+        margin: 0 0 24px 0;
+      }
+      
+      .runtime-schema-fields-container {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        margin-bottom: 32px;
+      }
+      
+      .runtime-schema-row {
+        display: grid;
+        gap: 20px 24px;
+        width: 100%;
+      }
+      
+      .runtime-schema-field-wrapper {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .runtime-schema-field-label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333333;
+        margin-bottom: 8px;
+        display: block;
+      }
+      
+      .runtime-schema-required-asterisk {
+        color: #d32f2f;
+        margin-left: 2px;
+      }
+      
+      .runtime-schema-field-input {
+        width: 100%;
+        padding: 12px 16px;
+        font-size: 14px;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        background-color: #ffffff;
+        color: #1a1a1a;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        font-family: inherit;
+      }
+      
+      .runtime-schema-field-input:focus {
+        outline: none;
+        border-color: #8b1538;
+        box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
+      }
+      
+      .runtime-schema-field-input:invalid.error,
+      .runtime-schema-field-input.error {
+        border-color: #d32f2f;
+        box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.1);
+      }
+      
+      .runtime-schema-field-input::placeholder {
+        color: #999999;
+      }
+      
+      .runtime-schema-date-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      
+      .runtime-schema-date-wrapper .runtime-schema-field-input {
+        padding-right: 40px;
+      }
+      
+      .runtime-schema-date-icon {
+        position: absolute;
+        right: 12px;
+        pointer-events: none;
+        font-size: 18px;
+        opacity: 0.6;
+      }
+      
+      .runtime-schema-select-wrapper {
+        position: relative;
+      }
+      
+      .runtime-schema-select-wrapper .runtime-schema-field-input {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 36px;
+        cursor: pointer;
+      }
+      
+      .runtime-schema-radio-group,
+      .runtime-schema-checkbox-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      
+      .runtime-schema-radio-option,
+      .runtime-schema-checkbox-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .runtime-schema-radio-option input[type="radio"],
+      .runtime-schema-checkbox-option input[type="checkbox"] {
+        width: auto;
+        margin: 0;
+        cursor: pointer;
+      }
+      
+      input[type="radio"].error,
+      input[type="checkbox"].error {
+        outline: 2px solid #d32f2f;
+        outline-offset: 2px;
+        border-radius: 2px;
+      }
+      
+      .runtime-schema-radio-option label,
+      .runtime-schema-checkbox-option label {
+        font-weight: 400;
+        margin: 0;
+        cursor: pointer;
+        color: #333333;
+      }
+      
+      textarea.runtime-schema-field-input {
+        min-height: 100px;
+        resize: vertical;
+        font-family: inherit;
+      }
+      
+      .runtime-schema-navigation {
+        display: flex;
+        justify-content: flex-start;
+        gap: 16px;
+        margin-top: 32px;
+        padding-top: 0;
+        border-top: none;
+      }
+      
+      .runtime-schema-nav-button {
+        padding: 14px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: inherit;
+        min-width: 120px;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-prev {
+        background-color: #ffffff;
+        color: #666666;
+        border: 1px solid #d0d0d0;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-prev:hover {
+        background-color: #f8f9fa;
+        border-color: #8b1538;
+        color: #8b1538;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-next {
+        background-color: #000000;
+        color: #ffffff;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-next:hover {
+        background-color: #333333;
+      }
+      
+      .runtime-schema-nav-button.runtime-schema-nav-next:active {
+        transform: translateY(1px);
+      }
+      
+      .runtime-schema-nav-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      @media (max-width: 768px) {
+        .runtime-schema-form-wrapper {
+          flex-direction: column;
+        }
+        
+        .runtime-schema-sidebar {
+          width: 100%;
+          border-right: none;
+          border-bottom: 1px solid #e0e0e0;
+          padding: 16px 0;
+        }
+        
+        .runtime-schema-steps-list {
+          display: flex;
+          overflow-x: auto;
+          padding: 0 16px;
+        }
+        
+        .runtime-schema-step-item {
+          flex-direction: column;
+          align-items: center;
+          min-width: 80px;
+          padding: 8px;
+          margin-right: 16px;
+        }
+        
+        .runtime-schema-step-item.active {
+          border-left: none;
+          border-bottom: 3px solid #8b1538;
+          padding-left: 8px;
+          padding-bottom: 5px;
+        }
+        
+        .runtime-schema-step-connector {
+          display: none;
+        }
+        
+        .runtime-schema-form-content {
+          padding: 24px 16px;
+        }
+        
+        .runtime-schema-fields-container {
+          gap: 20px;
+        }
+        
+        .runtime-schema-row {
+          grid-template-columns: 1fr !important;
+          gap: 20px;
+        }
+        
+        .runtime-schema-navigation {
+          flex-direction: column;
+        }
+        
+        .runtime-schema-nav-button {
+          width: 100%;
+        }
+      }
+    `;
+  }
+  /**
    * Toggle between edit mode and preview mode
    * @return {void}
    */
@@ -12546,10 +14390,26 @@ let FormeoEditor$1 = class FormeoEditor {
         this.stageContent.style.display = "none";
       }
       this.previewContainer.style.display = "block";
-      const renderer = new FormeoRenderer$1({
-        renderContainer: this.previewContainer
-      });
-      renderer.render(this.formData);
+      const runtimeSchema = this.formData;
+      if (!runtimeSchema || !runtimeSchema.steps || runtimeSchema.steps.length === 0) {
+        alert("No form steps found. Please add at least one section with fields to the form.");
+        this.isPreviewMode = false;
+        this.previewButton.innerHTML = dom.icon("new-eye");
+        this.previewButton.classList.remove("active");
+        if (this.stageContent) {
+          this.stageContent.style.display = "";
+        }
+        this.previewContainer.style.display = "none";
+        return;
+      }
+      const styleId = "formeo-runtime-schema-styles";
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement("style");
+        style.id = styleId;
+        style.textContent = this.getRuntimeSchemaStyles();
+        document.head.appendChild(style);
+      }
+      renderRuntimeSchemaForm(runtimeSchema, this.previewContainer);
       events.formeoUpdated({ type: "preview", isPreviewMode: true }, "formeoPreview");
     } else {
       if (this.stageContent) {

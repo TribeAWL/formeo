@@ -5,6 +5,7 @@
   "main": "dist/formeo.cjs.js",
   "module": "dist/formeo.es.js",
   "unpkg": "dist/formeo.umd.js",
+  "style": "dist/formeo.css",
   "exports": {
     ".": {
       "import": "./dist/formeo.es.js",
