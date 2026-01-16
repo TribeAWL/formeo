@@ -33,6 +33,14 @@
   },
   "files": [
     "dist/**/*",
+    "dist/demo.min.js",
+    "dist/demo.min.css",
+    "dist/index.min.js",
+    "dist/index.min2.js",
+    "dist/index.min3.js",
+    "dist/mode-json.min.js",
+    "dist/theme-github_light_default.min.js",
+    "dist/demo.min.css",
     "demo/**/*"
   ],
   "homepage": "https://formeo.io",
@@ -88,7 +96,7 @@
     "build:lib:unminified": "vite build --config vite.config.lib.mjs --mode production",
     "build:lib:minified": "vite build --config vite.config.lib.mjs --mode production-minified",
     "prebuild": "npm run build:lib",
-    "build": "npm run build:css && npm run build:css:min",
+    "build": "npm run clean && npm run build:lib && npm run build:css && npm run build:css:min && npm run build:demo && npm run postbuild",
     "clean": "rimraf dist",
     "build:css": "sass src/lib/sass/formeo.scss dist/formeo.css --style=expanded",
     "build:css:min": "sass src/lib/sass/formeo.scss dist/formeo.min.css --style=compressed",

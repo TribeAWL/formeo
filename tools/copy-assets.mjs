@@ -30,6 +30,16 @@ const targets = [
     src: resolve(projectRoot, 'dist/formeo*.css'),
     dest: resolve(projectRoot, 'dist/demo/assets/css/'),
   },
+  // Copy all demo JS (minified and unminified) to dist/
+  {
+    src: resolve(projectRoot, 'dist/demo/assets/js/*.js'),
+    dest: resolve(projectRoot, 'dist/'),
+  },
+  // Copy all demo CSS (minified and unminified) to dist/
+  {
+    src: resolve(projectRoot, 'dist/demo/assets/css/*.css'),
+    dest: resolve(projectRoot, 'dist/'),
+  },
   // Copy schema files
   {
     src: resolve(projectRoot, 'dist/formData_schema.json'),
