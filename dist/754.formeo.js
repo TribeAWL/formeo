@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkFormeo=self.webpackChunkFormeo||[]).push([[754],{8754(o,l,e){e.r(l),e.d(l,{default:()=>u});const u=[{config:{label:"row"},meta:{group:"layout",icon:"rows",id:"layout-row"}},{config:{label:"column"},meta:{group:"layout",icon:"columns",id:"layout-column"}},{config:{label:"Section"},meta:{group:"layout",icon:"section",id:"layout-section"}}]}}]);

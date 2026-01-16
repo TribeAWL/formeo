@@ -75,7 +75,7 @@ export const insertStyle = srcs => {
           },
           action: {
             load: () => onLoadStylesheet(styleLink, resolve),
-            error: () => reject(new Error(`${this.src} failed to load.`)),
+            error: e => reject(new Error(`${e.target.src} failed to load.`)),
           },
         })
 
