@@ -29,7 +29,8 @@ const DEFAULT_CONFIG$4 = {
   // init with user's preferred language
   override: {}
 };
-class I18N {
+let instance = null;
+class I18NBase {
   /**
    * Process options and start the module
    * @param {Object} options
@@ -45,14 +46,16 @@ class I18N {
    */
   processConfig(options) {
     const { location, ...restOptions } = { ...DEFAULT_CONFIG$4, ...options };
-    const parsedLocation = location.replace(/\/?$/, "/");
+    const parsedLocation = location.endsWith("/") ? location : `${location}/`;
     this.config = { location: parsedLocation, ...restOptions };
-    const { override, preloaded = {} } = this.config;
-    const allLangs = Object.entries(this.langs).concat(Object.entries(override || preloaded));
-    this.langs = allLangs.reduce((acc, [locale2, lang]) => {
-      acc[locale2] = this.applyLanguage(locale2, lang);
-      return acc;
-    }, {});
+    const { preloaded = {}, override = {} } = this.config;
+    const allLocales = /* @__PURE__ */ new Set([...Object.keys(preloaded), ...Object.keys(override)]);
+    for (const locale2 of allLocales) {
+      const preloadedLang = preloaded[locale2] || {};
+      const overrideLang = override[locale2] || {};
+      const mergedLang = { ...preloadedLang, ...overrideLang };
+      this.applyLanguage(locale2, mergedLang);
+    }
     this.locale = this.config.locale || this.config.langs[0];
   }
   /**
@@ -70,9 +73,10 @@ class I18N {
    * @param {String|Object} lang
    */
   addLanguage(locale2, lang = {}) {
-    lang = typeof lang === "string" ? I18N.processFile(lang) : lang;
+    lang = typeof lang === "string" ? I18NBase.processFile(lang) : lang;
     this.applyLanguage(locale2, lang);
-    this.config.langs.push("locale");
+    this.loaded.push(locale2);
+    this.config.langs.push(locale2);
   }
   /**
    * get a string from a loaded language file
@@ -101,12 +105,12 @@ class I18N {
    */
   makeSafe(str) {
     const mapObj = {
-      "{": "\\{",
-      "}": "\\}",
-      "|": "\\|"
+      "{": String.raw`\{`,
+      "}": String.raw`\}`,
+      "|": String.raw`\|`
     };
-    str = str.replace(/[{}|]/g, (matched) => mapObj[matched]);
-    return new RegExp(str, "g");
+    const escapedStr = str.replaceAll(/[{}|]/g, (matched) => mapObj[matched]);
+    return new RegExp(escapedStr, "g");
   }
   /**
    * Temporarily put a string into the currently loaded language
@@ -125,21 +129,24 @@ class I18N {
    * @return {String}      updated string translation
    */
   get(key, args) {
-    const _this = this;
     let value = this.getValue(key);
     if (!value) {
       return;
     }
+    if (!args) {
+      return value;
+    }
     const tokens = value.match(/\{[^}]+?\}/g);
-    if (args && tokens) {
-      if ("object" === typeof args) {
-        for (const token of tokens) {
-          const key2 = token.substring(1, token.length - 1);
-          value = value.replace(_this.makeSafe(token), args[key2] || "");
-        }
-      } else {
-        value = value.replace(/\{[^}]+?\}/g, args);
+    if (!tokens) {
+      return value;
+    }
+    if (typeof args === "object") {
+      for (const token of tokens) {
+        const tokenKey = token.slice(1, -1);
+        value = value.replace(this.makeSafe(token), args[tokenKey] ?? "");
       }
+    } else {
+      value = value.replaceAll(/\{[^}]+?\}/g, args);
     }
     return value;
   }
@@ -149,7 +156,7 @@ class I18N {
    * @return {Object} processed language
    */
   static processFile(response) {
-    return I18N.fromFile(response.replace(/\n\n/g, "\n"));
+    return I18N.fromFile(response.replaceAll("\n\n", "\n"));
   }
   /**
    * Static method: Turn raw text from the language files into fancy JSON
@@ -163,10 +170,27 @@ class I18N {
       const regex = /^(.+?) *?= *?([^\n]+)/;
       matches2 = regex.exec(lines[i2]);
       if (matches2) {
-        lang[matches2[1]] = matches2[2].replace(/(^\s+|\s+$)/g, "");
+        lang[matches2[1]] = matches2[2].trim();
       }
     }
     return lang;
+  }
+  /**
+   * Get the singleton instance
+   * @param {Object} options
+   * @return {I18NBase} singleton instance
+   */
+  static getInstance(options) {
+    if (!instance) {
+      instance = new I18NBase(options);
+    }
+    return instance;
+  }
+  /**
+   * Reset the singleton instance (useful for testing)
+   */
+  static resetInstance() {
+    instance = null;
   }
   /**
    * Load a remotely stored language file
@@ -174,26 +198,20 @@ class I18N {
    * @param  {Boolean} useCache
    * @return {Promise}       resolves response
    */
-  loadLang(locale2, useCache = true) {
-    const _this = this;
-    return new Promise(function(resolve, reject) {
-      if (_this.loaded.indexOf(locale2) !== -1 && useCache) {
-        _this.applyLanguage(_this.langs[locale2]);
-        return resolve(_this.langs[locale2]);
-      } else {
-        const langFile = [_this.config.location, locale2, _this.config.extension].join("");
-        return fetchData(langFile).then((lang) => {
-          const processedFile = I18N.processFile(lang);
-          _this.applyLanguage(locale2, processedFile);
-          _this.loaded.push(locale2);
-          return resolve(_this.langs[locale2]);
-        }).catch((err) => {
-          console.error(err);
-          const lang = _this.applyLanguage(locale2);
-          resolve(lang);
-        });
-      }
-    });
+  async loadLang(locale2, useCache = true) {
+    if (this.loaded.includes(locale2) && useCache) {
+      return this.langs[locale2];
+    }
+    const langFile = `${this.config.location}${locale2}${this.config.extension}`;
+    try {
+      const lang = await fetchData(langFile);
+      const processedFile = I18NBase.processFile(lang);
+      this.applyLanguage(locale2, processedFile);
+      return this.langs[locale2];
+    } catch (err) {
+      console.error(err);
+      return this.applyLanguage(locale2);
+    }
   }
   /**
    * applies overrides from config
@@ -205,6 +223,7 @@ class I18N {
     const override = this.config.override[locale2] || {};
     const existingLang = this.langs[locale2] || {};
     this.langs[locale2] = { ...existingLang, ...lang, ...override };
+    this.loaded.push(locale2);
     return this.langs[locale2];
   }
   /**
@@ -220,13 +239,37 @@ class I18N {
    * @return {Promise} language
    */
   async setCurrent(locale2 = "en-US") {
-    await this.loadLang(locale2);
+    if (!this.loaded.includes(locale2)) {
+      await this.loadLang(locale2);
+    }
     this.locale = locale2;
     this.current = this.langs[locale2];
     return this.current;
   }
 }
-const mi18n = new I18N();
+const I18N = new Proxy(I18NBase, {
+  /**
+   * Called when I18N() is invoked as a function (without new)
+   * Returns the singleton instance
+   */
+  apply(target, thisArg, args) {
+    return target.getInstance(...args);
+  },
+  /**
+   * Called when new I18N() is invoked
+   * Creates a new instance
+   */
+  construct(target, args) {
+    return new target(...args);
+  },
+  /**
+   * Proxy property access to the base class
+   */
+  get(target, prop) {
+    return target[prop];
+  }
+});
+const mi18n = I18N.getInstance();
 !(function() {
   try {
     if ("undefined" != typeof document) {
@@ -1203,9 +1246,9 @@ var hasRequired_cloneBuffer;
 function require_cloneBuffer() {
   if (hasRequired_cloneBuffer) return _cloneBuffer.exports;
   hasRequired_cloneBuffer = 1;
-  (function(module, exports) {
+  (function(module, exports$1) {
     var root = require_root();
-    var freeExports = exports && !exports.nodeType && exports;
+    var freeExports = exports$1 && !exports$1.nodeType && exports$1;
     var freeModule = freeExports && true && module && !module.nodeType && module;
     var moduleExports = freeModule && freeModule.exports === freeExports;
     var Buffer = moduleExports ? root.Buffer : void 0, allocUnsafe = Buffer ? Buffer.allocUnsafe : void 0;
@@ -1451,9 +1494,9 @@ var hasRequiredIsBuffer;
 function requireIsBuffer() {
   if (hasRequiredIsBuffer) return isBuffer.exports;
   hasRequiredIsBuffer = 1;
-  (function(module, exports) {
+  (function(module, exports$1) {
     var root = require_root(), stubFalse = requireStubFalse();
-    var freeExports = exports && !exports.nodeType && exports;
+    var freeExports = exports$1 && !exports$1.nodeType && exports$1;
     var freeModule = freeExports && true && module && !module.nodeType && module;
     var moduleExports = freeModule && freeModule.exports === freeExports;
     var Buffer = moduleExports ? root.Buffer : void 0;
@@ -1524,9 +1567,9 @@ var hasRequired_nodeUtil;
 function require_nodeUtil() {
   if (hasRequired_nodeUtil) return _nodeUtil.exports;
   hasRequired_nodeUtil = 1;
-  (function(module, exports) {
+  (function(module, exports$1) {
     var freeGlobal = require_freeGlobal();
-    var freeExports = exports && !exports.nodeType && exports;
+    var freeExports = exports$1 && !exports$1.nodeType && exports$1;
     var freeModule = freeExports && true && module && !module.nodeType && module;
     var moduleExports = freeModule && freeModule.exports === freeExports;
     var freeProcess = moduleExports && freeGlobal.process;
@@ -3538,7 +3581,7 @@ function _objectWithoutProperties(source, excluded) {
   }
   return target;
 }
-var version = "1.15.3";
+var version = "1.15.6";
 function userAgent(pattern) {
   if (typeof window !== "undefined" && window.navigator) {
     return !!/* @__PURE__ */ navigator.userAgent.match(pattern);
@@ -4290,7 +4333,8 @@ function Sortable(el, options) {
       x: 0,
       y: 0
     },
-    supportPointer: Sortable.supportPointer !== false && "PointerEvent" in window && !Safari,
+    // Disabled on Safari: #1571; Enabled on Safari IOS: #2244
+    supportPointer: Sortable.supportPointer !== false && "PointerEvent" in window && (!Safari || IOS),
     emptyInsertThreshold: 5
   };
   PluginManager.initializePlugins(this, el, defaults2);
@@ -4370,7 +4414,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
         pluginEvent2("filter", _this, {
           evt
         });
-        preventOnFilter && evt.cancelable && evt.preventDefault();
+        preventOnFilter && evt.preventDefault();
         return;
       }
     } else if (filter) {
@@ -4392,7 +4436,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
         }
       });
       if (filter) {
-        preventOnFilter && evt.cancelable && evt.preventDefault();
+        preventOnFilter && evt.preventDefault();
         return;
       }
     }
@@ -4448,9 +4492,14 @@ Sortable.prototype = /** @lends Sortable.prototype */
       on(ownerDocument, "dragover", nearestEmptyInsertDetectEvent);
       on(ownerDocument, "mousemove", nearestEmptyInsertDetectEvent);
       on(ownerDocument, "touchmove", nearestEmptyInsertDetectEvent);
-      on(ownerDocument, "mouseup", _this._onDrop);
-      on(ownerDocument, "touchend", _this._onDrop);
-      on(ownerDocument, "touchcancel", _this._onDrop);
+      if (options.supportPointer) {
+        on(ownerDocument, "pointerup", _this._onDrop);
+        !this.nativeDraggable && on(ownerDocument, "pointercancel", _this._onDrop);
+      } else {
+        on(ownerDocument, "mouseup", _this._onDrop);
+        on(ownerDocument, "touchend", _this._onDrop);
+        on(ownerDocument, "touchcancel", _this._onDrop);
+      }
       if (FireFox && this.nativeDraggable) {
         this.options.touchStartThreshold = 4;
         dragEl.draggable = true;
@@ -4463,9 +4512,14 @@ Sortable.prototype = /** @lends Sortable.prototype */
           this._onDrop();
           return;
         }
-        on(ownerDocument, "mouseup", _this._disableDelayedDrag);
-        on(ownerDocument, "touchend", _this._disableDelayedDrag);
-        on(ownerDocument, "touchcancel", _this._disableDelayedDrag);
+        if (options.supportPointer) {
+          on(ownerDocument, "pointerup", _this._disableDelayedDrag);
+          on(ownerDocument, "pointercancel", _this._disableDelayedDrag);
+        } else {
+          on(ownerDocument, "mouseup", _this._disableDelayedDrag);
+          on(ownerDocument, "touchend", _this._disableDelayedDrag);
+          on(ownerDocument, "touchcancel", _this._disableDelayedDrag);
+        }
         on(ownerDocument, "mousemove", _this._delayedDragTouchMoveHandler);
         on(ownerDocument, "touchmove", _this._delayedDragTouchMoveHandler);
         options.supportPointer && on(ownerDocument, "pointermove", _this._delayedDragTouchMoveHandler);
@@ -4491,6 +4545,8 @@ Sortable.prototype = /** @lends Sortable.prototype */
     off(ownerDocument, "mouseup", this._disableDelayedDrag);
     off(ownerDocument, "touchend", this._disableDelayedDrag);
     off(ownerDocument, "touchcancel", this._disableDelayedDrag);
+    off(ownerDocument, "pointerup", this._disableDelayedDrag);
+    off(ownerDocument, "pointercancel", this._disableDelayedDrag);
     off(ownerDocument, "mousemove", this._delayedDragTouchMoveHandler);
     off(ownerDocument, "touchmove", this._delayedDragTouchMoveHandler);
     off(ownerDocument, "pointermove", this._delayedDragTouchMoveHandler);
@@ -4701,6 +4757,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
     _this._dragStartId = _nextTick(_this._dragStarted.bind(_this, fallback, evt));
     on(document, "selectstart", _this);
     moved = true;
+    window.getSelection().removeAllRanges();
     if (Safari) {
       css(document.body, "user-select", "none");
     }
@@ -4920,6 +4977,7 @@ Sortable.prototype = /** @lends Sortable.prototype */
     off(ownerDocument, "mouseup", this._onDrop);
     off(ownerDocument, "touchend", this._onDrop);
     off(ownerDocument, "pointerup", this._onDrop);
+    off(ownerDocument, "pointercancel", this._onDrop);
     off(ownerDocument, "touchcancel", this._onDrop);
     off(document, "selectstart", this);
   },
@@ -10696,7 +10754,7 @@ const actions = {
     }
   }
 };
-const e = { "en-US": { "en-US": "English", dir: "ltr", "af-ZA": "Afrikaans (South Africa)", "ar-TN": "Arabic (Tunisia)", "cs-CZ": "Czech (Czechia)", "de-DE": "German (Germany)", "es-ES": "European Spanish", "fa-IR": "Persian (Iran)", "fi-FI": "Finnish (Finland)", "fr-FR": "French (France)", "hu-HU": "Hungarian (Hungary)", "it-IT": "Italian (Italy)", "ja-JP": "Japanese (Japan)", "nb-NO": "Norwegian Bokmål (Norway)", "pl-PL": "Polish (Poland)", "pt-BR": "Brazilian Portuguese", "pt-PT": "European Portuguese", "ro-RO": "Romanian (Romania)", "ru-RU": "Russian (Russia)", "th-TH": "Thai (Thailand)", "tr-TR": "Turkish (Türkiye)", "zh-CN": "Chinese (China)", "zh-HK": "Chinese (Hong Kong SAR China)", "action.add.attrs.attr": "What attribute would you like to add?", "action.add.attrs.value": "Default Value", addOption: "Add Option", allFieldsRemoved: "All fields were removed.", allowSelect: "Allow Select", and: "and", attribute: "Attribute", attributeNotPermitted: 'Attribute "{attribute}" is not permitted, please choose another.', attributes: "Attributes", "attrs.class": "Class", "attrs.className": "Class", "attrs.dir": "Direction", "attrs.id": "Id", "attrs.required": "Required", "attrs.style": "Style", "attrs.title": "Title", "attrs.type": "Type", "attrs.value": "Value", autocomplete: "Autocomplete", button: "Button", cannotBeEmpty: "This field cannot be empty", cannotClearFields: "There are no fields to clear", checkbox: "Checkbox", checkboxes: "Checkboxes", class: "Class", clear: "Clear", clearAllMessage: "Are you sure you want to clear all fields?", close: "Close", column: "Column", "condition.target.placeholder": "target", "condition.type.and": "And", "condition.type.if": "If", "condition.type.or": "Or", "condition.type.then": "Then", "condition.value.placeholder": "value", confirmClearAll: "Are you sure you want to remove all fields?", content: "Content", control: "Control", "controlGroups.nextGroup": "Next Group", "controlGroups.prevGroup": "Previous Group", "controls.filteringTerm": 'Filtering "{term}"', "controls.form.button": "Button", "controls.form.checkbox-group": "Checkbox Group", "controls.form.input.date": "Date", "controls.form.input.email": "Email", "controls.form.input.file": "File Upload", "controls.form.input.hidden": "Hidden Input", "controls.form.input.number": "Number", "controls.form.input.text": "Text Input", "controls.form.radio-group": "Radio Group", "controls.form.select": "Select", "controls.form.textarea": "TextArea", "controls.groups.form": "Form Fields", "controls.groups.html": "HTML Elements", "controls.groups.layout": "Layout", "controls.html.divider": "Divider", "controls.html.header": "Header", "controls.html.paragraph": "Paragraph", "controls.layout.column": "Column", "controls.layout.row": "Row", copy: "Copy To Clipboard", danger: "Danger", defineColumnLayout: "Define a column layout", defineColumnWidths: "Define column widths", description: "Help Text", descriptionField: "Description", "editing.row": "Editing Row", editorTitle: "Form Elements", field: "Field", "field.property.invalid": "not valid", "field.property.isChecked": "is checked", "field.property.isNotVisible": "is not visible", "field.property.isVisible": "is visible", "field.property.label": "label", "field.property.valid": "valid", "field.property.value": "value", fieldNonEditable: "This field cannot be edited.", fieldRemoveWarning: "Are you sure you want to remove this field?", fileUpload: "File Upload", formUpdated: "Form Updated", getStarted: "Drag a field from the right to get started.", group: "Group", grouped: "Grouped", hidden: "Hidden Input", hide: "Edit", htmlElements: "HTML Elements", if: "If", "if.condition.source.placeholder": "source", "if.condition.target.placeholder": "target / value", info: "Info", "input.date": "Date", "input.text": "Text", label: "Label", labelCount: "{label} {count}", labelEmpty: "Field Label cannot be empty", "lang.af": "Afrikaans", "lang.ar": "Arabic", "lang.cs": "Czech", "lang.de": "German", "lang.en": "English", "lang.es": "Spanish", "lang.fa": "Persian", "lang.fi": "Finnish", "lang.fr": "French", "lang.hu": "Hungarian", "lang.it": "Italian", "lang.ja": "Japanese", "lang.nb": "Norwegian Bokmål", "lang.pl": "Polish", "lang.pt": "Portuguese", "lang.ro": "Romanian", "lang.ru": "Russian", "lang.th": "Thai", "lang.tr": "Turkish", "lang.zh": "Chinese", layout: "Layout", limitRole: "Limit access to one or more of the following roles:", mandatory: "Mandatory", maxlength: "Max Length", "meta.group": "Group", "meta.icon": "Ico", "meta.label": "Label", minOptionMessage: "This field requires a minimum of 2 options", name: "Name", newOptionLabel: "New {type}", no: "No", number: "Number", off: "Off", on: "On", "operator.contains": "contains", "operator.equals": "equals", "operator.notContains": "not contains", "operator.notEquals": "not equal", "operator.notVisible": "not visible", "operator.visible": "visible", option: "Option", optional: "optional", optionEmpty: "Option value required", optionLabel: "Option {count}", options: "Options", or: "or", order: "Order", "panel.label.attrs": "Attributes", "panel.label.conditions": "Conditions", "panel.label.config": "Configuration", "panel.label.meta": "Meta", "panel.label.options": "Options", "panelEditButtons.attrs": "+ Attribute", "panelEditButtons.conditions": "+ Condition", "panelEditButtons.options": "+ Option", placeholder: "Placeholder", "placeholder.className": "space separated classes", "placeholder.email": "Enter you email", "placeholder.label": "Label", "placeholder.password": "Enter your password", "placeholder.placeholder": "Placeholder", "placeholder.text": "Enter some Text", "placeholder.textarea": "Enter a lot of text", "placeholder.value": "Value", preview: "Preview", primary: "Primary", remove: "Remove", removeMessage: "Remove Element", removeType: "Remove {type}", required: "Required", reset: "Reset", richText: "Rich Text Editor", roles: "Access", row: "Row", "row.makeInputGroup": "Make this row an input group.", "row.makeInputGroupDesc": "Input Groups enable users to add sets of inputs at a time.", "row.settings.fieldsetWrap": "Wrap row in a &lt;fieldset&gt; tag", "row.settings.fieldsetWrap.aria": "Wrap Row in Fieldset", save: "Save", secondary: "Secondary", select: "Select", selectColor: "Select Color", selectionsMessage: "Allow Multiple Selections", selectOptions: "Options", separator: "Separator", settings: "Settings", size: "Size", sizes: "Sizes", "sizes.lg": "Large", "sizes.m": "Default", "sizes.sm": "Small", "sizes.xs": "Extra Small", style: "Style", styles: "Styles", "styles.btn": "Button Style", "styles.btn.danger": "Danger", "styles.btn.default": "Default", "styles.btn.info": "Info", "styles.btn.primary": "Primary", "styles.btn.success": "Success", "styles.btn.warning": "Warning", subtype: "Type", success: "Success", text: "Text Field", then: "Then", "then.condition.target.placeholder": "target", toggle: "Toggle", ungrouped: "Un-Grouped", warning: "Warning", yes: "Yes" } }, i = e["en-US"];
+const e = { "en-US": { "en-US": "English", dir: "ltr", "af-ZA": "Afrikaans (South Africa)", "ar-TN": "Arabic (Tunisia)", "cs-CZ": "Czech (Czechia)", "de-DE": "German (Germany)", "es-ES": "European Spanish", "fa-IR": "Persian (Iran)", "fi-FI": "Finnish (Finland)", "fr-FR": "French (France)", "hu-HU": "Hungarian (Hungary)", "it-IT": "Italian (Italy)", "ja-JP": "Japanese (Japan)", "nb-NO": "Norwegian Bokmål (Norway)", "pl-PL": "Polish (Poland)", "pt-BR": "Brazilian Portuguese", "pt-PT": "European Portuguese", "ro-RO": "Romanian (Romania)", "ru-RU": "Russian (Russia)", "th-TH": "Thai (Thailand)", "tr-TR": "Turkish (Türkiye)", "zh-CN": "Chinese (China)", "zh-HK": "Chinese (Hong Kong SAR China)", "action.add.attrs.attr": "What attribute would you like to add?", "action.add.attrs.value": "Default Value", addOption: "Add Option", allFieldsRemoved: "All fields were removed.", allowSelect: "Allow Select", and: "and", attribute: "Attribute", attributeNotPermitted: 'Attribute "{attribute}" is not permitted, please choose another.', attributes: "Attributes", "attrs.class": "Class", "attrs.className": "Class", "attrs.dir": "Direction", "attrs.id": "Id", "attrs.required": "Required", "attrs.style": "Style", "attrs.title": "Title", "attrs.type": "Type", "attrs.value": "Value", autocomplete: "Autocomplete", button: "Button", cannotBeEmpty: "This field cannot be empty", cannotClearFields: "There are no fields to clear", checkbox: "Checkbox", checkboxes: "Checkboxes", class: "Class", clear: "Clear", clearAllMessage: "Are you sure you want to clear all fields?", close: "Close", column: "Column", "condition.target.placeholder": "target", "condition.type.and": "And", "condition.type.if": "If", "condition.type.or": "Or", "condition.type.then": "Then", "condition.value.placeholder": "value", confirmClearAll: "Are you sure you want to remove all fields?", content: "Content", control: "Control", "controlGroups.nextGroup": "Next Group", "controlGroups.prevGroup": "Previous Group", "controls.filteringTerm": 'Filtering "{term}"', "controls.form.button": "Button", "controls.form.checkbox-group": "Checkbox Group", "controls.form.input.date": "Date", "controls.form.input.email": "Email", "controls.form.input.file": "File Upload", "controls.form.input.hidden": "Hidden Input", "controls.form.input.number": "Number", "controls.form.input.text": "Text Input", "controls.form.radio-group": "Radio Group", "controls.form.select": "Select", "controls.form.textarea": "TextArea", "controls.groups.form": "Form Fields", "controls.groups.html": "HTML Elements", "controls.groups.layout": "Layout", "controls.html.divider": "Divider", "controls.html.header": "Header", "controls.html.paragraph": "Paragraph", "controls.layout.column": "Column", "controls.layout.row": "Row", copy: "Copy To Clipboard", danger: "Danger", defineColumnLayout: "Define a column layout", defineColumnWidths: "Define column widths", description: "Help Text", descriptionField: "Description", "editing.row": "Editing Row", editorTitle: "Form Elements", field: "Field", "field.property.invalid": "not valid", "field.property.isChecked": "is checked", "field.property.isNotVisible": "is not visible", "field.property.isVisible": "is visible", "field.property.label": "label", "field.property.valid": "valid", "field.property.value": "value", fieldNonEditable: "This field cannot be edited.", fieldRemoveWarning: "Are you sure you want to remove this field?", fileUpload: "File Upload", formUpdated: "Form Updated", getStarted: "Drag a field from the right to get started.", group: "Group", grouped: "Grouped", hidden: "Hidden Input", hide: "Edit", htmlElements: "HTML Elements", if: "If", "if.condition.source.placeholder": "source", "if.condition.target.placeholder": "target / value", info: "Info", "input.date": "Date", "input.text": "Text", label: "Label", labelCount: "{label} {count}", labelEmpty: "Field Label cannot be empty", "lang.af": "Afrikaans", "lang.ar": "Arabic", "lang.cs": "Czech", "lang.de": "German", "lang.en": "English", "lang.es": "Spanish", "lang.fa": "Persian", "lang.fi": "Finnish", "lang.fr": "French", "lang.hu": "Hungarian", "lang.it": "Italian", "lang.ja": "Japanese", "lang.nb": "Norwegian Bokmål", "lang.pl": "Polish", "lang.pt": "Portuguese", "lang.ro": "Romanian", "lang.ru": "Russian", "lang.th": "Thai", "lang.tr": "Turkish", "lang.zh": "Chinese", layout: "Layout", limitRole: "Limit access to one or more of the following roles:", mandatory: "Mandatory", maxlength: "Max Length", "meta.group": "Group", "meta.icon": "Ico", "meta.label": "Label", minOptionMessage: "This field requires a minimum of 2 options", name: "Name", newOptionLabel: "New {type}", no: "No", number: "Number", off: "Off", on: "On", "operator.contains": "contains", "operator.equals": "equals", "operator.notContains": "not contains", "operator.notEquals": "not equal", "operator.notVisible": "not visible", "operator.visible": "visible", option: "Option", optional: "optional", optionEmpty: "Option value required", optionLabel: "Option {count}", options: "Options", or: "or", order: "Order", "panel.label.attrs": "Attributes", "panel.label.conditions": "Conditions", "panel.label.config": "Configuration", "panel.label.meta": "Meta", "panel.label.options": "Options", "panelEditButtons.attrs": "+ Attribute", "panelEditButtons.conditions": "+ Condition", "panelEditButtons.options": "+ Option", "panelEditButtons.config": "+ Configuration", placeholder: "Placeholder", "placeholder.className": "space separated classes", "placeholder.email": "Enter you email", "placeholder.label": "Label", "placeholder.password": "Enter your password", "placeholder.placeholder": "Placeholder", "placeholder.text": "Enter some Text", "placeholder.textarea": "Enter a lot of text", "placeholder.value": "Value", preview: "Preview", primary: "Primary", remove: "Remove", removeMessage: "Remove Element", removeType: "Remove {type}", required: "Required", reset: "Reset", richText: "Rich Text Editor", roles: "Access", row: "Row", "row.makeInputGroup": "Make this row an input group.", "row.makeInputGroupDesc": "Input Groups enable users to add sets of inputs at a time.", "row.settings.fieldsetWrap": "Wrap row in a &lt;fieldset&gt; tag", "row.settings.fieldsetWrap.aria": "Wrap Row in Fieldset", save: "Save", cancel: "Cancel", secondary: "Secondary", select: "Select", selectColor: "Select Color", selectionsMessage: "Allow Multiple Selections", selectOptions: "Options", separator: "Separator", settings: "Settings", size: "Size", sizes: "Sizes", "sizes.lg": "Large", "sizes.m": "Default", "sizes.sm": "Small", "sizes.xs": "Extra Small", style: "Style", styles: "Styles", "styles.btn": "Button Style", "styles.btn.danger": "Danger", "styles.btn.default": "Default", "styles.btn.info": "Info", "styles.btn.primary": "Primary", "styles.btn.success": "Success", "styles.btn.warning": "Warning", subtype: "Type", success: "Success", text: "Text Field", then: "Then", "then.condition.target.placeholder": "target", toggle: "Toggle", ungrouped: "Un-Grouped", warning: "Warning", yes: "Yes" } }, i = e["en-US"];
 const locale = "en-US";
 mi18n.addLanguage(locale, i);
 mi18n.setCurrent(locale);
